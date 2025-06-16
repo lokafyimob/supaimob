@@ -7,13 +7,12 @@
     }
   },
   "env": {
-    "NEXTAUTH_URL": "https://your-domain.vercel.app",
-    "POSTGRES_PRISMA_URL": "@postgres_prisma_url",
-    "POSTGRES_URL_NON_POOLING": "@postgres_url_non_pooling"
+    "NEXTAUTH_URL": "https://lokafy-crm.vercel.app",
+    "DATABASE_URL": "postgresql://postgres:marcopolo@db.qurrccdpifrxowhawcjj.supabase.co:5432/postgres"
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_APP_URL": "https://your-domain.vercel.app"
+      "NEXT_PUBLIC_APP_URL": "https://lokafy-crm.vercel.app"
     }
   },
   "headers": [
