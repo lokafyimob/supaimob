@@ -1,0 +1,29 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+healthcheckPath = "/api/health"
+healthcheckTimeout = 100
+restartPolicyType = "ON_FAILURE"
+restartPolicyMaxRetries = 10
+
+[env]
+NODE_ENV = "production"
+NIXPACKS_NODE_VERSION = "18"
+
+[[services]]
+name = "crm-app"
+
+[services.build]
+buildCommand = "npm run build"
+startCommand = "npm run start:prod"
+
+[services.variables]
+PORT = "3000"
+NODE_ENV = "production"
+
+[[services]]
+name = "postgres"
+type = "database"
+engine = "postgresql"
+version = "15"

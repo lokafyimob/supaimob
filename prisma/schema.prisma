@@ -1,0 +1,491 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  name          String
+  password      String
+  role          String    @default("USER")
+  companyId     String?
+  isActive      Boolean   @default(true)
+  isBlocked     Boolean   @default(false)
+  lastLogin     DateTime?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  company       Company?  @relation(fields: [companyId], references: [id])
+  properties    Property[]
+  owners        Owner[]
+  tenants       Tenant[]
+  contracts     Contract[]
+  leads         Lead[]
+
+  @@map("users")
+}
+
+model Company {
+  id            String    @id @default(cuid())
+  name          String
+  tradeName     String?
+  document      String    @unique  // CNPJ
+  email         String
+  phone         String
+  address       String
+  city          String
+  state         String
+  zipCode       String
+  logo          String?
+  website       String?
+  active        Boolean   @default(true)
+  subscription  String    @default("BASIC") // BASIC, PREMIUM, ENTERPRISE
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  
+  users         User[]
+  properties    Property[]
+  owners        Owner[]
+  tenants       Tenant[]
+  contracts     Contract[]
+  notifications Notification[]
+  settings      Settings[]
+  leads         Lead[]
+
+  @@map("companies")
+}
+
+model Property {
+  id           String         @id @default(cuid())
+  title        String
+  description  String?
+  address      String
+  city         String
+  state        String
+  zipCode      String
+  bedrooms     Int
+  bathrooms    Int
+  area         Float
+  rentPrice    Float
+  salePrice    Float?
+  propertyType PropertyType
+  status       PropertyStatus @default(AVAILABLE)
+  availableFor String         @default("[]") // JSON array: ["RENT"], ["SALE"], or ["RENT", "SALE"]
+  ownerId      String
+  companyId    String
+  userId       String
+  images       String         // JSON string for SQLite
+  amenities    String         // JSON string for SQLite
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  contracts     Contract[]
+  notifications Notification[]
+  leadNotifications LeadNotification[]
+  matchedLeads  Lead[]
+  maintenances  Maintenance[]
+  monthlyReports MonthlyReport[]
+  owner         Owner          @relation(fields: [ownerId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+
+  @@map("properties")
+}
+
+model Owner {
+  id          String       @id @default(cuid())
+  name        String
+  email       String       
+  phone       String
+  document    String       
+  address     String
+  city        String
+  state       String
+  zipCode     String
+  companyId   String
+  userId      String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  bankAccount BankAccount?
+  properties  Property[]
+  company     Company      @relation(fields: [companyId], references: [id])
+  user        User         @relation(fields: [userId], references: [id])
+
+  @@unique([email, companyId])
+  @@unique([document, companyId])
+  @@map("owners")
+}
+
+model Tenant {
+  id               String     @id @default(cuid())
+  name             String
+  email            String     
+  phone            String
+  document         String     
+  address          String
+  city             String
+  state            String
+  zipCode          String
+  income           Float
+  companyId        String
+  userId           String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  emergencyContact String?
+  occupation       String?
+  contracts        Contract[]
+  notifications    Notification[]
+  company          Company    @relation(fields: [companyId], references: [id])
+  user             User       @relation(fields: [userId], references: [id])
+
+  @@unique([email, companyId])
+  @@unique([document, companyId])
+  @@map("tenants")
+}
+
+model Contract {
+  id                        String         @id @default(cuid())
+  propertyId                String
+  tenantId                  String
+  companyId                 String
+  userId                    String
+  startDate                 DateTime
+  endDate                   DateTime
+  rentAmount                Float
+  depositAmount             Float
+  administrationFeePercentage Float        @default(10.0)
+  managementFeePercentage   Float          @default(8.0)
+  iptuDeductible            Boolean        @default(true)
+  condominiumDeductible     Boolean        @default(true)
+  maintenanceDeductible     Boolean        @default(true)
+  status                    ContractStatus @default(ACTIVE)
+  terms                     String?
+  createdAt                 DateTime       @default(now())
+  updatedAt                 DateTime       @updatedAt
+  tenant        Tenant         @relation(fields: [tenantId], references: [id])
+  property      Property       @relation(fields: [propertyId], references: [id])
+  company       Company        @relation(fields: [companyId], references: [id])
+  user          User           @relation(fields: [userId], references: [id])
+  payments      Payment[]
+  notifications Notification[]
+  maintenances  Maintenance[]
+  monthlyReports MonthlyReport[]
+
+  @@map("contracts")
+}
+
+model Payment {
+  id           String        @id @default(cuid())
+  contractId   String
+  amount       Float
+  dueDate      DateTime
+  paidDate     DateTime?
+  status       PaymentStatus @default(PENDING)
+  paymentMethod String?      // BOLETO, PIX, DINHEIRO, TRANSFERENCIA, CARTAO
+  boletoUrl    String?
+  boletoCode   String?
+  penalty      Float?
+  interest     Float?
+  receipts     String?       // JSON array of receipt image URLs
+  notes        String?       // Additional payment notes
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  contract     Contract      @relation(fields: [contractId], references: [id])
+
+  @@map("payments")
+}
+
+model BankAccount {
+  id          String  @id @default(cuid())
+  ownerId     String  @unique
+  bankName    String
+  accountType String
+  agency      String
+  account     String
+  pixKey      String?
+  owner       Owner   @relation(fields: [ownerId], references: [id])
+
+  @@map("bank_accounts")
+}
+
+model Alert {
+  id        String    @id @default(cuid())
+  type      AlertType
+  message   String
+  recipient String
+  sent      Boolean   @default(false)
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@map("alerts")
+}
+
+model Notification {
+  id         String             @id @default(cuid())
+  type       NotificationType
+  priority   NotificationPriority @default(MEDIUM)
+  title      String
+  message    String
+  recipient  String
+  sent       Boolean            @default(false)
+  sentAt     DateTime?
+  tenantId   String?
+  propertyId String?
+  contractId String?
+  companyId  String
+  metadata   String?            // JSON string for additional data
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+  
+  tenant     Tenant?            @relation(fields: [tenantId], references: [id])
+  property   Property?          @relation(fields: [propertyId], references: [id])
+  contract   Contract?          @relation(fields: [contractId], references: [id])
+  company    Company            @relation(fields: [companyId], references: [id])
+
+  @@map("notifications")
+}
+
+enum Role {
+  SUPER_ADMIN
+  ADMIN
+  USER
+}
+
+enum PropertyType {
+  APARTMENT
+  HOUSE
+  COMMERCIAL
+  LAND
+  STUDIO
+}
+
+enum PropertyStatus {
+  AVAILABLE
+  RENTED
+  SOLD
+  MAINTENANCE
+}
+
+enum ContractStatus {
+  ACTIVE
+  EXPIRED
+  CANCELLED
+  RENEWED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+  CANCELLED
+}
+
+enum AlertType {
+  PAYMENT_DUE
+  PAYMENT_OVERDUE
+  CONTRACT_EXPIRING
+  MAINTENANCE_REQUEST
+  GENERAL
+}
+
+enum NotificationType {
+  PAYMENT_REMINDER
+  PAYMENT_REMINDER_WHATSAPP
+  PAYMENT_OVERDUE
+  CONTRACT_EXPIRING
+  DELINQUENCY_RISK
+  MAINTENANCE_REQUEST
+  GENERAL
+}
+
+enum NotificationPriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum LeadInterest {
+  RENT
+  BUY
+}
+
+enum LeadStatus {
+  ACTIVE
+  CONVERTED
+  INACTIVE
+  ARCHIVED
+}
+
+enum LeadNotificationType {
+  PROPERTY_MATCH
+  PRICE_MATCH
+  CRITERIA_UPDATE
+}
+
+enum MaintenanceType {
+  PLUMBING
+  ELECTRICAL
+  PAINTING
+  CLEANING
+  APPLIANCE_REPAIR
+  STRUCTURAL
+  GARDEN
+  SECURITY
+  HVAC
+  GENERAL
+  OTHER
+}
+
+enum MaintenanceCategory {
+  PREVENTIVE
+  CORRECTIVE
+  EMERGENCY
+  IMPROVEMENT
+}
+
+enum MaintenanceStatus {
+  PENDING
+  APPROVED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  ON_HOLD
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+model Settings {
+  id        String   @id @default(cuid())
+  companyId String
+  key       String
+  value     String   // JSON string para flexibilidade
+  category  String   // system, financial, notifications, etc
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  company   Company  @relation(fields: [companyId], references: [id])
+
+  @@unique([companyId, key])
+  @@map("settings")
+}
+
+model Lead {
+  id                String       @id @default(cuid())
+  name              String
+  email             String
+  phone             String
+  document          String?
+  interest          LeadInterest // RENT or BUY
+  propertyType      PropertyType
+  minPrice          Float?
+  maxPrice          Float
+  minBedrooms       Int?
+  maxBedrooms       Int?
+  minBathrooms      Int?
+  maxBathrooms      Int?
+  minArea           Float?
+  maxArea           Float?
+  preferredCities   String       // JSON array of cities
+  preferredStates   String       // JSON array of states
+  amenities         String?      // JSON array of desired amenities
+  notes             String?
+  status            LeadStatus   @default(ACTIVE)
+  companyId         String
+  userId            String
+  lastContactDate   DateTime?
+  matchedPropertyId String?      // When a match is found
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  
+  company           Company      @relation(fields: [companyId], references: [id])
+  user              User         @relation(fields: [userId], references: [id])
+  matchedProperty   Property?    @relation(fields: [matchedPropertyId], references: [id])
+  notifications     LeadNotification[]
+
+  @@map("leads")
+}
+
+model LeadNotification {
+  id         String               @id @default(cuid())
+  leadId     String
+  propertyId String
+  type       LeadNotificationType @default(PROPERTY_MATCH)
+  title      String
+  message    String
+  sent       Boolean              @default(false)
+  sentAt     DateTime?
+  createdAt  DateTime             @default(now())
+  
+  lead       Lead                 @relation(fields: [leadId], references: [id])
+  property   Property             @relation(fields: [propertyId], references: [id])
+
+  @@map("lead_notifications")
+}
+
+model Maintenance {
+  id               String            @id @default(cuid())
+  contractId       String
+  propertyId       String
+  type             MaintenanceType
+  category         MaintenanceCategory @default(CORRECTIVE)
+  title            String
+  description      String
+  amount           Float
+  supplier         String?
+  supplierContact  String?
+  scheduledDate    DateTime?
+  completedDate    DateTime?
+  status           MaintenanceStatus @default(PENDING)
+  priority         MaintenancePriority @default(MEDIUM)
+  images           String?           // JSON array of image URLs
+  receipts         String?           // JSON array of receipt URLs
+  notes            String?
+  approvedBy       String?
+  deductFromOwner  Boolean           @default(true)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  
+  contract         Contract          @relation(fields: [contractId], references: [id])
+  property         Property          @relation(fields: [propertyId], references: [id])
+
+  @@map("maintenances")
+}
+
+model MonthlyReport {
+  id                    String    @id @default(cuid())
+  contractId            String
+  propertyId            String
+  month                 Int       // 1-12
+  year                  Int
+  rentAmount            Float
+  administrationFee     Float
+  managementFee         Float
+  maintenanceCosts      Float     @default(0)
+  iptuCosts            Float     @default(0)
+  condominiumCosts     Float     @default(0)
+  otherDeductions      Float     @default(0)
+  grossAmount          Float
+  totalDeductions      Float
+  netAmount            Float
+  reportGenerated      Boolean   @default(false)
+  reportSent           Boolean   @default(false)
+  reportUrl            String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  
+  contract             Contract  @relation(fields: [contractId], references: [id])
+  property             Property  @relation(fields: [propertyId], references: [id])
+
+  @@unique([contractId, month, year])
+  @@map("monthly_reports")
+}

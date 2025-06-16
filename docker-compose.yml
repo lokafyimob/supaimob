@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  # Banco de Dados PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: crm-postgres
+    environment:
+      POSTGRES_DB: crm_imobiliario
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password123
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - crm-network
+
+  # Aplicação Next.js
+  app:
+    build: .
+    container_name: crm-app
+    environment:
+      DATABASE_URL: "postgresql://postgres:password123@postgres:5432/crm_imobiliario"
+      NEXTAUTH_SECRET: "sua-chave-secreta-aqui"
+      NEXTAUTH_URL: "http://localhost:3000"
+      OPENAI_API_KEY: "sua-chave-openai"
+      EMAIL_SERVICE_API_KEY: "sua-chave-email"
+      WHATSAPP_API_KEY: "sua-chave-whatsapp"
+      BOLETO_API_KEY: "sua-chave-boletos"
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+    networks:
+      - crm-network
+    volumes:
+      - .:/app
+    command: npm run dev
+
+  # Redis para cache (opcional)
+  redis:
+    image: redis:7-alpine
+    container_name: crm-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - crm-network
+
+volumes:
+  postgres_data:
+
+networks:
+  crm-network:
+    driver: bridge
