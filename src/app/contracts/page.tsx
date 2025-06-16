@@ -761,7 +761,6 @@ Sistema: CRM Imobiliário
                 <ContractMaintenances 
                   contractId={viewingContract.id}
                   propertyId={viewingContract.property.id}
-                  contract={viewingContract}
                 />
 
                 {/* Actions */}
