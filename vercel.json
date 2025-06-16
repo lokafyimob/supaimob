@@ -1,17 +1,6 @@
 {
   "version": 2,
-  "name": "crm-imobiliario",
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "includeFiles": [
-          "prisma/schema.prisma"
-        ]
-      }
-    }
-  ],
+  "name": "lokafy",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
