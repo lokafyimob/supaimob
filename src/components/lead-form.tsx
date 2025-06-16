@@ -45,8 +45,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     minArea: '',
     maxArea: '',
     preferredCities: [''],
-    preferredStates: [],
-    amenities: [],
+    preferredStates: [] as string[],
+    amenities: [] as string[],
     notes: '',
     status: 'ACTIVE',
     lastContactDate: ''
