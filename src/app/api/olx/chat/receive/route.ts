@@ -100,6 +100,18 @@ async function processIncomingMessage(data: {
       })
 
       if (!lead && (data.email || data.phone || data.name)) {
+        // Buscar primeiro usuário ativo para associar o lead
+        const firstUser = await prisma.user.findFirst({
+          where: { isActive: true },
+          include: { company: true }
+        })
+        
+        if (!firstUser || !firstUser.companyId) {
+          return NextResponse.json({
+            error: 'Nenhum usuário ativo encontrado para criar lead'
+          }, { status: 500 })
+        }
+
         // Criar novo lead
         lead = await prisma.lead.create({
           data: {
@@ -114,7 +126,9 @@ async function processIncomingMessage(data: {
             amenities: JSON.stringify([]),
             notes: `Lead criado via chat OLX - Chat ID: ${data.chatId}`,
             status: 'ACTIVE',
-            lastContactDate: new Date()
+            lastContactDate: new Date(),
+            companyId: firstUser.companyId,
+            userId: firstUser.id
           }
         })
         console.log('✅ New lead created from chat:', lead.id)
