@@ -8,7 +8,8 @@
   },
   "env": {
     "NEXTAUTH_URL": "https://lokafyimob.vercel.app",
-    "DATABASE_URL": "postgresql://postgres.qurrccdpifrxowhawcjj:marcopolo@aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require"
+    "DATABASE_URL": "file:./prisma/dev.db",
+    "NEXTAUTH_SECRET": "nX2n69Lw+LgxBsMwY7AB8wvoRX5cPnELy6lZV6UCC+k="
   },
   "build": {
     "env": {
