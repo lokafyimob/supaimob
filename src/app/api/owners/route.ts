@@ -29,9 +29,12 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  let user: any = null
+  let data: any = null
+  
   try {
-    const user = await requireAuth(request)
-    const data = await request.json()
+    user = await requireAuth(request)
+    data = await request.json()
     
     // Validate required fields
     if (!data.name || !data.email || !data.phone || !data.document) {
@@ -68,6 +71,9 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(owner, { status: 201 })
   } catch (error) {
     console.error('Error creating owner:', error)
+    if (user) console.error('User data:', { id: user.id, companyId: user.companyId })
+    if (data) console.error('Request data:', data)
+    
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -77,6 +83,9 @@ export async function POST(request: NextRequest) {
     
     // Handle database constraint errors
     if (error instanceof Error) {
+      console.error('Error message:', error.message)
+      console.error('Error stack:', error.stack)
+      
       if (error.message.includes('Unique constraint')) {
         return NextResponse.json(
           { error: 'Email ou documento já está em uso' },
@@ -87,6 +96,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           { error: 'Dados de usuário ou empresa inválidos' },
           { status: 400 }
+        )
+      }
+      if (error.message.includes('does not exist')) {
+        return NextResponse.json(
+          { error: 'Tabela ou coluna não existe no banco de dados' },
+          { status: 500 }
         )
       }
     }

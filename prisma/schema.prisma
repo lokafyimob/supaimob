@@ -106,13 +106,13 @@ model Owner {
   city        String
   state       String
   zipCode     String
-  companyId   String
+  companyId   String?
   userId      String
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   bankAccount BankAccount?
   properties  Property[]
-  company     Company      @relation(fields: [companyId], references: [id])
+  company     Company?     @relation(fields: [companyId], references: [id])
   user        User         @relation(fields: [userId], references: [id])
 
   @@unique([email, companyId])
