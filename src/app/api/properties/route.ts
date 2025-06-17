@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
         status: data.status,
         availableFor: JSON.stringify(data.availableFor || ['RENT']),
         ownerId: data.ownerId,
-        companyId: owner.companyId,
+        companyId: owner.companyId || user.companyId || '',
         userId: user.id,
         images: data.images || "[]",
         amenities: data.amenities || "[]"
