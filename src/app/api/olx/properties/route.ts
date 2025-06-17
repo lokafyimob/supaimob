@@ -16,8 +16,8 @@ export async function GET(request: NextRequest) {
     // Buscar propriedades ativas e disponíveis
     const properties = await prisma.property.findMany({
       where: {
-        isAvailable: active,
-        ...(active && { availableFor: { in: ['RENT', 'SALE', 'BOTH'] } })
+        status: active ? 'AVAILABLE' : undefined,
+        ...(active && { availableFor: { contains: 'RENT' } })
       },
       include: {
         owner: {
