@@ -50,11 +50,19 @@ export async function POST(request: NextRequest) {
  */
 export async function GET() {
   try {
-    const result = await olxChatService.testConnection()
-    
     return NextResponse.json({
-      configured: olxChatService.isConfigured(),
-      connectionTest: result
+      status: 'active',
+      endpoints: {
+        send: 'POST /api/olx-chat',
+        receive: 'POST /api/olx/chat/receive',
+        webhook: 'POST /api/olx/webhook',
+        properties: 'GET /api/olx/properties'
+      },
+      webhook_urls: {
+        chat_receive: 'https://lokafyimob.vercel.app/api/olx/chat/receive',
+        lead_webhook: 'https://lokafyimob.vercel.app/api/olx/webhook'
+      },
+      timestamp: new Date().toISOString()
     })
     
   } catch (error) {
