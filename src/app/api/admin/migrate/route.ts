@@ -3,113 +3,113 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('Starting comprehensive database migration...')
+    console.log('Iniciando migração completa do banco de dados...')
     
     const migrations = []
     
     try {
-      // Make companyId nullable in owners table
+      // Tornar companyId anulável na tabela owners
       await prisma.$executeRaw`ALTER TABLE owners ALTER COLUMN "companyId" DROP NOT NULL`
-      migrations.push('✅ Made owners.companyId nullable')
+      migrations.push('✅ Campo owners.companyId agora aceita valores nulos')
     } catch (e) {
-      migrations.push('⚠️ owners.companyId already nullable or failed')
+      migrations.push('⚠️ Campo owners.companyId já aceita nulos ou falhou')
     }
     
     try {
-      // Add missing columns to properties table
+      // Adicionar colunas faltantes na tabela properties
       await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "images" TEXT DEFAULT '[]'`
-      migrations.push('✅ Added properties.images column')
+      migrations.push('✅ Coluna properties.images adicionada')
     } catch (e) {
-      migrations.push('⚠️ properties.images already exists or failed')
+      migrations.push('⚠️ Coluna properties.images já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "amenities" TEXT DEFAULT '[]'`
-      migrations.push('✅ Added properties.amenities column')
+      migrations.push('✅ Coluna properties.amenities adicionada')
     } catch (e) {
-      migrations.push('⚠️ properties.amenities already exists or failed')
+      migrations.push('⚠️ Coluna properties.amenities já existe ou falhou')
     }
     
     try {
-      // Add missing columns to contracts table
+      // Adicionar colunas faltantes na tabela contracts
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "condominiumDeductible" BOOLEAN DEFAULT true`
-      migrations.push('✅ Added contracts.condominiumDeductible column')
+      migrations.push('✅ Coluna contracts.condominiumDeductible adicionada')
     } catch (e) {
-      migrations.push('⚠️ contracts.condominiumDeductible already exists or failed')
+      migrations.push('⚠️ Coluna contracts.condominiumDeductible já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "maintenanceDeductible" BOOLEAN DEFAULT true`
-      migrations.push('✅ Added contracts.maintenanceDeductible column')
+      migrations.push('✅ Coluna contracts.maintenanceDeductible adicionada')
     } catch (e) {
-      migrations.push('⚠️ contracts.maintenanceDeductible already exists or failed')
+      migrations.push('⚠️ Coluna contracts.maintenanceDeductible já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "iptuDeductible" BOOLEAN DEFAULT true`
-      migrations.push('✅ Added contracts.iptuDeductible column')
+      migrations.push('✅ Coluna contracts.iptuDeductible adicionada')
     } catch (e) {
-      migrations.push('⚠️ contracts.iptuDeductible already exists or failed')
+      migrations.push('⚠️ Coluna contracts.iptuDeductible já existe ou falhou')
     }
     
     try {
-      // Add missing columns to payments table
+      // Adicionar colunas faltantes na tabela payments
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoUrl" TEXT`
-      migrations.push('✅ Added payments.boletoUrl column')
+      migrations.push('✅ Coluna payments.boletoUrl adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.boletoUrl already exists or failed')
+      migrations.push('⚠️ Coluna payments.boletoUrl já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoCode" TEXT`
-      migrations.push('✅ Added payments.boletoCode column')
+      migrations.push('✅ Coluna payments.boletoCode adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.boletoCode already exists or failed')
+      migrations.push('⚠️ Coluna payments.boletoCode já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "penalty" REAL`
-      migrations.push('✅ Added payments.penalty column')
+      migrations.push('✅ Coluna payments.penalty adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.penalty already exists or failed')
+      migrations.push('⚠️ Coluna payments.penalty já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "interest" REAL`
-      migrations.push('✅ Added payments.interest column')
+      migrations.push('✅ Coluna payments.interest adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.interest already exists or failed')
+      migrations.push('⚠️ Coluna payments.interest já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "receipts" TEXT`
-      migrations.push('✅ Added payments.receipts column')
+      migrations.push('✅ Coluna payments.receipts adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.receipts already exists or failed')
+      migrations.push('⚠️ Coluna payments.receipts já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "notes" TEXT`
-      migrations.push('✅ Added payments.notes column')
+      migrations.push('✅ Coluna payments.notes adicionada')
     } catch (e) {
-      migrations.push('⚠️ payments.notes already exists or failed')
+      migrations.push('⚠️ Coluna payments.notes já existe ou falhou')
     }
     
-    console.log('Migration results:', migrations)
+    console.log('Resultados da migração:', migrations)
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Database migration completed', 
+      message: 'Migração do banco de dados concluída', 
       results: migrations
     })
     
   } catch (error) {
-    console.error('Migration error:', error)
+    console.error('Erro na migração:', error)
     return NextResponse.json(
       { 
         success: false, 
-        error: 'Migration failed', 
-        details: error instanceof Error ? error.message : 'Unknown error' 
+        error: 'Migração falhou', 
+        details: error instanceof Error ? error.message : 'Erro desconhecido' 
       },
       { status: 500 }
     )
