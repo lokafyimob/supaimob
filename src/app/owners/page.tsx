@@ -39,6 +39,7 @@ export default function Owners() {
     loading: false
   })
   const [migrationLoading, setMigrationLoading] = useState(false)
+  const [hasApiError, setHasApiError] = useState(false)
   
   const { toasts, removeToast, showSuccess, showError, showWarning } = useToast()
 
@@ -52,13 +53,16 @@ export default function Owners() {
       if (response.ok) {
         const data = await response.json()
         setOwners(Array.isArray(data) ? data : [])
+        setHasApiError(false)
       } else {
         console.error('Error fetching owners:', response.status)
         setOwners([])
+        setHasApiError(true)
       }
     } catch (error) {
       console.error('Error fetching owners:', error)
       setOwners([])
+      setHasApiError(true)
     } finally {
       setLoading(false)
     }
@@ -173,6 +177,7 @@ export default function Owners() {
       
       if (response.ok) {
         showSuccess('Migração concluída!', `${data.results?.length || 0} operações executadas`)
+        setHasApiError(false)
         // Recarregar a lista de owners após migração
         await fetchOwners()
       } else {
@@ -207,16 +212,16 @@ export default function Owners() {
     <DashboardLayout>
       <div className="space-y-6">
         {/* Migration Alert */}
-        {owners.length === 0 && !loading && (
-          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+        {hasApiError && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
               <div>
-                <h3 className="text-yellow-800 font-semibold">Banco de dados precisa ser corrigido</h3>
-                <p className="text-yellow-700 mt-1">
-                  Se você está vendo erros ao criar proprietários, clique no botão "Corrigir BD" para atualizar o banco de dados.
+                <h3 className="text-red-800 font-semibold">❌ Erro no banco de dados detectado</h3>
+                <p className="text-red-700 mt-1">
+                  A API está retornando erro 500. Clique no botão <strong>"Corrigir BD"</strong> para corrigir o banco de dados.
                 </p>
               </div>
             </div>
