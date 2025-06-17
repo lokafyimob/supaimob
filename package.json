@@ -9,7 +9,6 @@
     "build:docker": "BUILD_STANDALONE=true next build",
     "start": "next start -p $PORT",
     "start:prod": "NODE_ENV=production next start",
-    "postinstall": "prisma generate",
     "lint": "next lint",
     "lint:fix": "next lint --fix",
     "type-check": "tsc --noEmit",
