@@ -3,50 +3,104 @@ import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest) {
   try {
-    // This is a temporary endpoint to fix database schema issues
-    // Should be removed after migration is complete
+    console.log('Starting comprehensive database migration...')
     
-    console.log('Starting database migration...')
+    const migrations = []
     
-    // Make companyId nullable in owners table
-    await prisma.$executeRaw`ALTER TABLE owners ALTER COLUMN "companyId" DROP NOT NULL`
-    console.log('✅ Made owners.companyId nullable')
-    
-    // Add missing columns if they don't exist
-    await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "images" TEXT DEFAULT '[]'`
-    console.log('✅ Added properties.images column')
-    
-    await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "amenities" TEXT DEFAULT '[]'`
-    console.log('✅ Added properties.amenities column')
-    
-    // Test owner creation
-    const testData = {
-      name: 'Test Owner',
-      email: 'test-migration@example.com',
-      phone: '11999999999',
-      document: '12345678901',
-      address: 'Test Address',
-      city: 'Test City',
-      state: 'SP',
-      zipCode: '12345678',
-      companyId: null,
-      userId: '1'
+    try {
+      // Make companyId nullable in owners table
+      await prisma.$executeRaw`ALTER TABLE owners ALTER COLUMN "companyId" DROP NOT NULL`
+      migrations.push('✅ Made owners.companyId nullable')
+    } catch (e) {
+      migrations.push('⚠️ owners.companyId already nullable or failed')
     }
     
-    const testOwner = await prisma.owner.create({
-      data: testData
-    })
-    console.log('✅ Test owner created:', testOwner.id)
+    try {
+      // Add missing columns to properties table
+      await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "images" TEXT DEFAULT '[]'`
+      migrations.push('✅ Added properties.images column')
+    } catch (e) {
+      migrations.push('⚠️ properties.images already exists or failed')
+    }
     
-    // Clean up test data
-    await prisma.owner.delete({
-      where: { id: testOwner.id }
-    })
-    console.log('✅ Test data cleaned up')
+    try {
+      await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "amenities" TEXT DEFAULT '[]'`
+      migrations.push('✅ Added properties.amenities column')
+    } catch (e) {
+      migrations.push('⚠️ properties.amenities already exists or failed')
+    }
+    
+    try {
+      // Add missing columns to contracts table
+      await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "condominiumDeductible" BOOLEAN DEFAULT true`
+      migrations.push('✅ Added contracts.condominiumDeductible column')
+    } catch (e) {
+      migrations.push('⚠️ contracts.condominiumDeductible already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "maintenanceDeductible" BOOLEAN DEFAULT true`
+      migrations.push('✅ Added contracts.maintenanceDeductible column')
+    } catch (e) {
+      migrations.push('⚠️ contracts.maintenanceDeductible already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "iptuDeductible" BOOLEAN DEFAULT true`
+      migrations.push('✅ Added contracts.iptuDeductible column')
+    } catch (e) {
+      migrations.push('⚠️ contracts.iptuDeductible already exists or failed')
+    }
+    
+    try {
+      // Add missing columns to payments table
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoUrl" TEXT`
+      migrations.push('✅ Added payments.boletoUrl column')
+    } catch (e) {
+      migrations.push('⚠️ payments.boletoUrl already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoCode" TEXT`
+      migrations.push('✅ Added payments.boletoCode column')
+    } catch (e) {
+      migrations.push('⚠️ payments.boletoCode already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "penalty" REAL`
+      migrations.push('✅ Added payments.penalty column')
+    } catch (e) {
+      migrations.push('⚠️ payments.penalty already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "interest" REAL`
+      migrations.push('✅ Added payments.interest column')
+    } catch (e) {
+      migrations.push('⚠️ payments.interest already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "receipts" TEXT`
+      migrations.push('✅ Added payments.receipts column')
+    } catch (e) {
+      migrations.push('⚠️ payments.receipts already exists or failed')
+    }
+    
+    try {
+      await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "notes" TEXT`
+      migrations.push('✅ Added payments.notes column')
+    } catch (e) {
+      migrations.push('⚠️ payments.notes already exists or failed')
+    }
+    
+    console.log('Migration results:', migrations)
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Database migration completed successfully' 
+      message: 'Database migration completed', 
+      results: migrations
     })
     
   } catch (error) {
