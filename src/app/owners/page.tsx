@@ -51,10 +51,14 @@ export default function Owners() {
       const response = await fetch('/api/owners')
       if (response.ok) {
         const data = await response.json()
-        setOwners(data)
+        setOwners(Array.isArray(data) ? data : [])
+      } else {
+        console.error('Error fetching owners:', response.status)
+        setOwners([])
       }
     } catch (error) {
       console.error('Error fetching owners:', error)
+      setOwners([])
     } finally {
       setLoading(false)
     }
@@ -202,6 +206,23 @@ export default function Owners() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
+        {/* Migration Alert */}
+        {owners.length === 0 && !loading && (
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+            <div className="flex items-center">
+              <svg className="w-5 h-5 text-yellow-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+              <div>
+                <h3 className="text-yellow-800 font-semibold">Banco de dados precisa ser corrigido</h3>
+                <p className="text-yellow-700 mt-1">
+                  Se você está vendo erros ao criar proprietários, clique no botão "Corrigir BD" para atualizar o banco de dados.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -272,7 +293,7 @@ export default function Owners() {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total de Imóveis</p>
                 <p className="text-2xl font-bold text-gray-900 mt-2">
-                  {owners.reduce((sum, owner) => sum + owner.properties.length, 0)}
+                  {owners.reduce((sum, owner) => sum + (owner.properties?.length || 0), 0)}
                 </p>
               </div>
               <div className="bg-green-50 p-3 rounded-lg">
@@ -342,7 +363,7 @@ export default function Owners() {
                 </div>
                 <div className="flex items-center text-gray-600">
                   <Building2 className="w-4 h-4 mr-3" />
-                  <span className="text-sm">{owner.properties.length} imóvel(is)</span>
+                  <span className="text-sm">{owner.properties?.length || 0} imóvel(is)</span>
                 </div>
               </div>
 
