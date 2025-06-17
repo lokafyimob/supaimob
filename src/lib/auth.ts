@@ -2,7 +2,6 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
-import { ensureDbInitialized } from './init-db'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -21,57 +20,6 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
-          // Garantir que o banco está inicializado
-          await ensureDbInitialized()
-          
-          // Se for o usuário teste e não existir, criar agora
-          if (credentials.email === 'teste@crm.com') {
-            console.log('🚀 Checking/creating test user...')
-            
-            let company = await prisma.company.findFirst({
-              where: { document: '11.222.333/0001-44' }
-            })
-            
-            if (!company) {
-              console.log('📦 Creating demo company...')
-              company = await prisma.company.create({
-                data: {
-                  name: 'Imobiliária Demo',
-                  tradeName: 'Demo CRM',
-                  document: '11.222.333/0001-44',
-                  email: 'demo@crm.com',
-                  phone: '(11) 1234-5678',
-                  address: 'Rua Demo, 123',
-                  city: 'São Paulo',
-                  state: 'SP',
-                  zipCode: '01234-567'
-                }
-              })
-            }
-            
-            const hashedPassword = await bcrypt.hash('test123', 10)
-            
-            await prisma.user.upsert({
-              where: { email: 'teste@crm.com' },
-              update: {
-                password: hashedPassword,
-                companyId: company.id,
-                isActive: true,
-                isBlocked: false
-              },
-              create: {
-                email: 'teste@crm.com',
-                name: 'Usuário Teste',
-                password: hashedPassword,
-                role: 'USER',
-                companyId: company.id,
-                isActive: true,
-                isBlocked: false
-              }
-            })
-            
-            console.log('✅ Test user created/updated')
-          }
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: {
