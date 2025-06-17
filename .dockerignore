@@ -1,0 +1,13 @@
+node_modules
+.next
+.git
+.env*
+README.md
+docker-compose.yml
+Dockerfile
+.dockerignore
+.gitignore
+*.md
+.vercel
+dev.db*
+test-*.js

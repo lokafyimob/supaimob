@@ -50,4 +50,8 @@ EXPOSE 3000
 ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
-CMD ["node", "server.js"]
+# Add wait script and start command
+COPY scripts/wait-for-db.js ./scripts/
+RUN chmod +x ./scripts/wait-for-db.js
+
+CMD ["sh", "-c", "node scripts/wait-for-db.js && node server.js"]
