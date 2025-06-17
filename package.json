@@ -23,7 +23,8 @@
     "docker:logs": "docker-compose logs -f app",
     "vercel:deploy": "vercel deploy",
     "vercel:prod": "vercel deploy --prod",
-    "analyze": "ANALYZE=true npm run build"
+    "analyze": "ANALYZE=true npm run build",
+    "setup-db": "node scripts/setup-db.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
