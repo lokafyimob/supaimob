@@ -36,8 +36,29 @@ export async function POST(request: NextRequest) {
     // Debug logs
     console.log('🔍 POST /api/owners - Starting...')
     
+    // First, let's test if we can even access the database
+    try {
+      const userCount = await prisma.user.count()
+      console.log('📊 Database accessible, user count:', userCount)
+    } catch (dbError) {
+      console.error('💥 Database not accessible:', dbError)
+      return NextResponse.json({
+        error: 'Banco de dados não acessível',
+        details: dbError instanceof Error ? dbError.message : 'Unknown DB error'
+      }, { status: 500 })
+    }
+    
     user = await requireAuth(request)
     console.log('✅ User authenticated:', { id: user.id, email: user.email, companyId: user.companyId })
+    
+    // Check if user has a company
+    if (!user.companyId) {
+      console.error('❌ User has no company')
+      return NextResponse.json({
+        error: 'Usuário não possui empresa associada',
+        details: 'CompanyId is null'
+      }, { status: 400 })
+    }
     
     data = await request.json()
     console.log('📝 Request data:', data)
@@ -51,6 +72,32 @@ export async function POST(request: NextRequest) {
       )
     }
     
+    // Check if email or document already exists
+    try {
+      const existingOwner = await prisma.owner.findFirst({
+        where: {
+          OR: [
+            { email: data.email },
+            { document: data.document }
+          ]
+        }
+      })
+      
+      if (existingOwner) {
+        console.log('❌ Owner already exists')
+        return NextResponse.json({
+          error: 'Email ou documento já está em uso',
+          details: `Conflito com owner ID: ${existingOwner.id}`
+        }, { status: 400 })
+      }
+    } catch (checkError) {
+      console.error('❌ Error checking existing owner:', checkError)
+      return NextResponse.json({
+        error: 'Erro ao verificar duplicatas',
+        details: checkError instanceof Error ? checkError.message : 'Unknown check error'
+      }, { status: 500 })
+    }
+    
     console.log('🚀 Creating owner...')
     
     const ownerData = {
@@ -62,7 +109,7 @@ export async function POST(request: NextRequest) {
       city: data.city || '',
       state: data.state || '',
       zipCode: data.zipCode || '',
-      companyId: user.companyId || null,
+      companyId: user.companyId,
       userId: user.id
     }
     
