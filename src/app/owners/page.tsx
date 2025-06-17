@@ -211,22 +211,41 @@ export default function Owners() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Migration Alert */}
-        {hasApiError && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+        {/* Migration Alert - Always visible */}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <div className="flex items-center justify-between">
             <div className="flex items-center">
-              <svg className="w-5 h-5 text-red-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.728-.833-2.498 0L4.316 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              <svg className="w-5 h-5 text-blue-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <h3 className="text-red-800 font-semibold">❌ Erro no banco de dados detectado</h3>
-                <p className="text-red-700 mt-1">
-                  A API está retornando erro 500. Clique no botão <strong>"Corrigir BD"</strong> para corrigir o banco de dados.
+                <h3 className="text-blue-800 font-semibold">🔧 Migração do Banco de Dados</h3>
+                <p className="text-blue-700 mt-1">
+                  Se você está vendo erros ao criar proprietários, use o botão <strong>"Corrigir BD"</strong> ao lado →
                 </p>
               </div>
             </div>
+            <button 
+              onClick={runMigration}
+              disabled={migrationLoading}
+              className="ml-4 inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+            >
+              {migrationLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                  Migrando...
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                  </svg>
+                  Corrigir BD
+                </>
+              )}
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
