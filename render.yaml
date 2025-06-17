@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: crm-imobiliario
+    env: node
+    plan: free
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXTAUTH_SECRET
+        value: nX2n69Lw+LgxBsMwY7AB8wvoRX5cPnELy6lZV6UCC+k=
+      - key: NEXTAUTH_URL
+        sync: false
+
+databases:
+  - name: crm-postgres
+    plan: free
+    databaseName: crm_db
+    user: crm_user
