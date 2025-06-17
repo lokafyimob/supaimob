@@ -12,20 +12,27 @@ export const authOptions: NextAuthOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
+        console.log('🔍 Auth attempt:', credentials?.email)
+        
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Missing credentials')
           return null
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-          include: {
-            company: true
+        try {
+          const user = await prisma.user.findUnique({
+            where: { email: credentials.email },
+            include: {
+              company: true
+            }
+          })
+
+          console.log('🔍 User found:', !!user, user?.email)
+
+          if (!user) {
+            console.log('❌ User not found')
+            return null
           }
-        })
-
-        if (!user) {
-          return null
-        }
 
         // Verificar se usuário está bloqueado ou inativo
         if (user.isBlocked) {
@@ -41,7 +48,10 @@ export const authOptions: NextAuthOptions = {
           user.password
         )
 
+        console.log('🔍 Password valid:', isPasswordValid)
+
         if (!isPasswordValid) {
+          console.log('❌ Invalid password')
           return null
         }
 
@@ -51,6 +61,7 @@ export const authOptions: NextAuthOptions = {
           data: { lastLogin: new Date() }
         })
 
+        console.log('✅ Login successful for:', user.email)
         return {
           id: user.id,
           email: user.email,
@@ -58,6 +69,10 @@ export const authOptions: NextAuthOptions = {
           role: user.role,
           companyId: user.companyId || undefined,
           companyName: user.company?.name || undefined
+        }
+        } catch (error) {
+          console.log('❌ Auth error:', error)
+          return null
         }
       }
     })
