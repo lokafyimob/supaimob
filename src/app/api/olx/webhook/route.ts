@@ -48,13 +48,13 @@ async function handleLead(data: any) {
       name: data.contact?.name || data.name || 'Lead OLX',
       email: data.contact?.email || data.email || '',
       phone: data.contact?.phone || data.phone || '',
-      interest: 'RENT', // Assumir aluguel por padrão
-      propertyType: mapPropertyType(data.property?.type),
+      interest: 'RENT' as const, // Assumir aluguel por padrão
+      propertyType: mapPropertyType(data.property?.type) as any,
       maxPrice: parseFloat(data.property?.price) || 0,
       preferredCities: JSON.stringify([data.property?.city || '']),
       preferredStates: JSON.stringify([data.property?.state || '']),
       notes: `Lead recebido do OLX - Imóvel: ${data.property?.title || 'N/A'}`,
-      status: 'ACTIVE'
+      status: 'ACTIVE' as const
     }
 
     // Verificar se lead já existe (por email ou telefone)
@@ -80,11 +80,25 @@ async function handleLead(data: any) {
       })
       console.log('🔄 Lead atualizado:', lead.id)
     } else {
+      // Buscar primeiro usuário ativo para associar o lead
+      const firstUser = await prisma.user.findFirst({
+        where: { isActive: true },
+        include: { company: true }
+      })
+      
+      if (!firstUser || !firstUser.companyId) {
+        return NextResponse.json({
+          error: 'Nenhum usuário ativo encontrado para criar lead'
+        }, { status: 500 })
+      }
+
       // Criar novo lead
       lead = await prisma.lead.create({
         data: {
           ...leadData,
-          lastContactDate: new Date()
+          lastContactDate: new Date(),
+          companyId: firstUser.companyId,
+          userId: firstUser.id
         }
       })
       console.log('✅ Novo lead criado:', lead.id)
