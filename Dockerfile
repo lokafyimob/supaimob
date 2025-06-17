@@ -54,4 +54,5 @@ ENV HOSTNAME "0.0.0.0"
 COPY scripts/wait-for-db.js ./scripts/
 RUN chmod +x ./scripts/wait-for-db.js
 
-CMD ["sh", "-c", "node scripts/wait-for-db.js && node server.js"]
+# For Cloud Run, we'll handle database setup via API
+CMD ["node", "server.js"]
