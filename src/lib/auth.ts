@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
 import bcrypt from 'bcryptjs'
 import { prisma } from './prisma'
+import { ensureDbInitialized } from './init-db'
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -20,6 +21,8 @@ export const authOptions: NextAuthOptions = {
         }
 
         try {
+          // Garantir que o banco está inicializado
+          await ensureDbInitialized()
           const user = await prisma.user.findUnique({
             where: { email: credentials.email },
             include: {
