@@ -7,13 +7,6 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request)
     
     const owners = await prisma.owner.findMany({
-      where: {
-        userId: user.id
-      },
-      include: {
-        properties: true,
-        bankAccount: true
-      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -40,17 +33,25 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request)
     const data = await request.json()
     
+    // Validate required fields
+    if (!data.name || !data.email || !data.phone || !data.document) {
+      return NextResponse.json(
+        { error: 'Campos obrigatórios: nome, email, telefone e documento' },
+        { status: 400 }
+      )
+    }
+    
     const owner = await prisma.owner.create({
       data: {
         name: data.name,
         email: data.email,
         phone: data.phone,
         document: data.document,
-        address: data.address,
-        city: data.city,
-        state: data.state,
-        zipCode: data.zipCode,
-        companyId: user.companyId || '',
+        address: data.address || '',
+        city: data.city || '',
+        state: data.state || '',
+        zipCode: data.zipCode || '',
+        companyId: user.companyId || null,
         userId: user.id,
         bankAccount: data.bankAccount ? {
           create: {
@@ -58,13 +59,9 @@ export async function POST(request: NextRequest) {
             accountType: data.bankAccount.accountType,
             agency: data.bankAccount.agency,
             account: data.bankAccount.account,
-            pixKey: data.bankAccount.pixKey
+            pixKey: data.bankAccount.pixKey || null
           }
         } : undefined
-      },
-      include: {
-        properties: true,
-        bankAccount: true
       }
     })
 
@@ -77,6 +74,23 @@ export async function POST(request: NextRequest) {
         { status: 401 }
       )
     }
+    
+    // Handle database constraint errors
+    if (error instanceof Error) {
+      if (error.message.includes('Unique constraint')) {
+        return NextResponse.json(
+          { error: 'Email ou documento já está em uso' },
+          { status: 400 }
+        )
+      }
+      if (error.message.includes('Foreign key constraint')) {
+        return NextResponse.json(
+          { error: 'Dados de usuário ou empresa inválidos' },
+          { status: 400 }
+        )
+      }
+    }
+    
     return NextResponse.json(
       { error: 'Erro ao criar proprietário', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
