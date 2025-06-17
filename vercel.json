@@ -1,38 +1,9 @@
 {
   "version": 2,
-  "name": "lokafy",
+  "name": "crm-imobiliario",
   "functions": {
     "src/app/api/**/*.ts": {
       "maxDuration": 30
     }
-  },
-  "env": {
-    "NEXTAUTH_URL": "https://lokafyimob.vercel.app",
-    "DATABASE_URL": "file:./prisma/dev.db",
-    "NEXTAUTH_SECRET": "nX2n69Lw+LgxBsMwY7AB8wvoRX5cPnELy6lZV6UCC+k="
-  },
-  "build": {
-    "env": {
-      "NEXT_PUBLIC_APP_URL": "https://lokafyimob.vercel.app"
-    }
-  },
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        {
-          "key": "X-Content-Type-Options",
-          "value": "nosniff"
-        },
-        {
-          "key": "X-Frame-Options",
-          "value": "DENY"
-        },
-        {
-          "key": "X-XSS-Protection",
-          "value": "1; mode=block"
-        }
-      ]
-    }
-  ]
+  }
 }
