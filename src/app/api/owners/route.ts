@@ -33,41 +33,46 @@ export async function POST(request: NextRequest) {
   let data: any = null
   
   try {
+    // Debug logs
+    console.log('🔍 POST /api/owners - Starting...')
+    
     user = await requireAuth(request)
+    console.log('✅ User authenticated:', { id: user.id, email: user.email, companyId: user.companyId })
+    
     data = await request.json()
+    console.log('📝 Request data:', data)
     
     // Validate required fields
     if (!data.name || !data.email || !data.phone || !data.document) {
+      console.log('❌ Missing required fields')
       return NextResponse.json(
         { error: 'Campos obrigatórios: nome, email, telefone e documento' },
         { status: 400 }
       )
     }
     
+    console.log('🚀 Creating owner...')
+    
+    const ownerData = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      document: data.document,
+      address: data.address || '',
+      city: data.city || '',
+      state: data.state || '',
+      zipCode: data.zipCode || '',
+      companyId: user.companyId || null,
+      userId: user.id
+    }
+    
+    console.log('📊 Owner data to create:', ownerData)
+    
     const owner = await prisma.owner.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        document: data.document,
-        address: data.address || '',
-        city: data.city || '',
-        state: data.state || '',
-        zipCode: data.zipCode || '',
-        companyId: user.companyId || null,
-        userId: user.id,
-        bankAccount: data.bankAccount ? {
-          create: {
-            bankName: data.bankAccount.bankName,
-            accountType: data.bankAccount.accountType,
-            agency: data.bankAccount.agency,
-            account: data.bankAccount.account,
-            pixKey: data.bankAccount.pixKey || null
-          }
-        } : undefined
-      }
+      data: ownerData
     })
 
+    console.log('✅ Owner created successfully:', owner.id)
     return NextResponse.json(owner, { status: 201 })
   } catch (error) {
     console.error('Error creating owner:', error)
