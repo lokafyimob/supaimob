@@ -23,8 +23,7 @@
     "docker:logs": "docker-compose logs -f app",
     "vercel:deploy": "vercel deploy",
     "vercel:prod": "vercel deploy --prod",
-    "analyze": "ANALYZE=true npm run build",
-    "postinstall": "prisma generate"
+    "analyze": "ANALYZE=true npm run build"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",
