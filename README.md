@@ -176,3 +176,4 @@ Acesse: `http://localhost:3000`
 # Test Railway PostgreSQL Tue Jun 17 23:23:02 -03 2025
 # Test Railway external URL Tue Jun 17 23:26:56 -03 2025
 # Test Railway proxy connection Tue Jun 17 23:46:35 -03 2025
+# Test Neon connection Wed Jun 18 00:49:19 -03 2025
