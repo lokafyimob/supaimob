@@ -22,10 +22,7 @@ export const authOptions: NextAuthOptions = {
 
         try {
           const user = await prisma.user.findUnique({
-            where: { email: credentials.email },
-            include: {
-              company: true
-            }
+            where: { email: credentials.email }
           })
 
           console.log('🔍 User found:', !!user, user?.email)
@@ -35,12 +32,12 @@ export const authOptions: NextAuthOptions = {
             return null
           }
 
-        // Verificar se usuário está bloqueado ou inativo
-        if (user.isBlocked) {
+        // Verificar se usuário está bloqueado ou inativo (campos opcionais)
+        if (user.isBlocked === true) {
           throw new Error('Usuário bloqueado. Entre em contato com o administrador.')
         }
 
-        if (!user.isActive) {
+        if (user.isActive === false) {
           throw new Error('Usuário inativo. Entre em contato com o administrador.')
         }
 
@@ -69,7 +66,7 @@ export const authOptions: NextAuthOptions = {
           name: user.name,
           role: user.role,
           companyId: user.companyId || undefined,
-          companyName: user.company?.name || undefined
+          companyName: undefined
         }
         } catch (error) {
           console.log('❌ Auth error:', error)
