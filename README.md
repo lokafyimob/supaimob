@@ -166,3 +166,5 @@ Acesse: `http://localhost:3000`
 ---
 
 **Desenvolvido com ❤️ para revolucionar a gestão imobiliária**
+
+*Deploy updated for Supabase PostgreSQL*
