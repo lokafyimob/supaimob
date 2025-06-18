@@ -1,0 +1,25 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/prisma'
+
+export async function GET(request: NextRequest) {
+  try {
+    // Test database connection
+    await prisma.$connect()
+    
+    // Try to get owners count (will show the specific error)
+    const count = await prisma.owner.count()
+    
+    return NextResponse.json({
+      success: true,
+      database: 'connected',
+      owners_count: count
+    })
+    
+  } catch (error) {
+    return NextResponse.json({
+      error: 'Database error',
+      details: error instanceof Error ? error.message : 'Unknown error',
+      code: error instanceof Error && 'code' in error ? (error as any).code : 'unknown'
+    })
+  }
+}
