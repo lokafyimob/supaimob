@@ -173,3 +173,4 @@ Acesse: `http://localhost:3000`
 # Deploy for lokafyimob project Tue Jun 17 22:48:04 -03 2025
 # Test connection after restart Tue Jun 17 23:05:26 -03 2025
 # Test with new password Tue Jun 17 23:11:08 -03 2025
+# Test Railway PostgreSQL Tue Jun 17 23:23:02 -03 2025
