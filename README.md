@@ -175,3 +175,4 @@ Acesse: `http://localhost:3000`
 # Test with new password Tue Jun 17 23:11:08 -03 2025
 # Test Railway PostgreSQL Tue Jun 17 23:23:02 -03 2025
 # Test Railway external URL Tue Jun 17 23:26:56 -03 2025
+# Test Railway proxy connection Tue Jun 17 23:46:35 -03 2025
