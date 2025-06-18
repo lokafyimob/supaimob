@@ -1,80 +1,51 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import bcrypt from 'bcryptjs'
-
-const prisma = new PrismaClient()
 
 export async function POST(request: NextRequest) {
   try {
-    console.log('🔄 Setting up database and admin user...')
-    
-    // Test connection first
-    await prisma.$connect()
-    console.log('✅ Database connected')
-    
-    // Check if admin already exists
-    const existingAdmin = await prisma.user.findUnique({
-      where: { email: 'admin@crm.com' }
+    const { Client } = require('pg')
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL
     })
     
-    if (existingAdmin) {
-      return NextResponse.json({
-        success: true,
-        message: 'Admin user already exists',
-        admin: { email: existingAdmin.email, name: existingAdmin.name }
-      })
-    }
+    await client.connect()
     
-    // Create company first
-    const company = await prisma.company.create({
-      data: {
-        name: 'CRM Imobiliário',
-        tradeName: 'CRM Imobiliário Ltda', 
-        document: '12345678000199',
-        email: 'contato@crm.com',
-        phone: '(11) 99999-9999',
-        address: 'Rua Exemplo, 123',
-        city: 'São Paulo',
-        state: 'SP',
-        zipCode: '01234-567'
-      }
-    })
+    // Inserir usuário admin
+    await client.query(`
+      INSERT INTO users (id, email, name, password, role, "isActive", "createdAt", "updatedAt") 
+      VALUES ('admin-123', 'admin@crm.com', 'Admin', '$2a$10$CwTycUXWue0Thq9StjUM0uJ8.J8k8aZcB0.6WzU8F8YqJJv4ry/zO', 'ADMIN', true, NOW(), NOW())
+      ON CONFLICT (email) DO NOTHING
+    `)
     
-    // Create admin user
-    const hashedPassword = await bcrypt.hash('admin123', 12)
-    const adminUser = await prisma.user.create({
-      data: {
-        email: 'admin@crm.com',
-        name: 'Administrador',
-        password: hashedPassword,
-        role: 'ADMIN',
-        companyId: company.id,
-        isActive: true
-      }
-    })
+    // Criar tabela owners
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS owners (
+        id TEXT PRIMARY KEY DEFAULT 'owner-' || EXTRACT(EPOCH FROM NOW()),
+        name TEXT NOT NULL,
+        email TEXT NOT NULL,
+        phone TEXT NOT NULL,
+        document TEXT NOT NULL,
+        address TEXT NOT NULL,
+        city TEXT NOT NULL,
+        state TEXT NOT NULL,
+        "zipCode" TEXT NOT NULL,
+        "userId" TEXT NOT NULL DEFAULT 'admin-123',
+        "createdAt" TIMESTAMP DEFAULT NOW(),
+        "updatedAt" TIMESTAMP DEFAULT NOW()
+      )
+    `)
     
-    return NextResponse.json({
-      success: true,
-      message: 'Database setup completed successfully',
-      admin: { 
-        id: adminUser.id,
-        email: adminUser.email, 
-        name: adminUser.name 
-      },
-      company: {
-        id: company.id,
-        name: company.name
-      }
+    await client.end()
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: 'Setup completo\! Login: admin@crm.com / admin123' 
     })
     
   } catch (error) {
-    console.error('❌ Setup error:', error)
-    
-    return NextResponse.json({
-      error: 'Failed to setup database',
-      details: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
+    return NextResponse.json({ 
+      error: 'Erro no setup',
+      details: error instanceof Error ? error.message : 'Unknown error' 
+    })
   }
 }
+EOF < /dev/null
