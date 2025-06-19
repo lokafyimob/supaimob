@@ -765,7 +765,7 @@ export default function Leads() {
         <div className="lg:hidden space-y-4">
           {filteredLeads.map((lead) => {
             const cities = JSON.parse(lead.preferredCities)
-            const _states = JSON.parse(lead.preferredStates)
+            JSON.parse(lead.preferredStates)
             
             return (
               <div 

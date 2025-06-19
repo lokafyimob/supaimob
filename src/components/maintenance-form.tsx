@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Upload, Calendar } from 'lucide-react'
+import { X } from 'lucide-react'
 
 interface MaintenanceFormProps {
   isOpen: boolean

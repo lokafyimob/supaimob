@@ -1,6 +1,5 @@
 'use client'
 
-import { useSession } from 'next-auth/react'
 import { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import {
@@ -96,7 +95,6 @@ const upcomingTasks = [
 ]
 
 export default function Dashboard() {
-  const { data: _session } = useSession()
   const [stats, setStats] = useState<Stats>({
     properties: 0,
     owners: 0,

@@ -38,7 +38,7 @@ export default function Owners() {
     owner: null,
     loading: false
   })
-  const [_hasApiError, setHasApiError] = useState(false)
+  const [, setHasApiError] = useState(false)
   
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
