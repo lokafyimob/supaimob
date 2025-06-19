@@ -390,7 +390,7 @@ export default function Payments() {
               penalty: result.payment.penalty,
               interest: result.payment.interest,
               paidDate: result.payment.paidDate,
-              paymentMethod: result.payment.paymentMethod as string,
+              paymentMethod: result.payment.paymentMethod as "BOLETO" | "PIX" | "DINHEIRO" | "TRANSFERENCIA" | "CARTAO",
               receipts: result.payment.receipts ? JSON.parse(result.payment.receipts) : undefined
             }
           }
