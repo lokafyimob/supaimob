@@ -661,7 +661,7 @@ Sistema: CRM Imobiliário
           isOpen={showForm}
           onClose={closeForm}
           onSubmit={editingContract ? handleEditContract : handleCreateContract}
-          contract={editingContract}
+          contract={editingContract || undefined}
         />
 
         {/* Contract Details Modal */}

@@ -70,7 +70,7 @@ export async function POST(request: NextRequest) {
     console.log('📝 Request data:', data)
     
     // Validate required fields
-    if (!data.name || !data.email || !data.phone || !data.document) {
+    if (!data || !data.name || !data.email || !data.phone || !data.document) {
       console.log('❌ Missing required fields')
       return NextResponse.json(
         { error: 'Campos obrigatórios: nome, email, telefone e documento' },

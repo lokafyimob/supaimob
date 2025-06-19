@@ -154,7 +154,7 @@ export default function Payments() {
   useEffect(() => {
     loadPaymentSettings()
     fetchPayments()
-  }, [fetchPayments])
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadPaymentSettings = async () => {
     try {
