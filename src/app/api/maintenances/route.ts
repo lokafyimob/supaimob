@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const contractId = searchParams.get('contractId')
     const propertyId = searchParams.get('propertyId')
     
-    let whereClause: any = {}
+    const whereClause: any = {}
     
     if (contractId) {
       whereClause.contractId = contractId

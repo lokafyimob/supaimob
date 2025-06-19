@@ -24,7 +24,8 @@
     "vercel:deploy": "vercel deploy",
     "vercel:prod": "vercel deploy --prod",
     "analyze": "ANALYZE=true npm run build",
-    "setup-db": "node scripts/setup-db.js"
+    "setup-db": "node scripts/setup-db.js",
+    "init-prod": "node scripts/init-production.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.1.1",

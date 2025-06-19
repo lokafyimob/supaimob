@@ -4,7 +4,10 @@ import { useEffect, useState } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { LeadForm } from '@/components/lead-form'
 import { LeadMatchesModal } from '@/components/lead-matches-modal'
+import { AIListingsModal } from '@/components/ai-listings-modal'
 import { MatchAlert } from '@/components/match-alert'
+import { PartnershipAlert } from '@/components/partnership-alert'
+import { ToastContainer, useToast } from '@/components/toast'
 import {
   Plus,
   Search,
@@ -24,7 +27,10 @@ import {
   CheckCircle,
   AlertCircle,
   Sparkles,
-  X
+  X,
+  Bed,
+  TrendingUp,
+  Zap
 } from 'lucide-react'
 
 interface Lead {
@@ -65,8 +71,10 @@ export default function Leads() {
   const [filterInterest, setFilterInterest] = useState<string>('all')
   const [showMatchesModal, setShowMatchesModal] = useState(false)
   const [selectedLeadForMatches, setSelectedLeadForMatches] = useState<Lead | null>(null)
+  const [showAIListingsModal, setShowAIListingsModal] = useState(false)
+  const [selectedLeadForListings, setSelectedLeadForListings] = useState<Lead | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
-  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
+  const { toasts, removeToast, showSuccess, showError } = useToast()
   const [matchCounts, setMatchCounts] = useState<{[leadId: string]: number}>({})
   const [newMatches, setNewMatches] = useState<{
     leadId: string
@@ -77,18 +85,30 @@ export default function Leads() {
     matchType: 'RENT' | 'BUY'
   }[]>([])
   const [previousMatchCounts, setPreviousMatchCounts] = useState<{[leadId: string]: number}>({})
+  const [partnershipNotifications, setPartnershipNotifications] = useState<{
+    fromUserName: string
+    fromUserPhone: string | null
+    fromUserEmail: string
+    leadName: string
+    leadPhone: string
+    propertyTitle: string
+    propertyPrice: number
+    matchType: 'RENT' | 'BUY'
+  }[]>([])
 
   useEffect(() => {
     fetchLeads(true) // Suppress alerts on initial load
+    fetchPartnershipNotifications() // Check for partnership notifications on load
   }, [])
 
-  // Check for new matches periodically
+  // Check for new matches and partnerships periodically
   useEffect(() => {
     if (leads.length > 0) {
       const interval = setInterval(() => {
         // Only check if we're not currently loading
         if (!loading) {
           fetchMatchCounts(leads)
+          fetchPartnershipNotifications()
         }
       }, 30000) // Check every 30 seconds
 
@@ -96,12 +116,13 @@ export default function Leads() {
     }
   }, [leads, loading, previousMatchCounts])
 
-  // Listen for property updates to immediately check for new matches
+  // Listen for property updates to immediately check for new matches and detect partnerships
   useEffect(() => {
     const handlePropertyUpdate = () => {
       if (leads.length > 0 && !loading) {
-        console.log('Property updated, checking for new matches...')
+        console.log('Property updated, checking for new matches and detecting partnerships...')
         fetchMatchCounts(leads)
+        detectPartnerships() // Check for partnership opportunities when properties are updated
       }
     }
 
@@ -195,6 +216,69 @@ export default function Leads() {
     }
   }
 
+  const fetchPartnershipNotifications = async () => {
+    try {
+      const response = await fetch('/api/partnerships/notifications')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.success && data.notifications.length > 0) {
+          setPartnershipNotifications(data.notifications)
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching partnership notifications:', error)
+    }
+  }
+
+  const detectPartnerships = async () => {
+    try {
+      console.log('🤝 Detecting partnership opportunities...')
+      const response = await fetch('/api/partnerships/detect', {
+        method: 'POST'
+      })
+      console.log('🤝 Partnership detection response status:', response.status)
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('🤝 Partnership detection result:', data)
+        if (data.partnerships > 0) {
+          console.log(`✅ ${data.partnerships} partnerships found! Fetching notifications...`)
+          // Refresh partnership notifications to show new ones
+          setTimeout(() => {
+            fetchPartnershipNotifications()
+          }, 1000) // Wait a bit for the notifications to be created
+        } else {
+          console.log('ℹ️ No partnerships found')
+        }
+      } else {
+        console.error('❌ Partnership detection failed:', response.status)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
+      }
+    } catch (error) {
+      console.error('Error detecting partnerships:', error)
+    }
+  }
+
+  const handleDismissPartnershipAlert = async () => {
+    // Mark current partnership notifications as viewed
+    if (partnershipNotifications.length > 0) {
+      try {
+        // We don't have the notification IDs in the current format, 
+        // so we'll just clear the local state and let the next fetch handle it
+        setPartnershipNotifications([])
+      } catch (error) {
+        console.error('Error dismissing partnership notifications:', error)
+      }
+    }
+  }
+
+  const handleViewPartnerships = () => {
+    // For now, just dismiss the alert. In the future, we could create a partnerships modal
+    handleDismissPartnershipAlert()
+    showSuccess('Funcionalidade disponível!', 'Visualização de parcerias em desenvolvimento!')
+  }
+
   const handleCreateLead = async (leadData: any) => {
     try {
       const response = await fetch('/api/leads', {
@@ -206,16 +290,17 @@ export default function Leads() {
       })
 
       if (response.ok) {
-        showNotification('success', 'Lead criado com sucesso!')
+        showSuccess('Lead criado!', 'O lead foi cadastrado com sucesso.')
         await fetchLeads() // This will also fetch match counts
+        detectPartnerships() // Check for partnership opportunities after creating lead
         setShowForm(false)
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao criar lead')
+        showError('Erro ao criar lead', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error creating lead:', error)
-      showNotification('error', 'Erro ao criar lead')
+      showError('Erro ao criar lead', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -230,17 +315,18 @@ export default function Leads() {
       })
 
       if (response.ok) {
-        showNotification('success', 'Lead atualizado com sucesso!')
+        showSuccess('Lead atualizado!', 'As informações foram atualizadas com sucesso.')
         await fetchLeads() // This will also fetch match counts
+        detectPartnerships() // Check for partnership opportunities after updating lead
         setEditingLead(null)
         setShowForm(false)
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao atualizar lead')
+        showError('Erro ao atualizar lead', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error updating lead:', error)
-      showNotification('error', 'Erro ao atualizar lead')
+      showError('Erro ao atualizar lead', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -254,15 +340,15 @@ export default function Leads() {
       })
 
       if (response.ok) {
-        showNotification('success', 'Lead excluído com sucesso!')
+        showSuccess('Lead excluído!', 'O lead foi removido com sucesso.')
         await fetchLeads() // This will also fetch match counts
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao excluir lead')
+        showError('Erro ao excluir lead', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error deleting lead:', error)
-      showNotification('error', 'Erro ao excluir lead')
+      showError('Erro ao excluir lead', 'Verifique sua conexão e tente novamente.')
     } finally {
       setDeletingLeadId(null)
     }
@@ -271,6 +357,11 @@ export default function Leads() {
   const handleViewMatches = (lead: Lead) => {
     setSelectedLeadForMatches(lead)
     setShowMatchesModal(true)
+  }
+
+  const handleViewAIListings = (lead: Lead) => {
+    setSelectedLeadForListings(lead)
+    setShowAIListingsModal(true)
   }
 
   const handleViewMatchesFromAlert = (leadId: string) => {
@@ -312,10 +403,6 @@ export default function Leads() {
     }
   }
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message })
-    setTimeout(() => setNotification(null), 5000)
-  }
 
   const getInterestLabel = (interest: string) => {
     return interest === 'RENT' ? 'Aluguel' : 'Compra'
@@ -347,7 +434,7 @@ export default function Leads() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{borderColor: '#ff4352'}}></div>
         </div>
       </DashboardLayout>
     )
@@ -371,7 +458,16 @@ export default function Leads() {
                   setEditingLead(null)
                   setShowForm(true)
                 }}
-                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
+                style={{backgroundColor: '#ff4352'}}
+                onMouseEnter={(e) => {
+                  const target = e.target as HTMLButtonElement
+                  target.style.backgroundColor = '#e03e4d'
+                }}
+                onMouseLeave={(e) => {
+                  const target = e.target as HTMLButtonElement
+                  target.style.backgroundColor = '#ff4352'
+                }}
               >
                 <Plus className="w-4 h-4 mr-2" />
                 Novo Lead
@@ -380,8 +476,8 @@ export default function Leads() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        {/* Stats - Hidden on mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
             <div className="flex items-center">
               <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
@@ -475,8 +571,8 @@ export default function Leads() {
           </div>
         </div>
 
-        {/* Leads List */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
           {filteredLeads.length === 0 ? (
             <div className="text-center py-12">
               <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
@@ -622,6 +718,14 @@ export default function Leads() {
                                 Buscar
                               </button>
                             )}
+                            <button
+                              onClick={() => handleViewAIListings(lead)}
+                              className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-medium rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-sm"
+                              title="Buscar anúncios com IA"
+                            >
+                              <TrendingUp className="w-3 h-3 mr-1" />
+                              IA
+                            </button>
                           </div>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
@@ -660,6 +764,137 @@ export default function Leads() {
             </div>
           )}
         </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
+          {filteredLeads.map((lead) => {
+            const cities = JSON.parse(lead.preferredCities)
+            const states = JSON.parse(lead.preferredStates)
+            
+            return (
+              <div 
+                key={lead.id} 
+                className={`bg-white rounded-xl shadow-sm p-4 transition-all duration-200 ${
+                  deletingLeadId === lead.id ? 'opacity-60 bg-red-50' : 'hover:shadow-md'
+                }`}
+              >
+                <div className="flex items-start justify-between mb-3">
+                  <div>
+                    <h3 className="text-sm font-semibold text-gray-900">{lead.name}</h3>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs text-gray-500">
+                        {getInterestLabel(lead.interest)} • {getPropertyTypeLabel(lead.propertyType)}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {matchCounts[lead.id] > 0 && (
+                      <div className="flex items-center text-green-600">
+                        <div className="relative">
+                          <Bell className="w-4 h-4 mr-1" />
+                          <div className="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full"></div>
+                        </div>
+                        <span className="text-xs font-medium">{matchCounts[lead.id]}</span>
+                      </div>
+                    )}
+                    <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(lead.status)}`}>
+                      {getStatusLabel(lead.status)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center text-gray-600">
+                    <Mail className="w-4 h-4 mr-2" />
+                    <span className="text-sm">{lead.email}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <Phone className="w-4 h-4 mr-2" />
+                    <span className="text-sm">{lead.phone}</span>
+                  </div>
+                  <div className="flex items-center text-gray-600">
+                    <DollarSign className="w-4 h-4 mr-2" />
+                    <span className="text-sm">
+                      {lead.minPrice ? formatCurrency(lead.minPrice) : 'Min: Não def.'} - {formatCurrency(lead.maxPrice)}
+                    </span>
+                  </div>
+                  <div className="flex items-start text-gray-600">
+                    <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                    <span className="text-sm">
+                      {cities.length > 0 ? cities.slice(0, 2).join(', ') : 'Qualquer cidade'}
+                      {cities.length > 2 && ` (+${cities.length - 2})`}
+                    </span>
+                  </div>
+                  {(lead.minBedrooms || lead.maxBedrooms) && (
+                    <div className="flex items-center text-gray-600">
+                      <Bed className="w-4 h-4 mr-2" />
+                      <span className="text-sm">
+                        {lead.minBedrooms || 0}-{lead.maxBedrooms || '∞'} quartos
+                      </span>
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex space-x-2">
+                    {matchCounts[lead.id] > 0 ? (
+                      <button
+                        onClick={() => handleViewMatches(lead)}
+                        className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full hover:bg-green-200 transition-colors"
+                      >
+                        <Sparkles className="w-3 h-3 mr-1" />
+                        Ver {matchCounts[lead.id]} Match{matchCounts[lead.id] > 1 ? 'es' : ''}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleViewMatches(lead)}
+                        className="inline-flex items-center px-2 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-full hover:bg-gray-200 transition-colors"
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        Buscar
+                      </button>
+                    )}
+                    <button
+                      onClick={() => handleViewAIListings(lead)}
+                      className="inline-flex items-center px-2 py-1 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-medium rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-200"
+                      title="Buscar anúncios com IA"
+                    >
+                      <Zap className="w-3 h-3 mr-1" />
+                      IA
+                    </button>
+                  </div>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => {
+                        setEditingLead(lead)
+                        setShowForm(true)
+                      }}
+                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                      style={{color: '#ff4352'}}
+                      title="Editar lead"
+                    >
+                      <Edit className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteLead(lead.id)}
+                      disabled={deletingLeadId === lead.id}
+                      className={`p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
+                        deletingLeadId === lead.id ? 'opacity-50 cursor-not-allowed' : ''
+                      }`}
+                      title="Excluir lead"
+                    >
+                      {deletingLeadId === lead.id ? (
+                        <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                      ) : (
+                        <Trash2 className="w-4 h-4" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
       {/* Lead Form Modal */}
@@ -688,69 +923,34 @@ export default function Leads() {
         />
       )}
 
-      {/* Notification Toast */}
-      {notification && (
-        <div 
-          className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-out animate-in slide-in-from-right ${
-            notification.type === 'success' 
-              ? 'bg-green-600 text-white' 
-              : 'bg-red-600 text-white'
-          }`}
-        >
-          <div className="flex items-center">
-            {notification.type === 'success' ? (
-              <CheckCircle className="w-5 h-5 mr-2" />
-            ) : (
-              <AlertCircle className="w-5 h-5 mr-2" />
-            )}
-            <span className="font-medium">{notification.message}</span>
-            <button
-              onClick={() => setNotification(null)}
-              className="ml-4 text-white hover:text-gray-200"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-          <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
-            <div 
-              className="h-full bg-white/60 rounded-full transition-all duration-5000 ease-linear"
-              style={{ 
-                width: '100%',
-                animation: 'shrink 5s linear forwards'
-              }}
-            />
-          </div>
-        </div>
+      {/* AI Listings Modal */}
+      {showAIListingsModal && selectedLeadForListings && (
+        <AIListingsModal
+          isOpen={showAIListingsModal}
+          onClose={() => {
+            setShowAIListingsModal(false)
+            setSelectedLeadForListings(null)
+          }}
+          leadId={selectedLeadForListings.id}
+          leadName={selectedLeadForListings.name}
+        />
       )}
 
-      <style jsx>{`
-        @keyframes shrink {
-          from { width: 100%; }
-          to { width: 0%; }
-        }
-        @keyframes animate-in {
-          from {
-            opacity: 0;
-            transform: translateX(100%);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
-        }
-        .animate-in {
-          animation: animate-in 0.3s ease-out;
-        }
-        .slide-in-from-right {
-          animation: animate-in 0.3s ease-out;
-        }
-      `}</style>
+      {/* Toast Notifications */}
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
 
       {/* Match Alert */}
       <MatchAlert
         matches={newMatches}
         onDismiss={handleDismissMatchAlert}
         onViewMatches={handleViewMatchesFromAlert}
+      />
+
+      {/* Partnership Alert */}
+      <PartnershipAlert
+        partnerships={partnershipNotifications}
+        onDismiss={handleDismissPartnershipAlert}
+        onViewPartnerships={handleViewPartnerships}
       />
     </DashboardLayout>
   )

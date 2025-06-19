@@ -651,7 +651,7 @@ export default function Payments() {
               )}
             </div>
           </div>
-          <div className="mt-4 sm:mt-0 flex space-x-2">
+          <div className="mt-4 sm:mt-0 hidden md:flex space-x-2">
             <button 
               onClick={() => {
                 console.log('🔄 Forçando refresh dos dados...')
@@ -667,8 +667,8 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
+        {/* Stats - Hidden on mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -760,8 +760,8 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Payments Table */}
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50 border-b border-gray-200">
@@ -925,6 +925,123 @@ export default function Payments() {
           </div>
         </div>
 
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
+          {filteredPayments.map((payment) => {
+            const lateFees = calculateLateFees(payment)
+            return (
+              <div key={payment.id} className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                      <CreditCard className="w-5 h-5" style={{color: '#ff4352'}} />
+                    </div>
+                    <div>
+                      <button
+                        onClick={() => viewTenantHistory(payment)}
+                        className="text-sm font-semibold text-blue-600 hover:text-blue-800 hover:underline"
+                      >
+                        {payment.contract.tenant.name}
+                      </button>
+                      <p className="text-xs text-gray-500">{payment.contract.property.title}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    {getStatusIcon(payment.status)}
+                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                      {getStatusText(payment.status)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-2 mb-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Vencimento:</span>
+                    <span className="text-sm font-medium">{new Date(payment.dueDate).toLocaleDateString('pt-BR')}</span>
+                  </div>
+                  {payment.paidDate && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Pago em:</span>
+                      <span className="text-sm text-green-600">{new Date(payment.paidDate).toLocaleDateString('pt-BR')}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-gray-600">Valor:</span>
+                    <div className="text-right">
+                      <span className="text-sm font-bold">R$ {payment.amount.toLocaleString('pt-BR')}</span>
+                      {(lateFees.penalty > 0 || lateFees.interest > 0) && (
+                        <>
+                          <div className="text-xs text-red-600">
+                            + R$ {(lateFees.penalty + lateFees.interest).toLocaleString('pt-BR')} (multa/juros)
+                          </div>
+                          <div className="text-sm font-bold text-red-900">
+                            Total: R$ {lateFees.total.toLocaleString('pt-BR')}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  {payment.paymentMethod && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-gray-600">Forma de Pag.:</span>
+                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${getPaymentMethodColor(payment.paymentMethod)}`}>
+                        {getPaymentMethodText(payment.paymentMethod)}
+                      </span>
+                    </div>
+                  )}
+                  {lateFees.daysPastDue > 0 && payment.status !== 'PAID' && (
+                    <div className="text-xs text-orange-600 mt-1">
+                      {lateFees.daysPastDue} dias de atraso
+                      {lateFees.isInGracePeriod && (
+                        <span className="text-blue-600"> (em carência)</span>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-end space-x-2">
+                  {payment.status !== 'PAID' && (
+                    <button
+                      onClick={() => handleMarkAsPaid(payment)}
+                      className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                      title="Marcar como pago"
+                    >
+                      <CheckCircle className="w-4 h-4" />
+                    </button>
+                  )}
+                  {(payment.status === 'PAID' && payment.receipts && payment.receipts.length > 0) && (
+                    <button
+                      onClick={() => viewReceipts(payment)}
+                      className="p-2 text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                      title="Ver comprovantes"
+                    >
+                      <Image className="w-4 h-4" />
+                    </button>
+                  )}
+                  <button
+                    className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    title="Ver boleto"
+                  >
+                    <Eye className="w-4 h-4" />
+                  </button>
+                  <button
+                    className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                    title="Download"
+                  >
+                    <Download className="w-4 h-4" />
+                  </button>
+                  <button
+                    className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                    title="Enviar por email"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
         {filteredPayments.length === 0 && (
           <div className="text-center py-12">
             <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
@@ -938,15 +1055,6 @@ export default function Payments() {
                 ? 'Tente ajustar os filtros de busca.'
                 : 'Não há pagamentos cadastrados para este usuário.'}
             </p>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 max-w-md mx-auto">
-              <p className="text-blue-800 text-sm">
-                <strong>Para ver pagamentos:</strong><br/>
-                1. Clique no botão "🔍 Debug Sessão" acima<br/>
-                2. Verifique o console do navegador (F12)<br/>
-                3. Confirme qual usuário está logado<br/>
-                4. Usuário "bs@gmail.com" tem 1 pagamento pendente
-              </p>
-            </div>
           </div>
         )}
 

@@ -3,7 +3,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -12,6 +12,7 @@ model User {
   email         String    @unique
   name          String
   password      String
+  phone         String?   // Telefone do usuário/corretor
   role          String    @default("USER")
   companyId     String?
   isActive      Boolean   @default(true)
@@ -26,6 +27,8 @@ model User {
   tenants       Tenant[]
   contracts     Contract[]
   leads         Lead[]
+  partnershipsSent     PartnershipNotification[] @relation("PartnershipFrom")
+  partnershipsReceived PartnershipNotification[] @relation("PartnershipTo")
 
   @@map("users")
 }
@@ -81,6 +84,7 @@ model Property {
   userId       String
   images       String         // JSON string for SQLite
   amenities    String         // JSON string for SQLite
+  acceptsPartnership Boolean    @default(false) // Aceita parceria com outros usuários
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   contracts     Contract[]
@@ -430,6 +434,32 @@ model LeadNotification {
   property   Property             @relation(fields: [propertyId], references: [id])
 
   @@map("lead_notifications")
+}
+
+model PartnershipNotification {
+  id                String    @id @default(cuid())
+  fromUserId        String    // Usuário que tem o lead
+  toUserId          String    // Usuário que tem o imóvel (que aceita parceria)
+  leadId            String
+  propertyId        String
+  fromUserName      String    // Nome do usuário que tem o lead
+  fromUserPhone     String?   // Telefone do usuário que tem o lead
+  fromUserEmail     String    // Email do usuário que tem o lead
+  leadName          String    // Nome do lead/cliente
+  leadPhone         String    // Telefone do lead/cliente
+  propertyTitle     String    // Título do imóvel
+  propertyPrice     Float     // Preço do imóvel
+  matchType         String    // RENT ou BUY
+  sent              Boolean   @default(false)
+  sentAt            DateTime?
+  viewed            Boolean   @default(false)
+  viewedAt          DateTime?
+  createdAt         DateTime  @default(now())
+  
+  fromUser          User      @relation("PartnershipFrom", fields: [fromUserId], references: [id])
+  toUser            User      @relation("PartnershipTo", fields: [toUserId], references: [id])
+
+  @@map("partnership_notifications")
 }
 
 model Maintenance {

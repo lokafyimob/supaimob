@@ -17,43 +17,46 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
-    const savedTheme = localStorage.getItem('theme') as Theme
-    if (savedTheme && ['light', 'dark', 'auto'].includes(savedTheme)) {
-      setTheme(savedTheme)
-    } else {
-      // Check system preference on first load
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-      setTheme(prefersDark ? 'dark' : 'light')
+    if (typeof window !== 'undefined') {
+      const savedTheme = localStorage.getItem('theme') as Theme
+      if (savedTheme && ['light', 'dark', 'auto'].includes(savedTheme)) {
+        setTheme(savedTheme)
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
+        setTheme(prefersDark ? 'dark' : 'light')
+      }
     }
   }, [])
 
   useEffect(() => {
-    let resolvedTheme: 'light' | 'dark' = 'light'
+    if (typeof window !== 'undefined') {
+      let resolvedTheme: 'light' | 'dark' = 'light'
 
-    if (theme === 'auto') {
-      resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    } else {
-      resolvedTheme = theme
+      if (theme === 'auto') {
+        resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      } else {
+        resolvedTheme = theme
+      }
+
+      setActualTheme(resolvedTheme)
+      
+      const root = document.documentElement
+      const body = document.body
+      
+      if (resolvedTheme === 'dark') {
+        root.classList.add('dark')
+        body.classList.add('dark')
+      } else {
+        root.classList.remove('dark')
+        body.classList.remove('dark')
+      }
+
+      localStorage.setItem('theme', theme)
     }
-
-    setActualTheme(resolvedTheme)
-    
-    const root = document.documentElement
-    const body = document.body
-    
-    if (resolvedTheme === 'dark') {
-      root.classList.add('dark')
-      body.classList.add('dark')
-    } else {
-      root.classList.remove('dark')
-      body.classList.remove('dark')
-    }
-
-    localStorage.setItem('theme', theme)
   }, [theme])
 
   useEffect(() => {
-    if (theme === 'auto') {
+    if (typeof window !== 'undefined' && theme === 'auto') {
       const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
       const handleChange = () => {
         setActualTheme(mediaQuery.matches ? 'dark' : 'light')
@@ -75,7 +78,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeContext.Provider value={{ theme, setTheme, actualTheme }}>
-      {children}
+      <div suppressHydrationWarning>
+        {children}
+      </div>
     </ThemeContext.Provider>
   )
 }

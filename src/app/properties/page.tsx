@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { PropertyForm } from '@/components/property-form'
+import { ToastContainer, useToast } from '@/components/toast'
 import { Plus, Search, MapPin, Bed, Bath, Square, Edit, Trash2, CheckCircle, AlertCircle, X } from 'lucide-react'
 
 interface Property {
@@ -38,7 +39,8 @@ export default function Properties() {
   const [showForm, setShowForm] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null)
-  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
+  
+  const { toasts, removeToast, showSuccess, showError } = useToast()
 
   useEffect(() => {
     fetchProperties()
@@ -75,17 +77,17 @@ export default function Properties() {
       if (response.ok) {
         await fetchProperties()
         setShowForm(false)
-        showNotification('success', 'Imóvel cadastrado com sucesso!')
+        showSuccess('Imóvel criado!', 'O imóvel foi cadastrado com sucesso.')
         
         // Dispatch custom event to notify other components about property creation
         window.dispatchEvent(new CustomEvent('propertyCreated'))
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao criar imóvel')
+        showError('Erro ao criar imóvel', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error creating property:', error)
-      showNotification('error', 'Erro ao criar imóvel')
+      showError('Erro ao criar imóvel', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -109,17 +111,17 @@ export default function Properties() {
         await fetchProperties()
         setShowForm(false)
         setEditingProperty(null)
-        showNotification('success', 'Imóvel atualizado com sucesso!')
+        showSuccess('Imóvel atualizado!', 'As informações foram atualizadas com sucesso.')
         
         // Dispatch custom event to notify other components about property update
         window.dispatchEvent(new CustomEvent('propertyUpdated'))
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao atualizar imóvel')
+        showError('Erro ao atualizar imóvel', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error updating property:', error)
-      showNotification('error', 'Erro ao atualizar imóvel')
+      showError('Erro ao atualizar imóvel', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -133,18 +135,18 @@ export default function Properties() {
       })
 
       if (response.ok) {
-        showNotification('success', 'Imóvel excluído com sucesso!')
+        showSuccess('Imóvel excluído!', 'O imóvel foi removido com sucesso.')
         await fetchProperties()
         
         // Dispatch custom event to notify other components about property deletion
         window.dispatchEvent(new CustomEvent('propertyUpdated'))
       } else {
         const errorData = await response.json()
-        showNotification('error', errorData.error || 'Erro ao excluir imóvel')
+        showError('Erro ao excluir imóvel', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error deleting property:', error)
-      showNotification('error', 'Erro ao excluir imóvel')
+      showError('Erro ao excluir imóvel', 'Verifique sua conexão e tente novamente.')
     } finally {
       setDeletingPropertyId(null)
     }
@@ -156,10 +158,6 @@ export default function Properties() {
     setShowForm(true)
   }
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
-    setNotification({ type, message })
-    setTimeout(() => setNotification(null), 5000)
-  }
 
   const closeForm = () => {
     setShowForm(false)
@@ -228,7 +226,7 @@ export default function Properties() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{borderColor: '#ff4352'}}></div>
         </div>
       </DashboardLayout>
     )
@@ -247,7 +245,16 @@ export default function Properties() {
           </div>
           <button 
             onClick={() => setShowForm(true)}
-            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            style={{backgroundColor: '#ff4352'}}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#e03e4d'
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#ff4352'
+            }}
           >
             <Plus className="w-5 h-5 mr-2" />
             Novo Imóvel
@@ -295,98 +302,243 @@ export default function Properties() {
           </div>
         </div>
 
-        {/* Properties Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Imóvel
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Localização
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Características
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Preço
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Proprietário
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredProperties.map((property) => (
+                  <tr key={property.id} className={`hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${
+                    deletingPropertyId === property.id ? 'opacity-60 bg-red-50' : ''
+                  }`}>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="w-20 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                          {property.images.length > 0 ? (
+                            <img 
+                              src={property.images[0]} 
+                              alt={property.title}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                              Sem imagem
+                            </div>
+                          )}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900 dark:text-white">{property.title}</div>
+                          <div className="text-sm text-gray-500 dark:text-gray-400">{getTypeText(property.propertyType)}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        <div className="flex items-start">
+                          <MapPin className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <div>{property.address}</div>
+                            <div className="text-gray-500 dark:text-gray-400">{property.city} - {property.state}</div>
+                            <div className="text-gray-500 dark:text-gray-400">CEP: {property.zipCode}</div>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center">
+                            <Bed className="w-4 h-4 mr-1 text-gray-400" />
+                            <span>{property.bedrooms}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Bath className="w-4 h-4 mr-1 text-gray-400" />
+                            <span>{property.bathrooms}</span>
+                          </div>
+                          <div className="flex items-center">
+                            <Square className="w-4 h-4 mr-1 text-gray-400" />
+                            <span>{property.area}m²</span>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        <div className="font-bold">
+                          R$ {property.rentPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
+                        </div>
+                        {property.salePrice && (
+                          <div className="text-gray-500 dark:text-gray-400">
+                            Venda: R$ {property.salePrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900 dark:text-white">
+                        <div className="font-medium">{property.owner.name}</div>
+                        <div className="text-gray-500 dark:text-gray-400">{property.owner.email}</div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(property.status)}`}>
+                        {getStatusText(property.status)}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <div className="flex items-center justify-end space-x-2">
+                        <button 
+                          onClick={() => openEditForm(property)}
+                          className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          style={{color: '#ff4352'}}
+                          title="Editar imóvel"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </button>
+                        <button 
+                          onClick={() => handleDirectDeleteProperty(property.id)}
+                          disabled={deletingPropertyId === property.id}
+                          className={`p-2 text-red-600 hover:text-red-900 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${
+                            deletingPropertyId === property.id ? 'opacity-50 cursor-not-allowed' : ''
+                          }`}
+                          title="Deletar imóvel"
+                        >
+                          {deletingPropertyId === property.id ? (
+                            <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
           {filteredProperties.map((property) => (
             <div 
               key={property.id} 
-              className={`bg-white rounded-xl shadow-sm overflow-hidden transition-all duration-200 transform ${
+              className={`bg-white rounded-xl shadow-sm p-4 transition-all duration-200 ${
                 deletingPropertyId === property.id 
-                  ? 'opacity-60 bg-red-50 scale-95' 
-                  : 'hover:shadow-md hover:scale-[1.02]'
+                  ? 'opacity-60 bg-red-50' 
+                  : 'hover:shadow-md'
               }`}
             >
-              <div className="h-32 bg-gray-200 relative">
-                {property.images.length > 0 ? (
-                  <img 
-                    src={property.images[0]} 
-                    alt={property.title}
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-400 text-sm">
-                    Sem imagem
+              <div className="flex items-start space-x-3 mb-3">
+                <div className="w-20 h-16 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+                  {property.images.length > 0 ? (
+                    <img 
+                      src={property.images[0]} 
+                      alt={property.title}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">
+                      Sem imagem
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <h3 className="text-sm font-semibold text-gray-900 truncate">
+                        {property.title}
+                      </h3>
+                      <p className="text-xs text-gray-500">
+                        {getTypeText(property.propertyType)}
+                      </p>
+                    </div>
+                    <span className={`ml-2 px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(property.status)}`}>
+                      {getStatusText(property.status)}
+                    </span>
                   </div>
-                )}
-                <div className="absolute top-2 right-2">
-                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(property.status)}`}>
-                    {getStatusText(property.status)}
-                  </span>
                 </div>
               </div>
               
-              <div className="p-3">
-                <div className="flex items-start justify-between mb-1">
-                  <h3 className="text-sm font-semibold text-gray-900 line-clamp-1">
-                    {property.title}
-                  </h3>
-                  <span className="text-xs text-gray-500 bg-gray-100 px-1.5 py-0.5 rounded ml-2 flex-shrink-0">
-                    {getTypeText(property.propertyType)}
-                  </span>
+              <div className="space-y-2 mb-3">
+                <div className="flex items-start text-gray-600">
+                  <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
+                  <span className="text-sm">{property.address}, {property.city}</span>
                 </div>
                 
-                <div className="flex items-center text-gray-600 mb-1">
-                  <MapPin className="w-3 h-3 mr-1 flex-shrink-0" />
-                  <span className="text-xs line-clamp-1">{property.address}, {property.city}</span>
-                </div>
-                
-                <div className="flex items-center space-x-2 mb-2 text-xs text-gray-600">
+                <div className="flex items-center space-x-4 text-gray-600">
                   <div className="flex items-center">
-                    <Bed className="w-3 h-3 mr-0.5" />
-                    <span>{property.bedrooms}</span>
+                    <Bed className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{property.bedrooms}</span>
                   </div>
                   <div className="flex items-center">
-                    <Bath className="w-3 h-3 mr-0.5" />
-                    <span>{property.bathrooms}</span>
+                    <Bath className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{property.bathrooms}</span>
                   </div>
                   <div className="flex items-center">
-                    <Square className="w-3 h-3 mr-0.5" />
-                    <span>{property.area}m²</span>
+                    <Square className="w-4 h-4 mr-1" />
+                    <span className="text-sm">{property.area}m²</span>
                   </div>
                 </div>
-                
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-bold text-gray-900">
-                      R$ {property.rentPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {property.owner.name}
-                    </p>
-                  </div>
-                  <div className="flex space-x-0.5">
-                    <button 
-                      onClick={() => openEditForm(property)}
-                      className="p-1 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded transition-all duration-200 transform hover:scale-110"
-                      title="Editar imóvel"
-                    >
-                      <Edit className="w-3 h-3" />
-                    </button>
-                    <button 
-                      onClick={() => handleDirectDeleteProperty(property.id)}
-                      disabled={deletingPropertyId === property.id}
-                      className={`p-1 text-red-600 hover:text-red-900 hover:bg-red-50 rounded transition-all duration-200 transform hover:scale-110 ${
-                        deletingPropertyId === property.id ? 'opacity-50 cursor-not-allowed animate-pulse' : ''
-                      }`}
-                      title="Deletar imóvel"
-                    >
-                      {deletingPropertyId === property.id ? (
-                        <div className="w-3 h-3 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
-                      ) : (
-                        <Trash2 className="w-3 h-3" />
-                      )}
-                    </button>
-                  </div>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold text-gray-900">
+                    R$ {property.rentPrice.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {property.owner.name}
+                  </p>
+                </div>
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={() => openEditForm(property)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    style={{color: '#ff4352'}}
+                    title="Editar imóvel"
+                  >
+                    <Edit className="w-4 h-4" />
+                  </button>
+                  <button 
+                    onClick={() => handleDirectDeleteProperty(property.id)}
+                    disabled={deletingPropertyId === property.id}
+                    className={`p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
+                      deletingPropertyId === property.id ? 'opacity-50 cursor-not-allowed' : ''
+                    }`}
+                    title="Deletar imóvel"
+                  >
+                    {deletingPropertyId === property.id ? (
+                      <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                    ) : (
+                      <Trash2 className="w-4 h-4" />
+                    )}
+                  </button>
                 </div>
               </div>
             </div>
@@ -418,63 +570,10 @@ export default function Properties() {
         />
 
 
-        {/* Notification Toast */}
-        {notification && (
-          <div 
-            className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-out animate-in slide-in-from-right ${
-              notification.type === 'success' 
-                ? 'bg-green-600 text-white' 
-                : 'bg-red-600 text-white'
-            }`}
-          >
-            <div className="flex items-center">
-              {notification.type === 'success' ? (
-                <CheckCircle className="w-5 h-5 mr-2" />
-              ) : (
-                <AlertCircle className="w-5 h-5 mr-2" />
-              )}
-              <span className="font-medium">{notification.message}</span>
-              <button
-                onClick={() => setNotification(null)}
-                className="ml-4 text-white hover:text-gray-200"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-            <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
-              <div 
-                className="h-full bg-white/60 rounded-full transition-all duration-5000 ease-linear"
-                style={{ 
-                  width: '100%',
-                  animation: 'shrink 5s linear forwards'
-                }}
-              />
-            </div>
-          </div>
-        )}
 
-        <style jsx>{`
-          @keyframes shrink {
-            from { width: 100%; }
-            to { width: 0%; }
-          }
-          @keyframes animate-in {
-            from {
-              opacity: 0;
-              transform: translateX(100%);
-            }
-            to {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-          .animate-in {
-            animation: animate-in 0.3s ease-out;
-          }
-          .slide-in-from-right {
-            animation: animate-in 0.3s ease-out;
-          }
-        `}</style>
+
+        {/* Toast Notifications */}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </DashboardLayout>
   )

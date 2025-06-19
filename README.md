@@ -126,9 +126,12 @@ Acesse: `http://localhost:3000`
 
 ## 👤 Acesso ao Sistema
 
-### Usuário Demo
+### Usuário Demo (será criado automaticamente)
 - **Email**: admin@crm.com
 - **Senha**: admin123
+
+### Inicialização em Produção
+Após deploy, acesse: `/api/init` (POST) para criar o usuário demo automaticamente.
 
 ## 🎯 Como Usar
 

@@ -10,7 +10,6 @@ import {
   FileText,
   TrendingUp,
   AlertTriangle,
-  Calendar,
   DollarSign
 } from 'lucide-react'
 
@@ -144,29 +143,11 @@ export default function Dashboard() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">
-                Bem-vindo, {session?.user?.name}!
-              </h1>
-              <p className="text-gray-600 mt-1">
-                Aqui está um resumo das suas atividades hoje
-              </p>
-            </div>
-            <div className="mt-4 sm:mt-0">
-              <div className="flex items-center space-x-2 text-sm text-gray-500">
-                <Calendar className="w-4 h-4" />
-                <span>{new Date().toLocaleDateString('pt-BR', { 
-                  weekday: 'long', 
-                  year: 'numeric', 
-                  month: 'long', 
-                  day: 'numeric' 
-                })}</span>
-              </div>
-            </div>
-          </div>
+        {/* Welcome Section */}
+        <div className="mb-6">
+          <p className="text-gray-600">
+            Aqui está um resumo das suas atividades hoje
+          </p>
         </div>
 
         {/* Stats Grid */}
@@ -188,8 +169,8 @@ export default function Dashboard() {
                       )}
                     </p>
                   </div>
-                  <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                    <Icon className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                  <div className="p-3 rounded-lg" style={{backgroundColor: '#fef2f2'}}>
+                    <Icon className="w-6 h-6" style={{color: '#ff4352'}} />
                   </div>
                 </div>
                 <div className="mt-4 flex items-center">
@@ -269,7 +250,7 @@ export default function Dashboard() {
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-              <Building2 className="w-8 h-8 text-blue-600 mb-2" />
+              <Building2 className="w-8 h-8 mb-2" style={{color: '#ff4352'}} />
               <span className="text-sm font-medium text-gray-900">Novo Imóvel</span>
             </button>
             <button className="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">

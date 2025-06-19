@@ -34,7 +34,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
     availableFor: ['RENT'] as string[], // RENT, SALE
     ownerId: '',
     images: [] as string[],
-    amenities: [] as string[]
+    amenities: [] as string[],
+    acceptsPartnership: false
   })
 
   const [displayValues, setDisplayValues] = useState({
@@ -93,7 +94,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             availableFor: availableFor,
             ownerId: property.owner?.id || property.ownerId || '',
             images: images,
-            amenities: amenities
+            amenities: amenities,
+            acceptsPartnership: property.acceptsPartnership || false
           })
         } catch (error) {
           console.error('Error parsing property data:', error)
@@ -112,10 +114,18 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
 
   const fetchOwners = async () => {
     try {
+      console.log('Fetching owners...')
       const response = await fetch('/api/owners')
+      console.log('Owners API response status:', response.status)
+      
       if (response.ok) {
         const data = await response.json()
+        console.log('Owners data received:', data)
         setOwners(data)
+      } else {
+        console.error('Failed to fetch owners:', response.status, response.statusText)
+        const errorText = await response.text()
+        console.error('Error response:', errorText)
       }
     } catch (error) {
       console.error('Error fetching owners:', error)
@@ -135,8 +145,10 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
         rentPrice: formData.availableFor.includes('RENT') ? parseFloat(formData.rentPrice) : 0,
         salePrice: formData.availableFor.includes('SALE') && formData.salePrice ? parseFloat(formData.salePrice) : null,
         images: formData.images,
-        amenities: formData.amenities
+        amenities: formData.amenities,
+        acceptsPartnership: formData.acceptsPartnership
       }
+      
 
       onSubmit(submitData)
       onClose()
@@ -166,7 +178,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
       availableFor: ['RENT'],
       ownerId: '',
       images: [],
-      amenities: []
+      amenities: [],
+      acceptsPartnership: false
     })
     setDisplayValues({
       rentPrice: '',
@@ -539,6 +552,28 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
+                🤝 Parceria entre Usuários
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.acceptsPartnership}
+                    onChange={(e) => setFormData(prev => ({ ...prev, acceptsPartnership: e.target.checked }))}
+                    className="rounded border-gray-300 text-green-600 focus:ring-green-500 mr-2"
+                  />
+                  <div>
+                    <span className="text-sm text-gray-700 font-medium">Aceito parceria com outros usuários</span>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Se marcado, outros usuários com leads que fazem match serão notificados para fazer parceria
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
                 Status
               </label>
               <select
@@ -697,7 +732,16 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
                 <button
                   type="button"
                   onClick={addImage}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                  className="px-4 py-2 text-white rounded-lg transition-colors"
+                  style={{backgroundColor: '#ff4352'}}
+                  onMouseEnter={(e) => {
+                    const target = e.target as HTMLButtonElement
+                    target.style.backgroundColor = '#e03e4d'
+                  }}
+                  onMouseLeave={(e) => {
+                    const target = e.target as HTMLButtonElement
+                    target.style.backgroundColor = '#ff4352'
+                  }}
                 >
                   <Plus className="w-4 h-4" />
                 </button>
@@ -790,7 +834,20 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{backgroundColor: loading ? '#d1d5db' : '#ff4352'}}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading) {
+                  target.style.backgroundColor = '#e03e4d'
+                }
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading) {
+                  target.style.backgroundColor = '#ff4352'
+                }
+              }}
             >
               {loading ? 'Salvando...' : property ? 'Atualizar' : 'Criar Imóvel'}
             </button>

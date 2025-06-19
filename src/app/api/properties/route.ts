@@ -52,6 +52,7 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request)
     const data = await request.json()
     
+    
     // Get owner to access companyId and verify ownership
     const owner = await prisma.owner.findUnique({
       where: { id: data.ownerId }
@@ -86,7 +87,8 @@ export async function POST(request: NextRequest) {
         companyId: owner.companyId || user.companyId || '',
         userId: user.id,
         images: data.images || "[]",
-        amenities: data.amenities || "[]"
+        amenities: data.amenities || "[]",
+        acceptsPartnership: data.acceptsPartnership || false
       },
       include: {
         owner: true
@@ -95,6 +97,11 @@ export async function POST(request: NextRequest) {
 
     // Check for lead matches
     await checkForLeadMatches(property.id)
+    
+    // Check for partnership opportunities if property accepts partnership
+    if (data.acceptsPartnership) {
+      await checkForPartnershipOpportunities(property.id, user.id)
+    }
 
     // Format response for SQLite compatibility
     const formattedProperty = {
@@ -116,6 +123,149 @@ export async function POST(request: NextRequest) {
       { error: 'Erro ao criar imóvel' },
       { status: 500 }
     )
+  }
+}
+
+// Function to check for partnership opportunities when a property with partnership is created
+async function checkForPartnershipOpportunities(propertyId: string, propertyOwnerId: string) {
+  try {
+    console.log('🤝 Checking partnership opportunities for property:', propertyId)
+    
+    const property = await prisma.property.findUnique({
+      where: { id: propertyId },
+      include: { 
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        }
+      }
+    })
+
+    if (!property) return
+
+    const availableFor = JSON.parse(property.availableFor || '[]')
+    
+    // Find leads from other users that match this property
+    const matchingLeads = await prisma.lead.findMany({
+      where: {
+        AND: [
+          { userId: { not: propertyOwnerId } }, // Not the property owner
+          { status: 'ACTIVE' },
+          { propertyType: property.propertyType },
+          // Interest compatible with availability
+          availableFor.includes('RENT') && availableFor.includes('SALE') ? {
+            OR: [
+              { interest: 'RENT' },
+              { interest: 'BUY' }
+            ]
+          } : availableFor.includes('RENT') ? {
+            interest: 'RENT'
+          } : availableFor.includes('SALE') ? {
+            interest: 'BUY'
+          } : { interest: 'RENT' } // fallback
+        ]
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          }
+        }
+      }
+    })
+
+    console.log(`👥 Found ${matchingLeads.length} matching leads for partnership`)
+
+    for (const lead of matchingLeads) {
+      // Detailed compatibility check
+      const preferredCities = JSON.parse(lead.preferredCities || '[]')
+      const preferredStates = JSON.parse(lead.preferredStates || '[]')
+      
+      let isMatch = true
+      
+      // Check price compatibility
+      if (lead.interest === 'RENT' && property.rentPrice) {
+        if (lead.minPrice && property.rentPrice < lead.minPrice) isMatch = false
+        if (property.rentPrice > lead.maxPrice) isMatch = false
+      } else if (lead.interest === 'BUY' && property.salePrice) {
+        if (lead.minPrice && property.salePrice < lead.minPrice) isMatch = false
+        if (property.salePrice > lead.maxPrice) isMatch = false
+      }
+      
+      // Check rooms
+      if (lead.minBedrooms && property.bedrooms < lead.minBedrooms) isMatch = false
+      if (lead.maxBedrooms && property.bedrooms > lead.maxBedrooms) isMatch = false
+      
+      // Check bathrooms
+      if (lead.minBathrooms && property.bathrooms < lead.minBathrooms) isMatch = false
+      if (lead.maxBathrooms && property.bathrooms > lead.maxBathrooms) isMatch = false
+      
+      // Check area
+      if (lead.minArea && property.area < lead.minArea) isMatch = false
+      if (lead.maxArea && property.area > lead.maxArea) isMatch = false
+      
+      // Check location
+      if (preferredCities.length > 0) {
+        if (!preferredCities.includes(property.city)) {
+          if (preferredStates.length === 0 || !preferredStates.includes(property.state)) {
+            isMatch = false
+          }
+        }
+      }
+      
+      if (!isMatch) continue
+      
+      // Check if notification already exists (last 24h)
+      const existingNotification = await prisma.partnershipNotification.findFirst({
+        where: {
+          fromUserId: lead.userId,
+          toUserId: propertyOwnerId,
+          leadId: lead.id,
+          propertyId: property.id,
+          createdAt: {
+            gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+          }
+        }
+      })
+      
+      if (!existingNotification) {
+        const targetPrice = lead.interest === 'RENT' ? property.rentPrice : (property.salePrice || 0)
+        
+        // Buscar dados completos do dono do lead
+        const leadOwner = await prisma.user.findUnique({
+          where: { id: lead.userId },
+          select: { name: true, email: true, phone: true }
+        })
+        
+        // LÓGICA CORRIGIDA: Notificar dono do imóvel sobre dono do lead
+        await prisma.partnershipNotification.create({
+          data: {
+            fromUserId: lead.userId, // Lead owner (quem TEM o cliente interessado)
+            toUserId: propertyOwnerId, // Property owner (quem será notificado)
+            leadId: lead.id,
+            propertyId: property.id,
+            fromUserName: leadOwner?.name || '', // Nome de quem TEM o cliente
+            fromUserPhone: leadOwner?.phone || null, // Telefone de quem TEM o cliente
+            fromUserEmail: leadOwner?.email || '',
+            leadName: lead.name,
+            leadPhone: lead.phone,
+            propertyTitle: property.title,
+            propertyPrice: targetPrice,
+            matchType: lead.interest
+          }
+        })
+        
+        console.log(`✅ Partnership notification created: ${lead.name} (${lead.user.email}) for ${property.title}`)
+      }
+    }
+    
+  } catch (error) {
+    console.error('Error checking partnership opportunities:', error)
   }
 }
 

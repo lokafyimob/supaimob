@@ -413,33 +413,27 @@ Sistema: CRM Imobiliário
               Gerencie todos os contratos de locação
             </p>
           </div>
-          <div className="mt-4 sm:mt-0 flex space-x-3">
-            <button 
-              onClick={fetchContracts}
-              className="inline-flex items-center px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
-              title="Atualizar dados"
-            >
-              <RefreshCw className="w-5 h-5" />
-            </button>
-            <button 
-              onClick={() => setShowAIGenerator(true)}
-              className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
-            >
-              <Bot className="w-5 h-5 mr-2" />
-              Gerar com IA
-            </button>
-            <button 
-              onClick={() => setShowForm(true)}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Novo Contrato
-            </button>
-          </div>
+          <button 
+            onClick={() => setShowForm(true)}
+            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            style={{backgroundColor: '#ff4352'}}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#e03e4d'
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#ff4352'
+            }}
+          >
+            <Plus className="w-5 h-5 mr-2" />
+            Novo Contrato
+          </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+
+        {/* Stats - Hidden on mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -517,88 +511,78 @@ Sistema: CRM Imobiliário
           </div>
         </div>
 
-        {/* Contracts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Contracts List */}
+        <div className="space-y-4">
           {filteredContracts.map((contract) => {
             const daysUntilExpiration = getDaysUntilExpiration(contract.endDate)
             const isExpiringSoon = daysUntilExpiration <= 30 && daysUntilExpiration > 0
             
             return (
-              <div key={contract.id} className={`bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-all duration-200 transform hover:scale-[1.02] ${
+              <div key={contract.id} className={`bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow ${
                 deletingContractId === contract.id ? 'opacity-60 bg-red-50' : ''
               }`}>
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                      <FileText className="w-6 h-6 text-blue-600" />
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                      <FileText className="w-5 h-5" style={{color: '#ff4352'}} />
                     </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-gray-900">
-                        {contract.property.title}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        Contrato #{contract.id}
-                      </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-semibold text-gray-900 truncate">
+                          {contract.property.title}
+                        </h3>
+                        <div className="flex items-center space-x-2 ml-4">
+                          {getStatusIcon(contract.status)}
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contract.status)}`}>
+                            {getStatusText(contract.status)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Inquilino:</div>
+                          <div className="flex items-center text-gray-900">
+                            <User className="w-4 h-4 mr-2" />
+                            <span className="truncate font-medium">{contract.tenant.name}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Tipo:</div>
+                          <div className="flex items-center text-gray-900">
+                            <Building2 className="w-4 h-4 mr-2" />
+                            <span className="truncate font-medium">{getPropertyTypeText(contract.property.propertyType)}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Tempo Contrato:</div>
+                          <div className="flex items-center text-gray-900">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            <span className="truncate font-medium">{formatDate(contract.startDate)} até {formatDate(contract.endDate)}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Valor:</div>
+                          <div className="flex items-center text-gray-900">
+                            <span className="font-bold">R$ {contract.rentAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/mês</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(contract.status)}
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(contract.status)}`}>
-                      {getStatusText(contract.status)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center text-gray-600">
-                    <User className="w-4 h-4 mr-3" />
-                    <div>
-                      <span className="text-sm font-medium">Inquilino: </span>
-                      <span className="text-sm">{contract.tenant.name}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Building2 className="w-4 h-4 mr-3" />
-                    <div>
-                      <span className="text-sm">{getPropertyTypeText(contract.property.propertyType)}</span>
-                      <span className="text-xs text-gray-500 ml-2">{contract.property.address}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center text-gray-600">
-                    <Calendar className="w-4 h-4 mr-3" />
-                    <span className="text-sm">
-                      {formatDate(contract.startDate)} até {formatDate(contract.endDate)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-4">
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500">Valor do Aluguel</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      R$ {contract.rentAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
-                  </div>
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <p className="text-xs text-gray-500">Depósito</p>
-                    <p className="text-lg font-bold text-gray-900">
-                      R$ {contract.depositAmount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                    </p>
                   </div>
                 </div>
 
                 {isExpiringSoon && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                  <div className="mt-2 bg-yellow-50 border border-yellow-200 rounded-lg p-2">
                     <div className="flex items-center">
                       <AlertTriangle className="w-4 h-4 text-yellow-600 mr-2" />
-                      <span className="text-sm text-yellow-800">
+                      <span className="text-xs text-yellow-800">
                         Vence em {daysUntilExpiration} dias
                       </span>
                     </div>
                   </div>
                 )}
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-end mt-3">
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => viewContractDetails(contract)}

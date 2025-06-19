@@ -19,6 +19,8 @@ interface ToastProps {
 function ToastItem({ toast, onRemove }: ToastProps) {
   const [isVisible, setIsVisible] = useState(false)
   const [isExiting, setIsExiting] = useState(false)
+  const [progress, setProgress] = useState(100)
+  const [isPaused, setIsPaused] = useState(false)
 
   const handleRemove = useCallback(() => {
     setIsExiting(true)
@@ -28,28 +30,37 @@ function ToastItem({ toast, onRemove }: ToastProps) {
   }, [onRemove, toast.id])
 
   useEffect(() => {
-    // Animação de entrada
-    const timer = setTimeout(() => setIsVisible(true), 50)
+    // Animação de entrada com bounce
+    const timer = setTimeout(() => setIsVisible(true), 100)
     return () => clearTimeout(timer)
   }, [])
 
   useEffect(() => {
-    // Auto-dismiss
-    if (toast.duration && toast.duration > 0) {
-      const timer = setTimeout(() => {
-        handleRemove()
-      }, toast.duration)
-      return () => clearTimeout(timer)
+    // Auto-dismiss with progress bar
+    if (toast.duration && toast.duration > 0 && !isPaused) {
+      const interval = setInterval(() => {
+        setProgress(prev => {
+          const newProgress = prev - (100 / (toast.duration! / 50))
+          if (newProgress <= 0) {
+            clearInterval(interval)
+            handleRemove()
+            return 0
+          }
+          return newProgress
+        })
+      }, 50)
+      
+      return () => clearInterval(interval)
     }
-  }, [toast.duration, handleRemove])
+  }, [toast.duration, handleRemove, isPaused])
 
   const getIconAndColors = () => {
     switch (toast.type) {
       case 'success':
         return {
-          icon: <CheckCircle className="w-5 h-5" />,
-          bgColor: 'bg-green-50 border-green-200',
-          iconColor: 'text-green-600',
+          icon: <CheckCircle className="w-5 h-5" style={{color: '#22c55e'}} />,
+          bgColor: 'bg-white border-green-300',
+          iconColor: '',
           titleColor: 'text-green-800',
           messageColor: 'text-green-700'
         }
@@ -84,11 +95,16 @@ function ToastItem({ toast, onRemove }: ToastProps) {
 
   return (
     <div
-      className={`max-w-sm w-full ${bgColor} border rounded-lg shadow-lg pointer-events-auto transform transition-all duration-200 ease-in-out ${
+      className={`w-full ${bgColor} border rounded-lg shadow-xl pointer-events-auto transform hover:scale-105 hover:shadow-2xl cursor-pointer ${
         isVisible && !isExiting
-          ? 'translate-x-0 opacity-100 scale-100'
-          : 'translate-x-full opacity-0 scale-95'
+          ? 'animate-bounce-in'
+          : isExiting
+          ? 'animate-slide-out'
+          : 'translate-x-full opacity-0'
       }`}
+      style={toast.type === 'success' ? {backgroundColor: '#ffffff'} : undefined}
+      onMouseEnter={() => setIsPaused(true)}
+      onMouseLeave={() => setIsPaused(false)}
     >
       <div className="p-4">
         <div className="flex items-start">
@@ -116,6 +132,31 @@ function ToastItem({ toast, onRemove }: ToastProps) {
           </div>
         </div>
       </div>
+      
+      {/* Progress Bar */}
+      {toast.duration && toast.duration > 0 && (
+        <div className="h-1 bg-gray-200 dark:bg-gray-700 overflow-hidden rounded-b-lg">
+          <div 
+            className={`h-full transition-all duration-75 ease-linear ${
+              isPaused 
+                ? toast.type === 'success' 
+                  ? 'animate-progress-pulse-success' 
+                  : 'animate-progress-pulse-error'
+                : ''
+            }`}
+            style={{
+              width: `${progress}%`,
+              backgroundColor: toast.type === 'success' 
+                ? '#22c55e' 
+                : toast.type === 'error' 
+                ? '#ef4444' 
+                : toast.type === 'warning' 
+                ? '#f59e0b' 
+                : '#3b82f6'
+            }}
+          />
+        </div>
+      )}
     </div>
   )
 }
@@ -127,7 +168,7 @@ interface ToastContainerProps {
 
 export function ToastContainer({ toasts, onRemove }: ToastContainerProps) {
   return (
-    <div className="fixed top-4 right-4 z-50 space-y-2 pointer-events-none">
+    <div className="fixed top-6 right-6 z-50 space-y-3 pointer-events-none max-w-sm w-full">
       {toasts.map((toast) => (
         <ToastItem key={toast.id} toast={toast} onRemove={onRemove} />
       ))}

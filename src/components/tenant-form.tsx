@@ -454,7 +454,20 @@ export function TenantForm({ isOpen, onClose, onSubmit, tenant }: TenantFormProp
             <button
               type="submit"
               disabled={loading}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-6 py-2 text-white rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              style={{backgroundColor: loading ? '#d1d5db' : '#ff4352'}}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading) {
+                  target.style.backgroundColor = '#e03e4d'
+                }
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading) {
+                  target.style.backgroundColor = '#ff4352'
+                }
+              }}
             >
               {loading ? 'Salvando...' : tenant ? 'Atualizar' : 'Criar Inquilino'}
             </button>

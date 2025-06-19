@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { TenantForm } from '@/components/tenant-form'
+import { ToastContainer, useToast } from '@/components/toast'
 import { Plus, Search, Mail, Phone, MapPin, DollarSign, Edit, Trash2, UserCheck, AlertTriangle } from 'lucide-react'
 
 interface Tenant {
@@ -39,6 +40,8 @@ export default function Tenants() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null)
+  
+  const { toasts, removeToast, showSuccess, showError } = useToast()
 
   useEffect(() => {
     fetchTenants()
@@ -77,19 +80,18 @@ export default function Tenants() {
 
       if (response.ok) {
         const newTenant = await response.json()
-        // Adiciona o novo inquilino à lista existente para atualização imediata
         setTenants(prev => [newTenant, ...prev])
         setShowForm(false)
-        // Recarrega os dados para garantir consistência
         await fetchTenants()
+        showSuccess('Inquilino criado!', 'O inquilino foi cadastrado com sucesso.')
       } else {
         const errorData = await response.json()
+        showError('Erro ao criar inquilino', errorData.error || 'Tente novamente.')
         console.error('Error creating tenant:', errorData)
-        alert('Erro ao criar inquilino: ' + (errorData.error || 'Erro desconhecido'))
       }
     } catch (error) {
       console.error('Error creating tenant:', error)
-      alert('Erro ao criar inquilino. Verifique sua conexão.')
+      showError('Erro ao criar inquilino', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -107,22 +109,21 @@ export default function Tenants() {
 
       if (response.ok) {
         const updatedTenant = await response.json()
-        // Atualiza o inquilino na lista existente
         setTenants(prev => prev.map(tenant => 
           tenant.id === editingTenant.id ? updatedTenant : tenant
         ))
         setShowForm(false)
         setEditingTenant(null)
-        // Recarrega os dados para garantir consistência
         await fetchTenants()
+        showSuccess('Inquilino atualizado!', 'As informações foram atualizadas com sucesso.')
       } else {
         const errorData = await response.json()
         console.error('Error updating tenant:', errorData)
-        alert('Erro ao atualizar inquilino: ' + (errorData.error || 'Erro desconhecido'))
+        showError('Erro ao atualizar inquilino', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error updating tenant:', error)
-      alert('Erro ao atualizar inquilino. Verifique sua conexão.')
+      showError('Erro ao atualizar inquilino', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -135,18 +136,17 @@ export default function Tenants() {
       })
 
       if (response.ok) {
-        // Remove o inquilino da lista existente para atualização imediata
         setTenants(prev => prev.filter(tenant => tenant.id !== id))
-        // Recarrega os dados para garantir consistência
         await fetchTenants()
+        showSuccess('Inquilino excluído!', 'O inquilino foi removido com sucesso.')
       } else {
         const errorData = await response.json()
         console.error('Error deleting tenant:', errorData)
-        alert('Erro ao deletar inquilino: ' + (errorData.error || 'Erro desconhecido'))
+        showError('Erro ao excluir inquilino', errorData.error || 'Tente novamente.')
       }
     } catch (error) {
       console.error('Error deleting tenant:', error)
-      alert('Erro ao deletar inquilino. Verifique sua conexão.')
+      showError('Erro ao excluir inquilino', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -197,7 +197,7 @@ export default function Tenants() {
     return (
       <DashboardLayout>
         <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{borderColor: '#ff4352'}}></div>
         </div>
       </DashboardLayout>
     )
@@ -216,15 +216,24 @@ export default function Tenants() {
           </div>
           <button 
             onClick={() => setShowForm(true)}
-            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-white rounded-lg transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg"
+            style={{backgroundColor: '#ff4352'}}
+            onMouseEnter={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#e03e4d'
+            }}
+            onMouseLeave={(e) => {
+              const target = e.target as HTMLButtonElement
+              target.style.backgroundColor = '#ff4352'
+            }}
           >
             <Plus className="w-5 h-5 mr-2" />
             Novo Inquilino
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Stats - Hidden on mobile */}
+        <div className="hidden md:grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <div className="bg-white rounded-xl shadow-sm p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -287,75 +296,190 @@ export default function Tenants() {
           </div>
         </div>
 
-        {/* Tenants Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Desktop Table View */}
+        <div className="hidden lg:block bg-white rounded-xl shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50 dark:bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Inquilino
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Contato
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Localização
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Renda
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Contratos
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Ações
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-900 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredTenants.map((tenant) => {
+                  const status = getTenantStatus(tenant)
+                  return (
+                    <tr key={tenant.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                            <UserCheck className="w-5 h-5" style={{color: '#ff4352'}} />
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white">{tenant.name}</div>
+                            <div className="text-sm text-gray-500 dark:text-gray-400">Doc: {tenant.document}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="text-sm text-gray-900 dark:text-white">
+                          <div className="flex items-center mb-1">
+                            <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                            {tenant.email}
+                          </div>
+                          <div className="flex items-center">
+                            <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                            {formatPhoneDisplay(tenant.phone)}
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="text-sm text-gray-900 dark:text-white">
+                          <div className="flex items-start">
+                            <MapPin className="w-4 h-4 mr-2 text-gray-400 mt-0.5 flex-shrink-0" />
+                            <div>
+                              <div>{tenant.address}</div>
+                              <div className="text-gray-500 dark:text-gray-400">{tenant.city} - {tenant.state}</div>
+                              <div className="text-gray-500 dark:text-gray-400">CEP: {tenant.zipCode}</div>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <DollarSign className="w-4 h-4 mr-2 text-gray-400" />
+                          <span className="text-sm text-gray-900 dark:text-white font-medium">
+                            R$ {tenant.income.toLocaleString('pt-BR')}
+                          </span>
+                        </div>
+                        {tenant.occupation && (
+                          <div className="text-xs text-gray-500 dark:text-gray-400">
+                            {tenant.occupation}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4">
+                        {tenant.contracts.length > 0 ? (
+                          <div className="text-sm text-gray-900 dark:text-white">
+                            {tenant.contracts.map((contract) => (
+                              <div key={contract.id} className="mb-2 last:mb-0">
+                                <div className="font-medium">{contract.property.title}</div>
+                                <div className="text-gray-500 dark:text-gray-400 text-xs">
+                                  {new Date(contract.startDate).toLocaleDateString('pt-BR')} até{' '}
+                                  {new Date(contract.endDate).toLocaleDateString('pt-BR')}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <div className="flex items-center text-gray-500 dark:text-gray-400">
+                            <AlertTriangle className="w-4 h-4 mr-2" />
+                            <span className="text-sm">Sem contratos</span>
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${status.color}`}>
+                          {status.text}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <div className="flex items-center justify-end space-x-2">
+                          <button 
+                            onClick={() => openEditForm(tenant)}
+                            className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                            style={{color: '#ff4352'}}
+                            title="Editar inquilino"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button 
+                            onClick={() => handleDeleteTenant(tenant.id)}
+                            className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                            title="Deletar inquilino"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="lg:hidden space-y-4">
           {filteredTenants.map((tenant) => {
             const status = getTenantStatus(tenant)
             return (
-              <div key={tenant.id} className="bg-white rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                <div className="flex items-start justify-between mb-4">
+              <div key={tenant.id} className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
-                      <UserCheck className="w-6 h-6 text-blue-600" />
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                      <UserCheck className="w-5 h-5" style={{color: '#ff4352'}} />
                     </div>
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900">{tenant.name}</h3>
-                      <p className="text-sm text-gray-500">Doc: {tenant.document}</p>
+                      <h3 className="text-sm font-semibold text-gray-900">{tenant.name}</h3>
+                      <p className="text-xs text-gray-500">Doc: {tenant.document}</p>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 text-xs font-medium rounded-full ${status.color}`}>
-                      {status.text}
-                    </span>
-                    <div className="flex space-x-1">
-                      <button 
-                        onClick={() => openEditForm(tenant)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                        title="Editar inquilino"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button 
-                        onClick={() => handleDeleteTenant(tenant.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="Deletar inquilino"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
+                  <span className={`px-2 py-1 text-xs font-medium rounded-full ${status.color}`}>
+                    {status.text}
+                  </span>
                 </div>
 
-                <div className="space-y-3 mb-4">
+                <div className="space-y-2 mb-3">
                   <div className="flex items-center text-gray-600">
-                    <Mail className="w-4 h-4 mr-3" />
+                    <Mail className="w-4 h-4 mr-2" />
                     <span className="text-sm">{tenant.email}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <Phone className="w-4 h-4 mr-3" />
+                    <Phone className="w-4 h-4 mr-2" />
                     <span className="text-sm">{formatPhoneDisplay(tenant.phone)}</span>
                   </div>
-                  <div className="flex items-center text-gray-600">
-                    <MapPin className="w-4 h-4 mr-3" />
+                  <div className="flex items-start text-gray-600">
+                    <MapPin className="w-4 h-4 mr-2 mt-0.5 flex-shrink-0" />
                     <span className="text-sm">{tenant.address}, {tenant.city} - {tenant.state}</span>
                   </div>
                   <div className="flex items-center text-gray-600">
-                    <DollarSign className="w-4 h-4 mr-3" />
+                    <DollarSign className="w-4 h-4 mr-2" />
                     <span className="text-sm">Renda: R$ {tenant.income.toLocaleString('pt-BR')}</span>
                   </div>
                 </div>
 
                 {tenant.contracts.length > 0 && (
-                  <div className="border-t border-gray-200 pt-4">
-                    <h4 className="text-sm font-medium text-gray-900 mb-2">Contratos Ativos</h4>
+                  <div className="mb-3">
+                    <h4 className="text-xs font-medium text-gray-900 mb-1">Contratos:</h4>
                     {tenant.contracts.map((contract) => (
-                      <div key={contract.id} className="bg-gray-50 rounded-lg p-3">
-                        <p className="text-sm font-medium text-gray-900">
+                      <div key={contract.id} className="bg-gray-50 rounded p-2 mb-1 last:mb-0">
+                        <p className="text-xs font-medium text-gray-900">
                           {contract.property.title}
                         </p>
                         <p className="text-xs text-gray-500">
-                          {new Date(contract.startDate).toLocaleDateString('pt-BR')} até{' '}
-                          {new Date(contract.endDate).toLocaleDateString('pt-BR')}
+                          {new Date(contract.startDate).toLocaleDateString('pt-BR')} aé {new Date(contract.endDate).toLocaleDateString('pt-BR')}
                         </p>
                       </div>
                     ))}
@@ -363,20 +487,27 @@ export default function Tenants() {
                 )}
 
                 {tenant.contracts.length === 0 && (
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex items-center justify-center py-4 text-gray-500">
-                      <AlertTriangle className="w-5 h-5 mr-2" />
-                      <span className="text-sm">Nenhum contrato ativo</span>
-                    </div>
+                  <div className="mb-3 flex items-center justify-center py-2 text-gray-500">
+                    <AlertTriangle className="w-4 h-4 mr-2" />
+                    <span className="text-xs">Sem contratos</span>
                   </div>
                 )}
 
-                <div className="mt-4 flex items-center justify-between">
-                  <button className="text-blue-600 hover:text-blue-800 text-sm font-medium">
-                    Ver Histórico
+                <div className="flex items-center justify-end space-x-2">
+                  <button 
+                    onClick={() => openEditForm(tenant)}
+                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    style={{color: '#ff4352'}}
+                    title="Editar inquilino"
+                  >
+                    <Edit className="w-4 h-4" />
                   </button>
-                  <button className="text-green-600 hover:text-green-800 text-sm font-medium">
-                    Novo Contrato
+                  <button 
+                    onClick={() => handleDeleteTenant(tenant.id)}
+                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                    title="Deletar inquilino"
+                  >
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>
@@ -407,6 +538,9 @@ export default function Tenants() {
           onSubmit={editingTenant ? handleEditTenant : handleCreateTenant}
           tenant={editingTenant}
         />
+
+        {/* Toast Notifications */}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </DashboardLayout>
   )

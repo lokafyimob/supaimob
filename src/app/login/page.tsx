@@ -47,7 +47,7 @@ export default function Login() {
         <div className="w-full max-w-sm space-y-8">
           {/* Logo and Title */}
           <div className="text-center">
-            <div className="inline-flex items-center justify-center w-12 h-12 bg-red-500 rounded-lg mb-6">
+            <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg mb-6" style={{backgroundColor: '#ff4352'}}>
               <Building className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">CRM Imobiliário</h1>
@@ -63,7 +63,17 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors"
+                className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 transition-colors"
+                onFocus={(e) => {
+                  const target = e.target as HTMLInputElement
+                  target.style.borderColor = '#ff4352'
+                  target.style.boxShadow = '0 0 0 1px #ff4352'
+                }}
+                onBlur={(e) => {
+                  const target = e.target as HTMLInputElement
+                  target.style.borderColor = '#d1d5db'
+                  target.style.boxShadow = 'none'
+                }}
                 placeholder="E-mail"
                 required
               />
@@ -76,7 +86,17 @@ export default function Login() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 focus:ring-red-500 focus:border-red-500 transition-colors pr-10"
+                className="w-full px-3 py-3 border border-gray-300 rounded-md placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-1 transition-colors pr-10"
+                onFocus={(e) => {
+                  const target = e.target as HTMLInputElement
+                  target.style.borderColor = '#ff4352'
+                  target.style.boxShadow = '0 0 0 1px #ff4352'
+                }}
+                onBlur={(e) => {
+                  const target = e.target as HTMLInputElement
+                  target.style.borderColor = '#d1d5db'
+                  target.style.boxShadow = 'none'
+                }}
                 placeholder="Senha"
                 required
               />
@@ -91,7 +111,7 @@ export default function Login() {
 
             {/* Error Message */}
             {error && (
-              <div className="text-red-500 text-sm text-center bg-red-50 py-2 px-3 rounded-md border border-red-200">
+              <div className="text-sm text-center py-2 px-3 rounded-md border" style={{color: '#ff4352', backgroundColor: '#fef2f2', borderColor: '#fecaca'}}>
                 {error}
               </div>
             )}
@@ -100,7 +120,22 @@ export default function Login() {
             <button
               type="submit"
               disabled={loading || !email || !password}
-              className="w-full py-3 px-4 bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              className="w-full py-3 px-4 disabled:bg-gray-300 disabled:cursor-not-allowed text-white font-medium rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                backgroundColor: loading || !email || !password ? '#d1d5db' : '#ff4352'
+              }}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading && email && password) {
+                  target.style.backgroundColor = '#e03e4d'
+                }
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLButtonElement
+                if (!loading && email && password) {
+                  target.style.backgroundColor = '#ff4352'
+                }
+              }}
             >
               {loading ? (
                 <div className="flex items-center justify-center">
@@ -130,7 +165,7 @@ export default function Login() {
       </div>
 
       {/* Right side - Background Image/Pattern */}
-      <div className="hidden lg:block flex-1 bg-gradient-to-br from-red-400 via-red-500 to-red-600 relative overflow-hidden">
+      <div className="hidden lg:block flex-1 relative overflow-hidden" style={{background: 'linear-gradient(to bottom right, #ff6b7a, #ff4352, #e03e4d)'}}>
         <div className="absolute inset-0 bg-black/10"></div>
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white p-8 max-w-md">

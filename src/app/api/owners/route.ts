@@ -7,6 +7,12 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request)
     
     const owners = await prisma.owner.findMany({
+      where: {
+        userId: user.id // Only return owners that belong to the current user
+      },
+      include: {
+        properties: true // Include related properties
+      },
       orderBy: {
         createdAt: 'desc'
       }

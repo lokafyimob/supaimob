@@ -24,6 +24,7 @@ export function MatchAlert({ matches, onDismiss, onViewMatches }: MatchAlertProp
     if (matches.length > 0) {
       setIsVisible(true)
       
+      
       // Auto-rotate through matches if there are multiple
       if (matches.length > 1) {
         const interval = setInterval(() => {

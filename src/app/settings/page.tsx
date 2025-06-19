@@ -1,8 +1,10 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useTheme } from '@/lib/theme-context'
+import { ToastContainer, useToast } from '@/components/toast'
 import { 
   Building2, 
   Bell, 
@@ -14,7 +16,8 @@ import {
   Upload,
   Moon,
   Sun,
-  Globe
+  Globe,
+  User
 } from 'lucide-react'
 
 interface CompanySettings {
@@ -56,9 +59,17 @@ interface FinancialSettings {
   maxInterestDays: number    // máximo de dias para calcular juros
 }
 
+interface UserProfile {
+  name: string
+  email: string
+  phone: string
+}
+
 export default function Settings() {
   const { theme, setTheme } = useTheme()
-  const [activeTab, setActiveTab] = useState('company')
+  const { data: session } = useSession()
+  const { toasts, removeToast, showSuccess, showError } = useToast()
+  const [activeTab, setActiveTab] = useState('profile')
   const [loading, setLoading] = useState(false)
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle')
 
@@ -101,8 +112,15 @@ export default function Settings() {
     maxInterestDays: 365       // máximo 1 ano de juros
   })
 
+  const [userProfile, setUserProfile] = useState<UserProfile>({
+    name: '',
+    email: '',
+    phone: ''
+  })
+
   useEffect(() => {
     loadSettings()
+    loadUserProfile()
   }, [])
 
 
@@ -151,6 +169,54 @@ export default function Settings() {
       console.error('Error loading settings:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadUserProfile = async () => {
+    try {
+      if (session?.user) {
+        setUserProfile({
+          name: session.user.name || '',
+          email: session.user.email || '',
+          phone: '' // Will be loaded from API
+        })
+        
+        // Load phone from database
+        const response = await fetch('/api/users/profile')
+        if (response.ok) {
+          const data = await response.json()
+          if (data.phone) {
+            setUserProfile(prev => ({ ...prev, phone: data.phone }))
+          }
+        }
+      }
+    } catch (error) {
+      console.error('Error loading user profile:', error)
+    }
+  }
+
+  const saveUserProfile = async () => {
+    try {
+      const response = await fetch('/api/users/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name: userProfile.name,
+          phone: userProfile.phone
+        }),
+      })
+      
+      if (response.ok) {
+        showSuccess('Perfil atualizado!', 'Suas informações foram salvas com sucesso.')
+      } else {
+        const errorData = await response.json()
+        showError('Erro ao salvar perfil', errorData.error || 'Tente novamente.')
+      }
+    } catch (error) {
+      console.error('Error saving user profile:', error)
+      showError('Erro ao salvar perfil', 'Verifique sua conexão e tente novamente.')
     }
   }
 
@@ -239,6 +305,7 @@ export default function Settings() {
   }
 
   const tabs = [
+    { id: 'profile', name: 'Meu Perfil', icon: User },
     { id: 'company', name: 'Empresa', icon: Building2 },
     { id: 'system', name: 'Sistema', icon: Palette },
     { id: 'notifications', name: 'Notificações', icon: Bell },
@@ -268,28 +335,47 @@ export default function Settings() {
               Gerencie as configurações do sistema e da empresa
             </p>
           </div>
-          <button 
-            onClick={saveSettings}
-            disabled={saveStatus === 'saving'}
-            className={`mt-4 sm:mt-0 inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
-              saveStatus === 'saved' 
-                ? 'bg-green-600 text-white' 
-                : saveStatus === 'error'
-                ? 'bg-red-600 text-white'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
-            } disabled:opacity-50`}
-          >
-            <Save className="w-5 h-5 mr-2" />
-            {saveStatus === 'saving' && 'Salvando...'}
-            {saveStatus === 'saved' && 'Salvo!'}
-            {saveStatus === 'error' && 'Erro ao salvar'}
-            {saveStatus === 'idle' && 'Salvar Configurações'}
-          </button>
+          {activeTab === 'profile' ? (
+            <button 
+              onClick={saveUserProfile}
+              className="mt-4 sm:mt-0 inline-flex items-center px-4 py-2 text-white rounded-lg transition-colors"
+              style={{backgroundColor: '#ff4352'}}
+              onMouseEnter={(e) => {
+                const target = e.target as HTMLButtonElement
+                target.style.backgroundColor = '#e03e4d'
+              }}
+              onMouseLeave={(e) => {
+                const target = e.target as HTMLButtonElement
+                target.style.backgroundColor = '#ff4352'
+              }}
+            >
+              <Save className="w-5 h-5 mr-2" />
+              Salvar Perfil
+            </button>
+          ) : (
+            <button 
+              onClick={saveSettings}
+              disabled={saveStatus === 'saving'}
+              className={`mt-4 sm:mt-0 inline-flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${
+                saveStatus === 'saved' 
+                  ? 'bg-green-600 text-white' 
+                  : saveStatus === 'error'
+                  ? 'bg-red-600 text-white'
+                  : 'bg-blue-600 text-white hover:bg-blue-700'
+              } disabled:opacity-50`}
+            >
+              <Save className="w-5 h-5 mr-2" />
+              {saveStatus === 'saving' && 'Salvando...'}
+              {saveStatus === 'saved' && 'Salvo!'}
+              {saveStatus === 'error' && 'Erro ao salvar'}
+              {saveStatus === 'idle' && 'Salvar Configurações'}
+            </button>
+          )}
         </div>
 
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm overflow-hidden">
-          {/* Tabs */}
-          <div className="border-b border-gray-200 dark:border-gray-700">
+          {/* Desktop Tabs */}
+          <div className="hidden lg:block border-b border-gray-200 dark:border-gray-700">
             <nav className="flex space-x-8 px-6" aria-label="Tabs">
               {tabs.map((tab) => {
                 const Icon = tab.icon
@@ -311,8 +397,133 @@ export default function Settings() {
             </nav>
           </div>
 
+          {/* Mobile Tab Selector */}
+          <div className="lg:hidden border-b border-gray-200 dark:border-gray-700 px-4 py-3">
+            <select
+              value={activeTab}
+              onChange={(e) => setActiveTab(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:border-transparent"
+              style={{
+                '--focus-ring-color': '#ff4352',
+                '--focus-border-color': 'transparent'
+              } as React.CSSProperties}
+              onFocus={(e) => {
+                e.target.style.boxShadow = '0 0 0 2px rgba(255, 67, 82, 0.2)'
+                e.target.style.borderColor = '#ff4352'
+              }}
+              onBlur={(e) => {
+                e.target.style.boxShadow = ''
+                e.target.style.borderColor = '#d1d5db'
+              }}
+            >
+              {tabs.map((tab) => (
+                <option key={tab.id} value={tab.id}>
+                  {tab.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           {/* Tab Content */}
-          <div className="p-6">
+          <div className="p-4 lg:p-6">
+            {activeTab === 'profile' && (
+              <div className="space-y-6">
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Meu Perfil</h3>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Atualize suas informações pessoais. O telefone é importante para receber notificações de parceria.
+                </p>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Nome Completo *
+                    </label>
+                    <input
+                      type="text"
+                      value={userProfile.name}
+                      onChange={(e) => setUserProfile(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:border-transparent"
+                      style={{
+                        '--focus-ring-color': '#ff4352',
+                        '--focus-border-color': 'transparent'
+                      } as React.CSSProperties}
+                      onFocus={(e) => {
+                        e.target.style.boxShadow = '0 0 0 2px rgba(255, 67, 82, 0.2)'
+                        e.target.style.borderColor = '#ff4352'
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.boxShadow = ''
+                        e.target.style.borderColor = '#d1d5db'
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      value={userProfile.email}
+                      disabled
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg bg-gray-50 dark:bg-gray-800 cursor-not-allowed"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">O email não pode ser alterado</p>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Telefone/WhatsApp *
+                    </label>
+                    <input
+                      type="text"
+                      value={userProfile.phone}
+                      onChange={(e) => setUserProfile(prev => ({ ...prev, phone: formatPhone(e.target.value) }))}
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:border-transparent"
+                      style={{
+                        '--focus-ring-color': '#ff4352',
+                        '--focus-border-color': 'transparent'
+                      } as React.CSSProperties}
+                      onFocus={(e) => {
+                        e.target.style.boxShadow = '0 0 0 2px rgba(255, 67, 82, 0.2)'
+                        e.target.style.borderColor = '#ff4352'
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.boxShadow = ''
+                        e.target.style.borderColor = '#d1d5db'
+                      }}
+                      placeholder="(11) 99999-9999"
+                      maxLength={15}
+                    />
+                    <p className="text-xs text-gray-500 mt-1">
+                      Seu telefone será usado para receber notificações de oportunidades de parceria
+                    </p>
+                  </div>
+                </div>
+
+                {/* Info Box */}
+                <div className="p-4 rounded-lg" style={{backgroundColor: '#fef2f2'}}>
+                  <div className="flex">
+                    <div className="flex-shrink-0">
+                      <User className="w-5 h-5" style={{color: '#ff4352'}} />
+                    </div>
+                    <div className="ml-3">
+                      <h3 className="text-sm font-medium" style={{color: '#ff4352'}}>
+                        Por que o telefone é importante?
+                      </h3>
+                      <div className="mt-2 text-sm text-gray-700">
+                        <ul className="list-disc pl-5 space-y-1">
+                          <li>Receber notificações de oportunidades de parceria</li>
+                          <li>Outros corretores podem entrar em contato diretamente</li>
+                          <li>Facilita a comunicação para negociar parcerias</li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {activeTab === 'company' && (
               <div className="space-y-6">
                 <h3 className="text-lg font-medium text-gray-900 dark:text-white">Informações da Empresa</h3>
@@ -866,6 +1077,9 @@ export default function Settings() {
             )}
           </div>
         </div>
+
+        {/* Toast Notifications */}
+        <ToastContainer toasts={toasts} onRemove={removeToast} />
       </div>
     </DashboardLayout>
   )

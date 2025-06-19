@@ -4,6 +4,8 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Sidebar } from './sidebar'
+import { SettingsDropdown } from './settings-dropdown'
+import { Calendar } from 'lucide-react'
 
 interface DashboardLayoutProps {
   children: React.ReactNode
@@ -22,7 +24,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   if (status === 'loading') {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        <div className="animate-spin rounded-full h-32 w-32 border-b-2" style={{borderColor: '#ff4352'}}></div>
       </div>
     )
   }
@@ -34,7 +36,58 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex">
       <Sidebar />
-      <main className="flex-1 lg:ml-64">
+      <main className="flex-1 lg:ml-16">
+        {/* Top Header */}
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left - Welcome */}
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
+                <span className="text-sm font-semibold text-gray-600 dark:text-gray-300">
+                  {session?.user?.name?.charAt(0).toUpperCase()}
+                </span>
+              </div>
+              <div>
+                <h1 className="text-lg font-semibold text-gray-900 dark:text-white">
+                  Bem-vindo, {session?.user?.name}
+                </h1>
+              </div>
+            </div>
+            
+            {/* Right - Date, Avatar and Logout */}
+            <div className="flex items-center space-x-4">
+              {/* Date */}
+              <div className="hidden sm:flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+                <Calendar className="w-4 h-4" />
+                <span>
+                  {new Date().toLocaleDateString('pt-BR', { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric' 
+                  })}
+                </span>
+              </div>
+
+              {/* Avatar */}
+              <div className="flex items-center space-x-3">
+                <div className="relative">
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 border-white" style={{background: 'linear-gradient(to bottom right, #ff4352, #e03e4d)'}}>
+                    <span className="text-white font-semibold text-sm">
+                      {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                    </span>
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
+                </div>
+              </div>
+              
+              {/* Settings Dropdown */}
+              <SettingsDropdown />
+            </div>
+          </div>
+        </div>
+        
+        {/* Content */}
         <div className="p-6 lg:p-8">
           {children}
         </div>
