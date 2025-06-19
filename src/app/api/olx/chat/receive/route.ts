@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     
     // Verificar autenticação Bearer token (opcional)
     const authHeader = request.headers.get('authorization')
-    const token = authHeader?.replace('Bearer ', '')
+    const _token = authHeader?.replace('Bearer ', '')
     
     // TODO: Verificar token se necessário
     // if (token !== process.env.OLX_WEBHOOK_TOKEN) {
@@ -245,7 +245,7 @@ async function notifyTeamAboutMessage(data: {
  * Configurar webhook no OLX
  * POST /api/olx/chat/receive/setup
  */
-export async function PUT(request: NextRequest) {
+export async function PUT(_request: NextRequest) {
   try {
     const webhookUrl = 'https://lokafyimob.vercel.app/api/olx/chat/receive'
     

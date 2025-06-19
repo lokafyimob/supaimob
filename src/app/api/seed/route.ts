@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { seedDatabase } from '@/lib/seed'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     const result = await seedDatabase()
     return NextResponse.json({
