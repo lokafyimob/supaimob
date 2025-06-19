@@ -129,7 +129,7 @@ async function checkForMatches(leadId: string) {
     const preferredStates = JSON.parse(lead.preferredStates)
 
     // Build query for matching properties
-    const whereConditions: any = {
+    const whereConditions: Record<string, any> = {
       companyId: lead.companyId,
       propertyType: lead.propertyType,
       status: 'AVAILABLE'

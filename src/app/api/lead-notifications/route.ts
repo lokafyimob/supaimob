@@ -8,7 +8,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const leadId = searchParams.get('leadId')
     
-    const whereClause: any = {
+    const whereClause: Record<string, any> = {
       lead: {
         userId: user.id
       }

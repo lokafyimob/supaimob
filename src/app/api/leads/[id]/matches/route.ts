@@ -28,14 +28,14 @@ export async function GET(
     const preferredStates = JSON.parse(lead.preferredStates)
 
     // Build base conditions
-    const baseConditions: any = {
+    const baseConditions: Record<string, any> = {
       companyId: lead.companyId,
       propertyType: lead.propertyType,
       status: 'AVAILABLE'
     }
 
     // Build AND conditions array
-    const andConditions: any[] = []
+    const andConditions: Record<string, any>[] = []
 
     // Available for condition - mais rigoroso
     if (lead.interest === 'RENT') {
@@ -71,7 +71,7 @@ export async function GET(
 
     // Bedrooms
     if (lead.minBedrooms || lead.maxBedrooms) {
-      const bedroomsCondition: any = {}
+      const bedroomsCondition: Record<string, number> = {}
       if (lead.minBedrooms) bedroomsCondition.gte = lead.minBedrooms
       if (lead.maxBedrooms) bedroomsCondition.lte = lead.maxBedrooms
       andConditions.push({ bedrooms: bedroomsCondition })
@@ -79,7 +79,7 @@ export async function GET(
 
     // Bathrooms
     if (lead.minBathrooms || lead.maxBathrooms) {
-      const bathroomsCondition: any = {}
+      const bathroomsCondition: Record<string, number> = {}
       if (lead.minBathrooms) bathroomsCondition.gte = lead.minBathrooms
       if (lead.maxBathrooms) bathroomsCondition.lte = lead.maxBathrooms
       andConditions.push({ bathrooms: bathroomsCondition })
@@ -87,7 +87,7 @@ export async function GET(
 
     // Area
     if (lead.minArea || lead.maxArea) {
-      const areaCondition: any = {}
+      const areaCondition: Record<string, number> = {}
       if (lead.minArea) areaCondition.gte = lead.minArea
       if (lead.maxArea) areaCondition.lte = lead.maxArea
       andConditions.push({ area: areaCondition })
@@ -95,7 +95,7 @@ export async function GET(
 
     // Cities and states
     if (preferredCities.length > 0 || preferredStates.length > 0) {
-      const locationConditions: any[] = []
+      const locationConditions: Record<string, any>[] = []
       if (preferredCities.length > 0) {
         locationConditions.push({ city: { in: preferredCities } })
       }
