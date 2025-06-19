@@ -1,0 +1,11 @@
+# Ignore all files for Vercel deployment
+*
+**/*
+src/
+lib/
+components/
+app/
+pages/
+public/
+.next/
+node_modules/
