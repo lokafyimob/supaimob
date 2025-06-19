@@ -102,8 +102,8 @@ export class OLXChatService {
           }
       }
 
-    } catch (error) {
-      console.error('Erro ao enviar mensagem OLX:', error)
+    } catch {
+      console.error('Erro ao enviar mensagem OLX')
       return {
         success: false,
         error: 'Erro de conexão com a API do OLX'

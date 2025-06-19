@@ -101,7 +101,7 @@ export function UserForm({ isOpen, onClose, onSubmit, user }: UserFormProps) {
         const data = await response.json()
         setCompanies(data)
       }
-    } catch (error) {
+    } catch {
       console.error('Error fetching companies:', error)
     }
   }
