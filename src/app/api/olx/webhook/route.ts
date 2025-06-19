@@ -122,7 +122,7 @@ async function handleLead(data: any) {
 /**
  * Processar atualização de propriedade
  */
-async function handlePropertyUpdate(data: any) {
+async function handlePropertyUpdate(_data: Record<string, unknown>) {
   try {
     console.log('🏠 Processing property update from OLX')
 
@@ -147,7 +147,7 @@ async function handlePropertyUpdate(data: any) {
 /**
  * Processar mudança de status do anúncio
  */
-async function handleListingStatus(data: any) {
+async function handleListingStatus(_data: Record<string, unknown>) {
   try {
     console.log('📊 Processing listing status from OLX')
 

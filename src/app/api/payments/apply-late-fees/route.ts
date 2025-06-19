@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
         // Se há cobrança efetiva (passou do período de carência)
         if (lateFeesResult.effectiveDaysForCharges > 0) {
           // Atualizar o pagamento com multa e juros
-          const updatedPayment = await prisma.payment.update({
+          await prisma.payment.update({
             where: { id: payment.id },
             data: {
               penalty: lateFeesResult.penalty,
