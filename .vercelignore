@@ -1,0 +1,10 @@
+# ESLint cache
+.eslintcache
+
+# TypeScript build cache
+.tsbuildinfo
+
+# Avoid linting files during build
+*.eslintrc*
+.eslintrc.js
+.eslintrc.json
