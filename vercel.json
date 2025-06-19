@@ -1,23 +1,11 @@
 {
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "zeroConfig": true,
-        "outputDirectory": ".next"
-      }
-    }
-  ],
+  "buildCommand": "npm run build:vercel",
+  "outputDirectory": ".next",
+  "installCommand": "npm install",
+  "framework": null,
   "env": {
     "SKIP_ENV_VALIDATION": "1",
     "NEXT_TELEMETRY_DISABLED": "1",
     "DISABLE_ESLINT": "1"
-  },
-  "build": {
-    "env": {
-      "SKIP_ENV_VALIDATION": "1",
-      "DISABLE_ESLINT": "1"
-    }
   }
 }
