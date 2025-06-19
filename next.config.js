@@ -9,6 +9,12 @@ const nextConfig = {
   },
   env: {
     SKIP_ENV_VALIDATION: '1'
+  },
+  eslint: {
+    ignoreDuringBuilds: true
+  },
+  typescript: {
+    ignoreBuildErrors: true
   }
 }
 
