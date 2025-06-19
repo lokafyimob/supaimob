@@ -96,12 +96,21 @@ export async function POST(request: NextRequest) {
       }
     })
 
+    console.log('🏠 Propriedade criada:', property.id, property.title)
+    console.log('🤝 Aceita parceria:', data.acceptsPartnership)
+    
     // Check for lead matches
+    console.log('🔍 Iniciando checkForLeadMatches...')
     await checkForLeadMatches(property.id)
+    console.log('✅ checkForLeadMatches concluído')
     
     // Check for partnership opportunities if property accepts partnership
     if (data.acceptsPartnership) {
+      console.log('🤝 Iniciando checkForPartnershipOpportunities...')
       await checkForPartnershipOpportunities(property.id, user.id)
+      console.log('✅ checkForPartnershipOpportunities concluído')
+    } else {
+      console.log('❌ Propriedade não aceita parceria, pulando check')
     }
 
     // Format response for SQLite compatibility
