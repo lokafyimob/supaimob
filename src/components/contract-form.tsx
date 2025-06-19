@@ -68,7 +68,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
         resetForm()
       }
     }
-  }, [isOpen, contract, loadData])
+  }, [isOpen, contract]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadData = useCallback(async () => {
     setLoadingData(true)
