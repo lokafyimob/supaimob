@@ -47,12 +47,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
   const [monthlyReport, setMonthlyReport] = useState<Record<string, any> | null>(null)
 
-  useEffect(() => {
-    fetchMaintenances()
-    generateCurrentMonthReport()
-  }, [contractId, fetchMaintenances, generateCurrentMonthReport])
-
-  const fetchMaintenances = async () => {
+  const fetchMaintenances = useCallback(async () => {
     try {
       setLoading(true)
       const response = await fetch(`/api/maintenances?contractId=${contractId}`)
@@ -65,9 +60,9 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
     } finally {
       setLoading(false)
     }
-  }
+  }, [contractId])
 
-  const generateCurrentMonthReport = async () => {
+  const generateCurrentMonthReport = useCallback(async () => {
     try {
       const now = new Date()
       const month = now.getMonth() + 1
@@ -84,7 +79,13 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
     } catch (error) {
       console.error('Error generating monthly report:', error)
     }
-  }
+  }, [contractId])
+
+  useEffect(() => {
+    fetchMaintenances()
+    generateCurrentMonthReport()
+  }, [fetchMaintenances, generateCurrentMonthReport])
+
 
   const handleCreateMaintenance = async (data: Record<string, any>) => {
     try {

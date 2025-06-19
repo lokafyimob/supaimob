@@ -95,7 +95,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
     } finally {
       setLoadingData(false)
     }
-  }, [])
+  }, [contract])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
