@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
     // Test database connection
     await prisma.$connect()
@@ -19,7 +19,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       error: 'Database error',
       details: error instanceof Error ? error.message : 'Unknown error',
-      code: error instanceof Error && 'code' in error ? (error as any).code : 'unknown'
+      code: error instanceof Error && 'code' in error ? (error as { code: string }).code : 'unknown'
     })
   }
 }

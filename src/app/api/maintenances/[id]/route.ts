@@ -8,7 +8,7 @@ export async function GET(
 ) {
   try {
     const { id } = await params
-    const user = await requireAuth(request)
+    await requireAuth(request)
     
     const maintenance = await prisma.maintenance.findUnique({
       where: { id },
@@ -60,7 +60,7 @@ export async function PUT(
 ) {
   try {
     const { id } = await params
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const data = await request.json()
     
     const maintenance = await prisma.maintenance.update({
@@ -118,7 +118,7 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params
-    const user = await requireAuth(request)
+    await requireAuth(request)
     
     await prisma.maintenance.delete({
       where: { id }

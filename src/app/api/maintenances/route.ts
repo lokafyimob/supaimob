@@ -4,12 +4,12 @@ import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const { searchParams } = new URL(request.url)
     const contractId = searchParams.get('contractId')
     const propertyId = searchParams.get('propertyId')
     
-    const whereClause: any = {}
+    const whereClause: Record<string, string> = {}
     
     if (contractId) {
       whereClause.contractId = contractId
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const data = await request.json()
     
     console.log('Creating maintenance with data:', data)

@@ -4,13 +4,13 @@ import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const { searchParams } = new URL(request.url)
     const contractId = searchParams.get('contractId')
     const month = searchParams.get('month')
     const year = searchParams.get('year')
     
-    const whereClause: any = {}
+    const whereClause: Record<string, string | number> = {}
     
     if (contractId) {
       whereClause.contractId = contractId
@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const data = await request.json()
     
     // Calculate totals
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 // Generate monthly report automatically
 export async function PUT(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    await requireAuth(request)
     const { searchParams } = new URL(request.url)
     const contractId = searchParams.get('contractId')
     const month = parseInt(searchParams.get('month') || '0')
