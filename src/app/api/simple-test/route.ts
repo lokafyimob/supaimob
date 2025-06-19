@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   return NextResponse.json({
     success: true,
     message: 'Simple API test working',
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
       received: body,
       timestamp: new Date().toISOString()
     })
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: 'Invalid JSON' },
       { status: 400 }
