@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { PropertyForm } from '@/components/property-form'
 import { ToastContainer, useToast } from '@/components/toast'
-import { Plus, Search, MapPin, Bed, Bath, Square, Edit, Trash2, CheckCircle, AlertCircle, X } from 'lucide-react'
+import { Plus, Search, MapPin, Bed, Bath, Square, Edit, Trash2 } from 'lucide-react'
 
 interface Property {
   id: string

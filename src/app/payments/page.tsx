@@ -154,7 +154,7 @@ export default function Payments() {
   useEffect(() => {
     loadPaymentSettings()
     fetchPayments()
-  }, [])
+  }, [fetchPayments])
 
   const loadPaymentSettings = async () => {
     try {
@@ -221,7 +221,7 @@ export default function Payments() {
           console.log('✅ Dados brutos da API:', realPayments)
           
           // Mapear os dados do banco para o formato esperado pela interface
-          const formattedPayments = realPayments.map((payment: any) => {
+          const formattedPayments = realPayments.map((payment: Record<string, any>) => {
             console.log('🔄 Formatando pagamento:', payment.id, payment.contract?.tenant?.name)
             return {
               id: payment.id, // Usar ID real do banco
@@ -390,7 +390,7 @@ export default function Payments() {
               penalty: result.payment.penalty,
               interest: result.payment.interest,
               paidDate: result.payment.paidDate,
-              paymentMethod: result.payment.paymentMethod as any,
+              paymentMethod: result.payment.paymentMethod as string,
               receipts: result.payment.receipts ? JSON.parse(result.payment.receipts) : undefined
             }
           }
