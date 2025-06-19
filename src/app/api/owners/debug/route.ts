@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     debugInfo.step = 'authenticating'
     
     // Teste 2: Autenticação
-    let user: Record<string, any> | null = null
+    let user: Record<string, any>
     try {
       user = await requireAuth(request)
       debugInfo.auth = { 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     debugInfo.step = 'parsing-data'
     
     // Teste 3: Parse dos dados
-    let data: Record<string, any> | null = null
+    let data: Record<string, any>
     try {
       data = await request.json()
       debugInfo.requestData = data

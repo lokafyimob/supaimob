@@ -20,10 +20,7 @@ import {
   MessageSquare,
   Sparkles,
   UserPlus,
-  LogOut,
-  DoorOpen,
-  Power,
-  UserMinus
+  Power
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos

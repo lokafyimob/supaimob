@@ -96,7 +96,7 @@ const upcomingTasks = [
 ]
 
 export default function Dashboard() {
-  const { data: session } = useSession()
+  const { data: _session } = useSession()
   const [stats, setStats] = useState<Stats>({
     properties: 0,
     owners: 0,
@@ -128,7 +128,7 @@ export default function Dashboard() {
           properties: properties.length || 0,
           owners: owners.length || 0,
           tenants: tenants.length || 0,
-          activeContracts: contracts.filter((c: any) => c.status === 'ACTIVE').length || 0
+          activeContracts: contracts.filter((c: { status: string }) => c.status === 'ACTIVE').length || 0
         })
       } catch (error) {
         console.error('Error fetching stats:', error)

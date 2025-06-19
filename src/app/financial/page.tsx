@@ -62,7 +62,7 @@ export default function Financial() {
       await new Promise(resolve => setTimeout(resolve, 1000))
       
       window.location.reload()
-    } catch (error) {
+    } catch {
       showError('Erro ao atualizar', 'Não foi possível atualizar os dados.')
     } finally {
       setRefreshing(false)
