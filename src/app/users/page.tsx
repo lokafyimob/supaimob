@@ -5,7 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { UserForm } from '@/components/user-form'
-import { Plus, Search, Mail, Building2, Edit, Trash2, User, Shield, Lock, Unlock, Calendar, Eye } from 'lucide-react'
+import { Plus, Search, Building2, Edit, Trash2, User, Shield, Lock, Unlock, Calendar } from 'lucide-react'
 
 interface User {
   id: string

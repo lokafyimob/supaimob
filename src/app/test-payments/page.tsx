@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { CheckCircle, Image, X, Upload } from 'lucide-react'
+import { Image, X, Upload } from 'lucide-react'
 
 interface TestPayment {
   id: string

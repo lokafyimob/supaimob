@@ -68,7 +68,7 @@ export default function Tenants() {
     }
   }
 
-  const handleCreateTenant = async (data: any) => {
+  const handleCreateTenant = async (data: Record<string, any>) => {
     try {
       const response = await fetch('/api/tenants', {
         method: 'POST',
@@ -95,7 +95,7 @@ export default function Tenants() {
     }
   }
 
-  const handleEditTenant = async (data: any) => {
+  const handleEditTenant = async (data: Record<string, any>) => {
     if (!editingTenant) return
 
     try {
