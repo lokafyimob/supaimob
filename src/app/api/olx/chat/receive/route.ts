@@ -9,11 +9,9 @@ export async function POST(request: NextRequest) {
   try {
     console.log('💬 OLX Chat message received')
     
-    // Verificar autenticação Bearer token (opcional)
-    const authHeader = request.headers.get('authorization')
-    const _token = authHeader?.replace('Bearer ', '')
-    
-    // TODO: Verificar token se necessário
+    // TODO: Verificar autenticação Bearer token se necessário
+    // const authHeader = request.headers.get('authorization')
+    // const token = authHeader?.replace('Bearer ', '')
     // if (token !== process.env.OLX_WEBHOOK_TOKEN) {
     //   return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     // }
