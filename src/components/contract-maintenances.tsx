@@ -45,7 +45,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
   const [editingMaintenance, setEditingMaintenance] = useState<Maintenance | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
-  const [monthlyReport, setMonthlyReport] = useState<Record<string, any> | null>(null)
+  const [monthlyReport, setMonthlyReport] = useState<Record<string, unknown> | null>(null)
 
   const fetchMaintenances = useCallback(async () => {
     try {
@@ -87,7 +87,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
   }, [fetchMaintenances, generateCurrentMonthReport])
 
 
-  const handleCreateMaintenance = async (data: Record<string, any>) => {
+  const handleCreateMaintenance = async (data: Record<string, unknown>) => {
     try {
       console.log('Sending maintenance data:', data)
       const response = await fetch('/api/maintenances', {
@@ -112,7 +112,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
         try {
           const errorData = JSON.parse(responseText)
           errorMessage = errorData.error || errorMessage
-        } catch {
+        } catch (_e) {
           errorMessage = responseText || errorMessage
         }
         
@@ -124,7 +124,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
     }
   }
 
-  const handleUpdateMaintenance = async (data: any) => {
+  const handleUpdateMaintenance = async (data: Record<string, unknown>) => {
     try {
       const response = await fetch(`/api/maintenances/${editingMaintenance?.id}`, {
         method: 'PUT',

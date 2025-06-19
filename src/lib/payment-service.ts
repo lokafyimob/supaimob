@@ -153,7 +153,7 @@ export class PaymentService {
     }
   }
 
-  async generateMonthlyPayments(contractId: string, startDate: string, endDate: string, amount: number): Promise<string[]> {
+  async generateMonthlyPayments(contractId: string, startDate: string, endDate: string, _amount: number): Promise<string[]> {
     try {
       const payments: string[] = []
       const start = new Date(startDate)
@@ -195,7 +195,7 @@ export class PaymentService {
     daysPastDue: number
     effectiveDaysForCharges: number
   }> {
-    const { PrismaClient } = require('@prisma/client')
+    const { PrismaClient } = await import('@prisma/client')
     const prisma = new PrismaClient()
     
     try {
@@ -336,12 +336,12 @@ export class PaymentService {
     return code
   }
 
-  private generatePixQrCode(amount: number): string {
+  private generatePixQrCode(_amount: number): string {
     // Gerar QR Code PIX simulado
     return `00020126580014BR.GOV.BCB.PIX01365f84c2c3-4a77-4b6a-9f8e-123456789abc5204000053039865802BR5909TESTE6009SAO PAULO6220051634567890123456304`
   }
 
-  async generatePaymentReport(startDate: string, endDate: string): Promise<{
+  async generatePaymentReport(_startDate: string, _endDate: string): Promise<{
     totalReceived: number
     totalPending: number
     totalOverdue: number
