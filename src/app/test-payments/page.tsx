@@ -100,7 +100,7 @@ export default function TestPayments() {
               
               {payment.status === 'PAID' && payment.receipts && (
                 <button className="bg-purple-600 text-white p-2 rounded hover:bg-purple-700">
-                  <Image className="w-4 h-4" alt="View receipt" />
+                  <Image className="w-4 h-4" />
                 </button>
               )}
             </div>
