@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { X, Eye, MapPin, Home, DollarSign, Users, Square, Bath, Star, ExternalLink } from 'lucide-react'
+import { X, Eye, MapPin, Home, Users, Square, Bath, Star } from 'lucide-react'
 
 interface LeadMatchesModalProps {
   isOpen: boolean

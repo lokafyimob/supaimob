@@ -35,14 +35,14 @@ export async function withTenantIsolation(
   }
 }
 
-export function addCompanyFilter(where: any = {}, companyId: string) {
+export function addCompanyFilter(where: Record<string, unknown> = {}, companyId: string) {
   return {
     ...where,
     companyId
   }
 }
 
-export function addCompanyInclude(include: any = {}) {
+export function addCompanyInclude(include: Record<string, unknown> = {}) {
   return {
     ...include,
     company: {

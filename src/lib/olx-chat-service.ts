@@ -148,7 +148,7 @@ export class OLXChatService {
         success: response.status !== 401,
         message: response.status === 401 ? 'Token inválido' : 'Conexão OK'
       }
-    } catch (error) {
+    } catch {
       return {
         success: false,
         error: 'Erro de conexão'

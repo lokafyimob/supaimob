@@ -15,13 +15,11 @@ import {
   Edit,
   Eye,
   Download,
-  Bot,
   AlertTriangle,
   CheckCircle,
   Clock,
   X,
-  Trash2,
-  RefreshCw
+  Trash2
 } from 'lucide-react'
 
 interface Contract {

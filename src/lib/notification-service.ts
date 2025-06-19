@@ -5,7 +5,7 @@ interface NotificationData {
   type: 'EMAIL' | 'WHATSAPP' | 'SMS'
   priority: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT'
   companyId?: string
-  templateData?: Record<string, any>
+  templateData?: Record<string, unknown>
 }
 
 interface EmailConfig {
@@ -241,7 +241,7 @@ export class NotificationService {
     }
   }
 
-  private generateEmailTemplate(message: string, _templateData?: Record<string, unknown>): string {
+  private generateEmailTemplate(message: string): string {
     return `
       <!DOCTYPE html>
       <html>

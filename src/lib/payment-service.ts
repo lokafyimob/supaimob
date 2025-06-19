@@ -153,7 +153,7 @@ export class PaymentService {
     }
   }
 
-  async generateMonthlyPayments(contractId: string, startDate: string, endDate: string, _amount: number): Promise<string[]> {
+  async generateMonthlyPayments(contractId: string, startDate: string, endDate: string): Promise<string[]> {
     try {
       const payments: string[] = []
       const start = new Date(startDate)
@@ -277,7 +277,7 @@ export class PaymentService {
     }
   }
 
-  async processWebhook(webhookData: any): Promise<boolean> {
+  async processWebhook(webhookData: Record<string, unknown>): Promise<boolean> {
     try {
       // Processar webhook de pagamento
       console.log('Processing payment webhook:', webhookData)
@@ -336,12 +336,12 @@ export class PaymentService {
     return code
   }
 
-  private generatePixQrCode(_amount: number): string {
+  private generatePixQrCode(): string {
     // Gerar QR Code PIX simulado
     return `00020126580014BR.GOV.BCB.PIX01365f84c2c3-4a77-4b6a-9f8e-123456789abc5204000053039865802BR5909TESTE6009SAO PAULO6220051634567890123456304`
   }
 
-  async generatePaymentReport(_startDate: string, _endDate: string): Promise<{
+  async generatePaymentReport(): Promise<{
     totalReceived: number
     totalPending: number
     totalOverdue: number
