@@ -55,7 +55,7 @@ export function AIListingsModal({ isOpen, onClose, leadId, leadName }: AIListing
     if (isOpen && leadId) {
       fetchListings()
     }
-  }, [isOpen, leadId, fetchListings])
+  }, [isOpen, leadId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchListings = useCallback(async () => {
     try {
