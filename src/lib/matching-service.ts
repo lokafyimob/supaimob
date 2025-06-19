@@ -24,11 +24,10 @@ export async function checkForLeadMatches(propertyId: string) {
     // Parse availableFor
     const availableFor = JSON.parse(property.availableFor || '[]')
     
-    // Buscar leads compatíveis do mesmo usuário
+    // Buscar leads compatíveis (mesmo usuário + outros usuários para parceria)
     const compatibleLeads = await prisma.lead.findMany({
       where: {
         AND: [
-          { userId: property.userId }, // Mesmo usuário
           { status: 'ACTIVE' },
           { propertyType: property.propertyType },
           // Interesse compatível
@@ -88,23 +87,74 @@ export async function checkForLeadMatches(propertyId: string) {
       if (isMatch) {
         console.log(`✅ Match encontrado! Lead ${lead.name} x Propriedade ${property.title}`)
         
-        // Criar notificação de match
-        await prisma.leadNotification.create({
-          data: {
-            leadId: lead.id,
-            propertyId: property.id,
-            type: 'PROPERTY_MATCH',
-            title: `Match Encontrado: ${property.title}`,
-            message: `A propriedade "${property.title}" faz match com o lead "${lead.name}"!`,
-            sent: false
-          }
-        })
+        if (lead.userId === property.userId) {
+          // Match do mesmo usuário - criar notificação e vincular
+          console.log(`👤 Match próprio: ${lead.user.name}`)
+          
+          await prisma.leadNotification.create({
+            data: {
+              leadId: lead.id,
+              propertyId: property.id,
+              type: 'PROPERTY_MATCH',
+              title: `Match Encontrado: ${property.title}`,
+              message: `A propriedade "${property.title}" faz match com o lead "${lead.name}"!`,
+              sent: false
+            }
+          })
 
-        // Atualizar lead com propriedade matched
-        await prisma.lead.update({
-          where: { id: lead.id },
-          data: { matchedPropertyId: property.id }
-        })
+          await prisma.lead.update({
+            where: { id: lead.id },
+            data: { matchedPropertyId: property.id }
+          })
+          
+        } else if (property.acceptsPartnership) {
+          // Match de parceria - criar notificação de parceria
+          console.log(`🤝 Match parceria: ${lead.user.name} → ${property.user.name}`)
+          
+          // Verificar se já não foi notificado
+          const existingNotification = await prisma.partnershipNotification.findFirst({
+            where: {
+              fromUserId: lead.userId,
+              toUserId: property.userId,
+              leadId: lead.id,
+              propertyId: property.id,
+              createdAt: {
+                gte: new Date(Date.now() - 24 * 60 * 60 * 1000)
+              }
+            }
+          })
+
+          if (!existingNotification) {
+            let userPhone = lead.user.phone
+            if (!userPhone && lead.user.companyId) {
+              const company = await prisma.company.findUnique({
+                where: { id: lead.user.companyId },
+                select: { phone: true }
+              })
+              userPhone = company?.phone || null
+            }
+
+            const targetPrice = lead.interest === 'RENT' ? property.rentPrice : (property.salePrice || 0)
+            
+            await prisma.partnershipNotification.create({
+              data: {
+                fromUserId: lead.userId,
+                toUserId: property.userId,
+                leadId: lead.id,
+                propertyId: property.id,
+                fromUserName: lead.user.name || '',
+                fromUserPhone: userPhone,
+                fromUserEmail: lead.user.email || '',
+                leadName: lead.name,
+                leadPhone: lead.phone,
+                propertyTitle: property.title,
+                propertyPrice: targetPrice,
+                matchType: lead.interest,
+                sent: false
+              }
+            })
+          }
+        }
       }
     }
     
