@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  let user: any = null
-  let data: any = null
+  let user: Record<string, any> | null = null
+  let data: Record<string, any> | null = null
   
   try {
     // Debug logs

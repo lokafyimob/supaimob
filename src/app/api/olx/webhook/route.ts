@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
 /**
  * Processar lead recebido do OLX
  */
-async function handleLead(data: any) {
+async function handleLead(data: Record<string, any>) {
   try {
     console.log('👤 Processing lead from OLX')
 
@@ -49,7 +49,7 @@ async function handleLead(data: any) {
       email: data.contact?.email || data.email || '',
       phone: data.contact?.phone || data.phone || '',
       interest: 'RENT' as const, // Assumir aluguel por padrão
-      propertyType: mapPropertyType(data.property?.type) as any,
+      propertyType: mapPropertyType(data.property?.type) as 'APARTMENT' | 'HOUSE' | 'COMMERCIAL' | 'LAND' | 'STUDIO',
       maxPrice: parseFloat(data.property?.price) || 0,
       preferredCities: JSON.stringify([data.property?.city || '']),
       preferredStates: JSON.stringify([data.property?.state || '']),

@@ -3,7 +3,7 @@ import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 
 export async function POST(request: NextRequest) {
-  const debugInfo: any = {
+  const debugInfo: Record<string, any> = {
     step: 'starting',
     timestamp: new Date().toISOString(),
     errors: []
@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
     debugInfo.step = 'authenticating'
     
     // Teste 2: Autenticação
-    let user: any = null
+    let user: Record<string, any> | null = null
     try {
       user = await requireAuth(request)
       debugInfo.auth = { 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
     debugInfo.step = 'parsing-data'
     
     // Teste 3: Parse dos dados
-    let data: any = null
+    let data: Record<string, any> | null = null
     try {
       data = await request.json()
       debugInfo.requestData = data
