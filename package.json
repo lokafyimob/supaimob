@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "dev:stable": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3000",
-    "build": "prisma generate && next build",
+    "build": "rm -rf node_modules/.prisma && prisma generate && next build",
     "postbuild": "",
     "build:docker": "BUILD_STANDALONE=true next build",
     "start": "next start -p $PORT",
