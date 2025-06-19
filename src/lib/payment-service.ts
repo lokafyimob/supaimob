@@ -336,7 +336,7 @@ export class PaymentService {
     return code
   }
 
-  private generatePixQrCode(): string {
+  private generatePixQrCode(_amount: number): string {
     // Gerar QR Code PIX simulado
     return `00020126580014BR.GOV.BCB.PIX01365f84c2c3-4a77-4b6a-9f8e-123456789abc5204000053039865802BR5909TESTE6009SAO PAULO6220051634567890123456304`
   }

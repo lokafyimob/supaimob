@@ -241,7 +241,7 @@ export class NotificationService {
     }
   }
 
-  private generateEmailTemplate(message: string): string {
+  private generateEmailTemplate(message: string, _templateData?: Record<string, unknown>): string {
     return `
       <!DOCTYPE html>
       <html>
