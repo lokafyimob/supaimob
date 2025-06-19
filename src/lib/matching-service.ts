@@ -419,7 +419,11 @@ async function isPropertyLeadMatch(property: any, lead: any): Promise<boolean> {
     const preferredStates = JSON.parse(lead.preferredStates || '[]')
     
     if (preferredCities.length > 0) {
-      if (!preferredCities.includes(property.city)) {
+      // Case insensitive comparison for cities
+      const citiesLowerCase = preferredCities.map((city: string) => city.toLowerCase().trim())
+      const propertyCityLower = property.city.toLowerCase().trim()
+      
+      if (!citiesLowerCase.includes(propertyCityLower)) {
         if (preferredStates.length === 0 || !preferredStates.includes(property.state)) {
           return false
         }
