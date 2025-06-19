@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { 
   CreditCard, 
@@ -176,7 +176,7 @@ export default function Payments() {
     }
   }
 
-  const fetchPayments = async () => {
+  const fetchPayments = useCallback(async () => {
     try {
       console.log('🔄 Carregando pagamentos...')
       
@@ -289,7 +289,7 @@ export default function Payments() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
 
   const showNotification = (type: 'success' | 'error', message: string) => {
     setNotification({ type, message })
