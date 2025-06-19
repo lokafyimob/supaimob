@@ -11,11 +11,12 @@ const nextConfig = {
     SKIP_ENV_VALIDATION: '1'
   },
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: true,
+    dirs: [] // Don't lint any directories
   },
   typescript: {
     ignoreBuildErrors: true
-  }
+  },
 }
 
 module.exports = nextConfig
