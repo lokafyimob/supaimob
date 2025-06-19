@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { AIDelinquencyDetector } from '@/lib/ai-delinquency-detector'
 import { NotificationService } from '@/lib/notification-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 
 export async function POST() {
   try {

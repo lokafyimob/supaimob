@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { AIContractGenerator } from '@/lib/ai-contract-generator'
 import { requireAuth } from '@/lib/auth-middleware'
 

@@ -1,54 +1,44 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
+import bcrypt from 'bcryptjs'
 
 export async function GET(request: NextRequest) {
   return POST(request)
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    const { Client } = require('pg')
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL
+    // Verificar se usuário admin já existe
+    const existingAdmin = await prisma.user.findUnique({
+      where: { email: 'admin@crm.com' }
     })
     
-    await client.connect()
-    
-    // Inserir usuário admin
-    await client.query(`
-      INSERT INTO users (id, email, name, password, role, "isActive", "createdAt", "updatedAt") 
-      VALUES ('admin-123', 'admin@crm.com', 'Admin', '$2a$10$CwTycUXWue0Thq9StjUM0uJ8.J8k8aZcB0.6WzU8F8YqJJv4ry/zO', 'ADMIN', true, NOW(), NOW())
-      ON CONFLICT (email) DO NOTHING
-    `)
-    
-    // Criar tabela owners
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS owners (
-        id TEXT PRIMARY KEY DEFAULT 'owner-' || EXTRACT(EPOCH FROM NOW()),
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        document TEXT NOT NULL,
-        address TEXT NOT NULL,
-        city TEXT NOT NULL,
-        state TEXT NOT NULL,
-        "zipCode" TEXT NOT NULL,
-        "userId" TEXT NOT NULL DEFAULT 'admin-123',
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-    
-    await client.end()
+    if (!existingAdmin) {
+      // Criar hash da senha
+      const hashedPassword = await bcrypt.hash('admin123', 10)
+      
+      // Criar usuário admin
+      await prisma.user.create({
+        data: {
+          id: 'admin-123',
+          email: 'admin@crm.com',
+          name: 'Admin',
+          password: hashedPassword,
+          role: 'ADMIN',
+          isActive: true
+        }
+      })
+    }
     
     return NextResponse.json({ 
       success: true, 
-      message: 'Setup completo\! Login: admin@crm.com / admin123' 
+      message: 'Setup completo! Login: admin@crm.com / admin123' 
     })
     
   } catch (error) {
     return NextResponse.json({ 
       error: 'Erro no setup',
       details: error instanceof Error ? error.message : 'Unknown error' 
-    })
+    }, { status: 500 })
   }
 }

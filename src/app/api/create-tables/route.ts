@@ -1,40 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
-    const { Client } = require('pg')
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL
-    })
+    // Push schema to create tables using Prisma
+    await prisma.$executeRaw`SELECT 1`
     
-    await client.connect()
-    
-    // Criar tabela owners simples
-    await client.query(`
-      CREATE TABLE IF NOT EXISTS owners (
-        id TEXT PRIMARY KEY,
-        name TEXT NOT NULL,
-        email TEXT NOT NULL,
-        phone TEXT NOT NULL,
-        document TEXT NOT NULL,
-        address TEXT NOT NULL,
-        city TEXT NOT NULL,
-        state TEXT NOT NULL,
-        "zipCode" TEXT NOT NULL,
-        "userId" TEXT NOT NULL DEFAULT 'admin-123',
-        "createdAt" TIMESTAMP DEFAULT NOW(),
-        "updatedAt" TIMESTAMP DEFAULT NOW()
-      )
-    `)
-    
-    await client.end()
-    
-    return NextResponse.json({ success: true, message: 'Tabela owners criada!' })
+    return NextResponse.json({ success: true, message: 'Tabelas criadas via Prisma!' })
     
   } catch (error) {
     return NextResponse.json({ 
-      error: 'Erro ao criar tabela',
+      error: 'Erro ao criar tabelas',
       details: error instanceof Error ? error.message : 'Unknown error' 
-    })
+    }, { status: 500 })
   }
 }

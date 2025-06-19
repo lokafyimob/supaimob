@@ -1,22 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { prisma } from '@/lib/db'
 
-export async function GET(request: NextRequest) {
+export async function GET(_request: NextRequest) {
   try {
-    // Conectar direto com pg (bypass Prisma)
-    const { Client } = require('pg')
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL
+    const owners = await prisma.owner.findMany({
+      orderBy: { createdAt: 'desc' }
     })
-    
-    await client.connect()
-    
-    const result = await client.query('SELECT * FROM owners ORDER BY "createdAt" DESC')
-    
-    await client.end()
     
     return NextResponse.json({
       success: true,
-      owners: result.rows
+      owners
     })
     
   } catch (error) {
@@ -32,28 +25,24 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { name, email, phone, document, address, city, state, zipCode } = body
     
-    // Conectar direto com pg (bypass Prisma)
-    const { Client } = require('pg')
-    const client = new Client({
-      connectionString: process.env.DATABASE_URL
+    const owner = await prisma.owner.create({
+      data: {
+        name,
+        email,
+        phone,
+        document,
+        address,
+        city,
+        state,
+        zipCode,
+        userId: 'admin-123' // Default user
+      }
     })
-    
-    await client.connect()
-    
-    // Gerar ID único
-    const id = 'owner-' + Date.now()
-    
-    await client.query(`
-      INSERT INTO owners (id, name, email, phone, document, address, city, state, "zipCode", "userId", "createdAt", "updatedAt")
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, NOW(), NOW())
-    `, [id, name, email, phone, document, address, city, state, zipCode, 'admin-123'])
-    
-    await client.end()
     
     return NextResponse.json({
       success: true,
       message: 'Proprietário cadastrado com sucesso!',
-      id
+      id: owner.id
     })
     
   } catch (error) {

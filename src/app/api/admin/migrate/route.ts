@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 
-export async function POST(request: NextRequest) {
+export async function POST(_request: NextRequest) {
   try {
     console.log('Iniciando migração completa do banco de dados...')
     
@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
       // Tornar companyId anulável na tabela owners
       await prisma.$executeRaw`ALTER TABLE owners ALTER COLUMN "companyId" DROP NOT NULL`
       migrations.push('✅ Campo owners.companyId agora aceita valores nulos')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Campo owners.companyId já aceita nulos ou falhou')
     }
     
@@ -19,14 +19,14 @@ export async function POST(request: NextRequest) {
       // Adicionar colunas faltantes na tabela properties
       await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "images" TEXT DEFAULT '[]'`
       migrations.push('✅ Coluna properties.images adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna properties.images já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE properties ADD COLUMN IF NOT EXISTS "amenities" TEXT DEFAULT '[]'`
       migrations.push('✅ Coluna properties.amenities adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna properties.amenities já existe ou falhou')
     }
     
@@ -34,21 +34,21 @@ export async function POST(request: NextRequest) {
       // Adicionar colunas faltantes na tabela contracts
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "condominiumDeductible" BOOLEAN DEFAULT true`
       migrations.push('✅ Coluna contracts.condominiumDeductible adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna contracts.condominiumDeductible já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "maintenanceDeductible" BOOLEAN DEFAULT true`
       migrations.push('✅ Coluna contracts.maintenanceDeductible adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna contracts.maintenanceDeductible já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE contracts ADD COLUMN IF NOT EXISTS "iptuDeductible" BOOLEAN DEFAULT true`
       migrations.push('✅ Coluna contracts.iptuDeductible adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna contracts.iptuDeductible já existe ou falhou')
     }
     
@@ -56,42 +56,42 @@ export async function POST(request: NextRequest) {
       // Adicionar colunas faltantes na tabela payments
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoUrl" TEXT`
       migrations.push('✅ Coluna payments.boletoUrl adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.boletoUrl já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "boletoCode" TEXT`
       migrations.push('✅ Coluna payments.boletoCode adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.boletoCode já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "penalty" REAL`
       migrations.push('✅ Coluna payments.penalty adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.penalty já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "interest" REAL`
       migrations.push('✅ Coluna payments.interest adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.interest já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "receipts" TEXT`
       migrations.push('✅ Coluna payments.receipts adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.receipts já existe ou falhou')
     }
     
     try {
       await prisma.$executeRaw`ALTER TABLE payments ADD COLUMN IF NOT EXISTS "notes" TEXT`
       migrations.push('✅ Coluna payments.notes adicionada')
-    } catch (e) {
+    } catch {
       migrations.push('⚠️ Coluna payments.notes já existe ou falhou')
     }
     

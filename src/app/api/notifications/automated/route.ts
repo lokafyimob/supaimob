@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { NotificationService } from '@/lib/notification-service'
-import { prisma } from '@/lib/prisma'
+import { prisma } from '@/lib/db'
 import { addDays, differenceInDays } from 'date-fns'
 
 export async function POST() {
