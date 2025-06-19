@@ -112,7 +112,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
         try {
           const errorData = JSON.parse(responseText)
           errorMessage = errorData.error || errorMessage
-        } catch (_e) {
+        } catch {
           errorMessage = responseText || errorMessage
         }
         
