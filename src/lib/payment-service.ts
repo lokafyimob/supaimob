@@ -153,11 +153,11 @@ export class PaymentService {
     }
   }
 
-  async generateMonthlyPayments(contractId: string, startDate: string, endDate: string): Promise<string[]> {
+  async generateMonthlyPayments(contractId: string, _startDate: string, _endDate: string): Promise<string[]> {
     try {
       const payments: string[] = []
-      const start = new Date(startDate)
-      const end = new Date(endDate)
+      const start = new Date(_startDate)
+      const end = new Date(_endDate)
       
       const currentDate = new Date(start)
       
