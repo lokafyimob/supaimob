@@ -58,7 +58,7 @@ export default function OLXChatWidget({
           message: data.error || 'Erro ao enviar mensagem'
         })
       }
-    } catch (error) {
+    } catch {
       setStatus({
         type: 'error',
         message: 'Erro de conexão. Tente novamente.'

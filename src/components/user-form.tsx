@@ -123,7 +123,7 @@ export function UserForm({ isOpen, onClose, onSubmit, user }: UserFormProps) {
       }
 
       await onSubmit(submitData)
-    } catch (error) {
+    } catch {
       setError('Erro ao salvar usuário. Tente novamente.')
     } finally {
       setLoading(false)
