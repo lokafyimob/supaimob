@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MaintenanceForm } from './maintenance-form'
 import { 
   Wrench, 
@@ -45,12 +45,12 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
   const [editingMaintenance, setEditingMaintenance] = useState<Maintenance | null>(null)
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
-  const [monthlyReport, setMonthlyReport] = useState<any>(null)
+  const [monthlyReport, setMonthlyReport] = useState<Record<string, any> | null>(null)
 
   useEffect(() => {
     fetchMaintenances()
     generateCurrentMonthReport()
-  }, [contractId])
+  }, [contractId, fetchMaintenances, generateCurrentMonthReport])
 
   const fetchMaintenances = async () => {
     try {
@@ -86,7 +86,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
     }
   }
 
-  const handleCreateMaintenance = async (data: any) => {
+  const handleCreateMaintenance = async (data: Record<string, any>) => {
     try {
       console.log('Sending maintenance data:', data)
       const response = await fetch('/api/maintenances', {
@@ -111,7 +111,7 @@ export function ContractMaintenances({ contractId, propertyId }: ContractMainten
         try {
           const errorData = JSON.parse(responseText)
           errorMessage = errorData.error || errorMessage
-        } catch (e) {
+        } catch {
           errorMessage = responseText || errorMessage
         }
         

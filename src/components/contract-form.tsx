@@ -1,13 +1,14 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { X } from 'lucide-react'
+import { calculateContractEndDate } from '../lib/date-utils'
 
 interface ContractFormProps {
   isOpen: boolean
   onClose: () => void
-  onSubmit: (data: any) => void
-  contract?: any
+  onSubmit: (data: Record<string, any>) => void
+  contract?: Record<string, any>
 }
 
 interface Property {
@@ -67,9 +68,9 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
         resetForm()
       }
     }
-  }, [isOpen, contract])
+  }, [isOpen, contract, loadData])
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     setLoadingData(true)
     try {
       // Load properties and tenants
@@ -94,7 +95,7 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
     } finally {
       setLoadingData(false)
     }
-  }
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -150,7 +151,6 @@ export function ContractForm({ isOpen, onClose, onSubmit, contract }: ContractFo
     if (!startDate) return ''
     const start = new Date(startDate)
     // Usar função utilitária para cálculo seguro da data final
-    const { calculateContractEndDate } = require('../lib/date-utils')
     const end = calculateContractEndDate(start, months)
     return end.toISOString().split('T')[0]
   }
