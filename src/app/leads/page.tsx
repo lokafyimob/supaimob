@@ -11,7 +11,6 @@ import { ToastContainer, useToast } from '@/components/toast'
 import {
   Plus,
   Search,
-  Filter,
   Users,
   Target,
   Phone,
@@ -19,15 +18,12 @@ import {
   MapPin,
   Home,
   DollarSign,
-  Calendar,
   Eye,
   Edit,
   Trash2,
   Bell,
   CheckCircle,
-  AlertCircle,
   Sparkles,
-  X,
   Bed,
   TrendingUp,
   Zap
@@ -58,7 +54,7 @@ interface Lead {
   matchedPropertyId?: string
   createdAt: string
   updatedAt: string
-  notifications: any[]
+  notifications: Record<string, any>[]
 }
 
 export default function Leads() {
@@ -279,7 +275,7 @@ export default function Leads() {
     showSuccess('Funcionalidade disponível!', 'Visualização de parcerias em desenvolvimento!')
   }
 
-  const handleCreateLead = async (leadData: any) => {
+  const handleCreateLead = async (leadData: Omit<Lead, 'id' | 'createdAt' | 'updatedAt' | 'notifications'>) => {
     try {
       const response = await fetch('/api/leads', {
         method: 'POST',
@@ -304,7 +300,7 @@ export default function Leads() {
     }
   }
 
-  const handleUpdateLead = async (leadData: any) => {
+  const handleUpdateLead = async (leadData: Partial<Lead>) => {
     try {
       const response = await fetch(`/api/leads/${editingLead?.id}`, {
         method: 'PUT',
