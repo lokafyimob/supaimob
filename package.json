@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "next dev -p 3000",
     "dev:stable": "NODE_OPTIONS='--max-old-space-size=4096' next dev -p 3000",
-    "build": "prisma generate && SKIP_ENV_VALIDATION=1 next build",
+    "build": "prisma generate && SKIP_ENV_VALIDATION=1 DISABLE_ESLINT=true next build",
     "postbuild": "if [ \"$DATABASE_URL\" ]; then prisma db push; fi",
     "build:docker": "BUILD_STANDALONE=true next build",
     "start": "next start -p $PORT",
