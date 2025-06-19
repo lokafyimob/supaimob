@@ -5,7 +5,7 @@ import { DashboardLayout } from '@/components/dashboard-layout'
 
 export default function MigratePage() {
   const [loading, setLoading] = useState(false)
-  const [results, setResults] = useState<any>(null)
+  const [results, setResults] = useState<Record<string, any> | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const runMigration = async () => {
@@ -28,7 +28,7 @@ export default function MigratePage() {
       } else {
         setError(data.error || 'Erro na migração')
       }
-    } catch (err) {
+    } catch {
       setError('Erro de conexão')
     } finally {
       setLoading(false)
@@ -44,7 +44,7 @@ export default function MigratePage() {
       const response = await fetch('/api/migrate')
       const data = await response.json()
       setResults(data)
-    } catch (err) {
+    } catch {
       setError('Erro ao testar endpoint')
     } finally {
       setLoading(false)
@@ -69,7 +69,7 @@ export default function MigratePage() {
               <h3 className="font-semibold text-yellow-800 mb-2">⚠️ Atenção</h3>
               <p className="text-yellow-700">
                 Esta operação irá modificar a estrutura do banco de dados. 
-                Execute apenas se estiver enfrentando erros de "coluna não existe".
+                Execute apenas se estiver enfrentando erros de &quot;coluna não existe&quot;.
               </p>
             </div>
           </div>

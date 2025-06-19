@@ -66,7 +66,7 @@ export default function OLXChatPage() {
         configured: data.configured,
         connected: data.connectionTest?.success || false
       })
-    } catch (error) {
+    } catch {
       setConnectionStatus({
         configured: false,
         connected: false
@@ -112,7 +112,7 @@ export default function OLXChatPage() {
           message: data.error || 'Erro ao testar conexão'
         })
       }
-    } catch (error) {
+    } catch {
       setStatus({
         type: 'error',
         message: 'Erro de conexão com a API'
@@ -304,7 +304,7 @@ export default function OLXChatPage() {
               <ul className="space-y-1 text-blue-700 dark:text-blue-300">
                 <li>• Insira o Chat ID específico</li>
                 <li>• Digite a mensagem</li>
-                <li>• Clique em "Enviar via OLX"</li>
+                <li>• Clique em &quot;Enviar via OLX&quot;</li>
               </ul>
             </div>
           </div>

@@ -17,7 +17,7 @@ interface Owner {
   city: string
   state: string
   zipCode: string
-  properties: any[]
+  properties: Record<string, any>[]
   bankAccount: {
     bankName: string
     accountType: string
@@ -38,9 +38,9 @@ export default function Owners() {
     owner: null,
     loading: false
   })
-  const [hasApiError, setHasApiError] = useState(false)
+  const [_hasApiError, setHasApiError] = useState(false)
   
-  const { toasts, removeToast, showSuccess, showError, showWarning } = useToast()
+  const { toasts, removeToast, showSuccess, showError } = useToast()
 
   useEffect(() => {
     fetchOwners()
