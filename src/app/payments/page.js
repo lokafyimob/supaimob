@@ -10,7 +10,9 @@ import {
   Clock,
   AlertTriangle,
   CreditCard,
-  Search
+  Search,
+  Eye,
+  FileText
 } from 'lucide-react'
 
 export default function Payments() {
@@ -37,7 +39,9 @@ export default function Payments() {
       dueDate: '2024-12-20',
       status: 'paid',
       tenant: { name: 'Pedro Oliveira', email: 'pedro@email.com' },
-      property: { title: 'Sala Comercial', address: 'Av. Principal, 789' }
+      property: { title: 'Sala Comercial', address: 'Av. Principal, 789' },
+      receiptUrl: '/uploads/receipts/comprovante-pedro.jpg',
+      paidAt: '2024-12-22'
     },
     {
       id: 4,
@@ -56,6 +60,10 @@ export default function Payments() {
   const [notes, setNotes] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
   const [filterStatus, setFilterStatus] = useState('all')
+  const [uploadedFile, setUploadedFile] = useState(null)
+  const [uploadedFileUrl, setUploadedFileUrl] = useState('')
+  const [showReceiptModal, setShowReceiptModal] = useState(false)
+  const [viewingReceipt, setViewingReceipt] = useState(null)
 
   const fetchPayments = async () => {
     try {
@@ -113,10 +121,73 @@ export default function Payments() {
     }
   }
 
+  const handleFileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+      if (!allowedTypes.includes(file.type)) {
+        alert('Apenas arquivos JPG, PNG ou PDF são permitidos')
+        return
+      }
+      
+      // Validate file size (5MB max)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Arquivo muito grande. Tamanho máximo: 5MB')
+        return
+      }
+      
+      setUploadedFile(file)
+      
+      // Create preview URL for images
+      if (file.type.startsWith('image/')) {
+        const url = URL.createObjectURL(file)
+        setUploadedFileUrl(url)
+      } else {
+        setUploadedFileUrl('')
+      }
+    }
+  }
+
+  const removeUploadedFile = () => {
+    if (uploadedFileUrl) {
+      URL.revokeObjectURL(uploadedFileUrl)
+    }
+    setUploadedFile(null)
+    setUploadedFileUrl('')
+  }
+
+  const viewReceipt = (payment) => {
+    setViewingReceipt(payment)
+    setShowReceiptModal(true)
+  }
+
   const handleMarkAsPaid = async () => {
     if (!selectedPayment) return
 
     try {
+      let receiptUrl = ''
+      
+      // Upload file if exists
+      if (uploadedFile) {
+        const formData = new FormData()
+        formData.append('file', uploadedFile)
+        formData.append('paymentId', selectedPayment.id)
+        
+        const uploadResponse = await fetch('/api/payments/upload-receipt', {
+          method: 'POST',
+          body: formData
+        })
+        
+        if (uploadResponse.ok) {
+          const uploadData = await uploadResponse.json()
+          receiptUrl = uploadData.fileUrl
+        } else {
+          alert('Erro ao fazer upload do comprovante')
+          return
+        }
+      }
+
       const response = await fetch('/api/payments/mark-paid', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -124,13 +195,16 @@ export default function Payments() {
           paymentId: selectedPayment.id,
           paymentMethod,
           notes,
-          includeInterest
+          includeInterest,
+          receiptUrl
         })
       })
 
       if (response.ok) {
         setShowModal(false)
         setSelectedPayment(null)
+        setNotes('')
+        removeUploadedFile()
         fetchPayments()
         alert('Pagamento marcado como pago!')
       }
@@ -411,6 +485,15 @@ export default function Payments() {
 
                 <div className="flex items-center justify-end mt-3">
                   <div className="flex space-x-2">
+                    {payment.status === 'paid' && payment.receiptUrl && (
+                      <button 
+                        onClick={() => viewReceipt(payment)}
+                        className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110"
+                        title="Ver comprovante"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                    )}
                     {payment.status !== 'paid' && (
                       <button 
                         onClick={() => {
@@ -424,6 +507,16 @@ export default function Payments() {
                       </button>
                     )}
                   </div>
+                  
+                  {payment.status === 'paid' && payment.receiptUrl && (
+                    <button 
+                      onClick={() => viewReceipt(payment)}
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium ml-4"
+                    >
+                      Ver Comprovante
+                    </button>
+                  )}
+                  
                   {payment.status !== 'paid' && (
                     <button 
                       onClick={() => {
@@ -528,6 +621,70 @@ export default function Payments() {
 
             <div style={{ marginBottom: '20px' }}>
               <label style={{ display: 'block', marginBottom: '5px' }}>
+                <strong>Comprovante de Pagamento:</strong>
+              </label>
+              <input
+                type="file"
+                onChange={handleFileUpload}
+                accept=".jpg,.jpeg,.png,.pdf"
+                style={{
+                  width: '100%',
+                  padding: '8px',
+                  borderRadius: '5px',
+                  border: '1px solid #ccc',
+                  marginBottom: '10px'
+                }}
+              />
+              <small style={{ color: '#666', fontSize: '12px' }}>
+                Formatos aceitos: JPG, PNG, PDF (máx. 5MB)
+              </small>
+              
+              {uploadedFile && (
+                <div style={{
+                  marginTop: '10px',
+                  padding: '10px',
+                  backgroundColor: '#f8f9fa',
+                  borderRadius: '5px',
+                  border: '1px solid #e9ecef'
+                }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '14px', fontWeight: 'bold' }}>
+                      📎 {uploadedFile.name}
+                    </span>
+                    <button
+                      onClick={removeUploadedFile}
+                      style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#dc3545',
+                        cursor: 'pointer',
+                        fontSize: '16px'
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
+                  
+                  {uploadedFileUrl && (
+                    <div style={{ marginTop: '10px' }}>
+                      <img 
+                        src={uploadedFileUrl} 
+                        alt="Preview" 
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '200px',
+                          borderRadius: '5px',
+                          border: '1px solid #ddd'
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', marginBottom: '5px' }}>
                 <strong>Observações:</strong>
               </label>
               <textarea
@@ -575,6 +732,115 @@ export default function Payments() {
                 }}
               >
                 Confirmar Pagamento
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Receipt Viewer Modal */}
+      {showReceiptModal && viewingReceipt && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            padding: '30px',
+            borderRadius: '10px',
+            maxWidth: '800px',
+            width: '90%',
+            maxHeight: '90vh',
+            overflow: 'auto'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <h2>Comprovante de Pagamento</h2>
+              <button
+                onClick={() => {
+                  setShowReceiptModal(false)
+                  setViewingReceipt(null)
+                }}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#666'
+                }}
+              >
+                ✕
+              </button>
+            </div>
+            
+            <div style={{ marginBottom: '20px' }}>
+              <p><strong>Inquilino:</strong> {viewingReceipt.tenant.name}</p>
+              <p><strong>Imóvel:</strong> {viewingReceipt.property.title}</p>
+              <p><strong>Valor:</strong> R$ {viewingReceipt.amount.toFixed(2)}</p>
+              <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidAt ? new Date(viewingReceipt.paidAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
+            </div>
+
+            {viewingReceipt.receiptUrl && (
+              <div style={{ textAlign: 'center' }}>
+                {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
+                  <div>
+                    <FileText size={48} style={{ margin: '20px auto', color: '#666' }} />
+                    <p>Arquivo PDF</p>
+                    <a 
+                      href={viewingReceipt.receiptUrl} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        display: 'inline-block',
+                        padding: '10px 20px',
+                        backgroundColor: '#007bff',
+                        color: 'white',
+                        textDecoration: 'none',
+                        borderRadius: '5px',
+                        marginTop: '10px'
+                      }}
+                    >
+                      Abrir PDF
+                    </a>
+                  </div>
+                ) : (
+                  <img 
+                    src={viewingReceipt.receiptUrl} 
+                    alt="Comprovante de pagamento" 
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '500px',
+                      borderRadius: '5px',
+                      border: '1px solid #ddd'
+                    }}
+                  />
+                )}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+              <button
+                onClick={() => {
+                  setShowReceiptModal(false)
+                  setViewingReceipt(null)
+                }}
+                style={{
+                  padding: '10px 20px',
+                  backgroundColor: '#6c757d',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '5px',
+                  cursor: 'pointer'
+                }}
+              >
+                Fechar
               </button>
             </div>
           </div>
