@@ -1,12 +1,7 @@
 @import "tailwindcss";
 
-/* Gia Variable Font Face - Weight 900 */
-@font-face {
-  font-family: 'Gia Variable';
-  src: url('https://fonts.adobe.com/fonts/gia-variable?vf-axes=wght%2C900&vf-font-size=100&vf-font=GiaVariable-UltraLite') format('woff2');
-  font-weight: 900;
-  font-display: swap;
-}
+/* Work Sans Black - Very similar to Gia Variable Weight 900 */
+@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@900&display=swap');
 
 /* Definir fonte personalizada para logo */
 @font-face {
