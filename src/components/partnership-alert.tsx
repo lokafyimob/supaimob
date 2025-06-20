@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Handshake, Sparkles, X, Phone, Eye, Users } from 'lucide-react'
+import { notificationSounds } from '@/lib/notification-sounds'
 
 interface PartnershipAlertProps {
   partnerships: {
@@ -26,10 +27,18 @@ export function PartnershipAlert({ partnerships, onDismiss, onViewPartnerships }
     if (partnerships.length > 0) {
       setIsVisible(true)
       
+      // 🎵 Play partnership sound when alert appears
+      notificationSounds.playByType('partnership')
+      
       // Auto-rotate through partnerships if there are multiple
       if (partnerships.length > 1) {
         const interval = setInterval(() => {
-          setCurrentPartnershipIndex((prev) => (prev + 1) % partnerships.length)
+          setCurrentPartnershipIndex((prev) => {
+            const newIndex = (prev + 1) % partnerships.length
+            // Play sound for each new partnership
+            notificationSounds.playByType('partnership')
+            return newIndex
+          })
         }, 4000) // Change every 4 seconds
         
         return () => clearInterval(interval)

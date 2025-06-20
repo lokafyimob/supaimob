@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { Bell, Sparkles, X, Phone, Eye } from 'lucide-react'
+import { notificationSounds } from '@/lib/notification-sounds'
 
 interface MatchAlertProps {
   matches: {
@@ -24,11 +25,18 @@ export function MatchAlert({ matches, onDismiss, onViewMatches }: MatchAlertProp
     if (matches.length > 0) {
       setIsVisible(true)
       
+      // 🎵 Play match sound when alert appears
+      notificationSounds.playByType('match')
       
       // Auto-rotate through matches if there are multiple
       if (matches.length > 1) {
         const interval = setInterval(() => {
-          setCurrentMatchIndex((prev) => (prev + 1) % matches.length)
+          setCurrentMatchIndex((prev) => {
+            const newIndex = (prev + 1) % matches.length
+            // Play sound for each new match
+            notificationSounds.playByType('match')
+            return newIndex
+          })
         }, 4000) // Change every 4 seconds
         
         return () => clearInterval(interval)
