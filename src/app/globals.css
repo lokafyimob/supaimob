@@ -9,6 +9,15 @@
   font-display: swap;
 }
 
+/* Alliance No.2 ExtraBold Font - Local OTF file */
+@font-face {
+  font-family: 'Alliance No.2';
+  src: url('/fonts/Alliance No.2 ExtraBold.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Definir fonte personalizada para logo */
 @font-face {
   font-family: 'Alliance';
