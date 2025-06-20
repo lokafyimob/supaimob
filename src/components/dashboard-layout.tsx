@@ -38,8 +38,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar />
       <main className="flex-1 lg:ml-16">
         {/* Top Header */}
-        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8 py-4">
-          <div className="flex items-center justify-between">
+        <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
             {/* Left - Welcome */}
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
