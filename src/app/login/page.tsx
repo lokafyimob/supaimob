@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { signIn, getSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { Eye, EyeOff, Building } from 'lucide-react'
+import { SoundTestPanel } from '@/components/sound-test-panel'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -192,6 +193,9 @@ export default function Login() {
         <div className="absolute bottom-20 left-10 w-24 h-24 bg-white/10 rounded-full blur-xl"></div>
         <div className="absolute top-1/2 right-20 w-16 h-16 bg-white/10 rounded-full blur-xl"></div>
       </div>
+
+      {/* 🎵 Sound Test Panel - Para testar os 8 sons diferentes */}
+      <SoundTestPanel />
     </div>
   )
 }
