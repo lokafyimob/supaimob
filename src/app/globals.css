@@ -1,6 +1,9 @@
 @import "tailwindcss";
 
-/* Import Alliance font - você pode substituir por uma URL real da fonte */
+/* Import Adobe Fonts - Gia Variable */
+@import url('https://use.typekit.net/css?family=gia-variable:n9');
+
+/* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@600;700;800&family=Nunito:wght@700;800;900&family=Inter:wght@700;800;900&display=swap');
 
 /* Definir fonte personalizada para logo */
