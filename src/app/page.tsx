@@ -1,26 +1,9 @@
-'use client'
-
-import { useEffect } from 'react'
-import { useSession } from 'next-auth/react'
-import { useRouter } from 'next/navigation'
-
 export default function Home() {
-  const { data: session, status } = useSession()
-  const router = useRouter()
-
-  useEffect(() => {
-    if (status === 'loading') return
-    
-    if (session) {
-      router.push('/dashboard')
-    } else {
-      router.push('/login')
-    }
-  }, [session, status, router])
-
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+    <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial' }}>
+      <h1 style={{ fontSize: '48px', color: '#ff4352' }}>AV HOME</h1>
+      <p>Teste de deploy - Vercel Build</p>
+      <p>{new Date().toLocaleString('pt-BR')}</p>
     </div>
   )
 }
