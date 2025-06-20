@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 /* Import Alliance font - você pode substituir por uma URL real da fonte */
-@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@600;700;800&display=swap');
 
 /* Definir fonte personalizada para logo */
 @font-face {
