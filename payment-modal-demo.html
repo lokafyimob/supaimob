@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pagamentos - Demo Modal com Juros</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .payment-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 8px;
+            background: #fafafa;
+        }
+        .btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn:hover {
+            background-color: #218838;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .radio-option:hover {
+            border-color: #28a745;
+            background-color: #f8f9fa;
+        }
+        .radio-option.selected {
+            border-color: #28a745;
+            background-color: #d4edda;
+        }
+        .radio-option input[type="radio"] {
+            margin-right: 10px;
+        }
+        .option-details {
+            flex: 1;
+        }
+        .option-title {
+            font-weight: bold;
+            color: #333;
+        }
+        .option-subtitle {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .option-amount {
+            font-size: 18px;
+            font-weight: bold;
+            color: #28a745;
+        }
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            border: 1px solid #ddd;
+            background: #f8f9fa;
+            color: #333;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .btn-save {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: #28a745;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn-save:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        .status {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status.overdue {
+            background: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sistema de Pagamentos</h1>
+        <p>Gestão de pagamentos com opções de multa e juros</p>
+
+        <!-- Exemplo de Pagamentos -->
+        <div class="payment-card">
+            <h3>João Silva - Apartamento 101</h3>
+            <p><strong>Valor:</strong> R$ 1.500,00</p>
+            <p><strong>Vencimento:</strong> 15/11/2024</p>
+            <p><strong>Status:</strong> <span class="status overdue">Em Atraso</span></p>
+            <p><strong>Dias de Atraso:</strong> 15 dias</p>
+            <button class="btn" onclick="openPaymentModal('joao', 1500, 15)">
+                Marcar como Pago
+            </button>
+        </div>
+
+        <div class="payment-card">
+            <h3>Maria Santos - Casa 205</h3>
+            <p><strong>Valor:</strong> R$ 2.200,00</p>
+            <p><strong>Vencimento:</strong> 25/11/2024</p>
+            <p><strong>Status:</strong> <span class="status overdue">Em Atraso</span></p>
+            <p><strong>Dias de Atraso:</strong> 5 dias</p>
+            <button class="btn" onclick="openPaymentModal('maria', 2200, 5)">
+                Marcar como Pago
+            </button>
+        </div>
+
+        <div class="payment-card">
+            <h3>Carlos Oliveira - Loja 102</h3>
+            <p><strong>Valor:</strong> R$ 3.000,00</p>
+            <p><strong>Vencimento:</strong> 30/12/2024</p>
+            <p><strong>Status:</strong> <span class="status pending">Pendente</span></p>
+            <button class="btn" onclick="openPaymentModal('carlos', 3000, 0)">
+                Marcar como Pago
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal de Pagamento -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h2>Marcar Pagamento como Pago</h2>
+            
+            <div class="form-group">
+                <p><strong>Inquilino:</strong> <span id="tenantName"></span></p>
+                <p><strong>Valor Original:</strong> R$ <span id="originalAmount"></span></p>
+                <p><strong>Dias de Atraso:</strong> <span id="daysOverdue"></span> dias</p>
+            </div>
+
+            <div class="form-group">
+                <h4>Valor a ser Registrado:</h4>
+                
+                <div class="radio-option" onclick="selectOption('with')">
+                    <input type="radio" name="interest" value="with" id="withInterest">
+                    <div class="option-details">
+                        <div class="option-title">Valor com multa e juros</div>
+                        <div class="option-subtitle">Recomendado para pagamentos em atraso</div>
+                        <div class="option-amount">R$ <span id="totalWithInterest"></span></div>
+                    </div>
+                </div>
+                
+                <div class="radio-option" onclick="selectOption('without')">
+                    <input type="radio" name="interest" value="without" id="withoutInterest">
+                    <div class="option-details">
+                        <div class="option-title">Apenas valor original</div>
+                        <div class="option-subtitle">Sem multa ou juros</div>
+                        <div class="option-amount">R$ <span id="originalAmountDisplay"></span></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><strong>Forma de Pagamento:</strong></label>
+                <select id="paymentMethod">
+                    <option value="">Selecione a forma de pagamento</option>
+                    <option value="PIX">PIX</option>
+                    <option value="TRANSFERENCIA">Transferência Bancária</option>
+                    <option value="DINHEIRO">Dinheiro</option>
+                    <option value="CARTAO">Cartão</option>
+                    <option value="BOLETO">Boleto</option>
+                </select>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-cancel" onclick="closeModal()">Cancelar</button>
+                <button class="btn-save" id="saveBtn" onclick="savePayment()" disabled>
+                    Marcar como Pago
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPayment = {};
+
+        function openPaymentModal(tenant, amount, daysOverdue) {
+            // Configurações
+            const penaltyRate = 0.02; // 2%
+            const dailyInterestRate = 0.00033; // 0.033% ao dia
+            
+            // Cálculos
+            const penalty = daysOverdue > 0 ? amount * penaltyRate : 0;
+            const interest = daysOverdue > 0 ? amount * dailyInterestRate * daysOverdue : 0;
+            const totalWithInterest = amount + penalty + interest;
+            
+            // Armazenar dados do pagamento
+            currentPayment = {
+                tenant,
+                originalAmount: amount,
+                daysOverdue,
+                penalty,
+                interest,
+                totalWithInterest
+            };
+            
+            // Preencher modal
+            document.getElementById('tenantName').textContent = tenant;
+            document.getElementById('originalAmount').textContent = amount.toLocaleString('pt-BR');
+            document.getElementById('daysOverdue').textContent = daysOverdue;
+            document.getElementById('totalWithInterest').textContent = totalWithInterest.toLocaleString('pt-BR');
+            document.getElementById('originalAmountDisplay').textContent = amount.toLocaleString('pt-BR');
+            
+            // Resetar seleções
+            document.getElementById('paymentMethod').value = '';
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('input[name="interest"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Selecionar opção padrão baseada em atraso
+            if (daysOverdue > 0) {
+                selectOption('with');
+            } else {
+                selectOption('without');
+            }
+            
+            // Mostrar modal
+            document.getElementById('paymentModal').classList.add('show');
+            
+            updateSaveButton();
+        }
+
+        function selectOption(type) {
+            // Limpar seleções anteriores
+            document.querySelectorAll('.radio-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            document.querySelectorAll('input[name="interest"]').forEach(radio => {
+                radio.checked = false;
+            });
+            
+            // Selecionar nova opção
+            if (type === 'with') {
+                document.getElementById('withInterest').checked = true;
+                document.getElementById('withInterest').closest('.radio-option').classList.add('selected');
+            } else {
+                document.getElementById('withoutInterest').checked = true;
+                document.getElementById('withoutInterest').closest('.radio-option').classList.add('selected');
+            }
+            
+            updateSaveButton();
+        }
+
+        function updateSaveButton() {
+            const method = document.getElementById('paymentMethod').value;
+            const interestSelected = document.querySelector('input[name="interest"]:checked');
+            const saveBtn = document.getElementById('saveBtn');
+            
+            if (method && interestSelected) {
+                saveBtn.disabled = false;
+            } else {
+                saveBtn.disabled = true;
+            }
+        }
+
+        function savePayment() {
+            const method = document.getElementById('paymentMethod').value;
+            const interestOption = document.querySelector('input[name="interest"]:checked').value;
+            const includeInterest = interestOption === 'with';
+            
+            const finalAmount = includeInterest ? currentPayment.totalWithInterest : currentPayment.originalAmount;
+            
+            // Simular chamada da API
+            console.log('=== DADOS DO PAGAMENTO ===');
+            console.log('Inquilino:', currentPayment.tenant);
+            console.log('Valor Original:', currentPayment.originalAmount);
+            console.log('Incluir Juros:', includeInterest);
+            console.log('Valor Final:', finalAmount);
+            console.log('Método:', method);
+            console.log('Multa:', currentPayment.penalty);
+            console.log('Juros:', currentPayment.interest);
+            
+            // Exemplo da chamada real da API:
+            const apiCall = {
+                url: '/api/payments/mark-paid',
+                method: 'POST',
+                body: {
+                    paymentId: 'exemplo-id',
+                    paymentMethod: method,
+                    includeInterest: includeInterest
+                }
+            };
+            
+            alert(`✅ Pagamento registrado com sucesso!
+
+Inquilino: ${currentPayment.tenant}
+Método: ${method}
+Valor: R$ ${finalAmount.toLocaleString('pt-BR')}
+${includeInterest ? `(Incluindo R$ ${(currentPayment.penalty + currentPayment.interest).toLocaleString('pt-BR')} de multa/juros)` : '(Apenas valor original)'}
+
+💻 Dados da API:
+${JSON.stringify(apiCall, null, 2)}`);
+            
+            closeModal();
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.remove('show');
+        }
+
+        // Event listeners
+        document.getElementById('paymentMethod').addEventListener('change', updateSaveButton);
+        
+        // Fechar modal clicando fora
+        document.getElementById('paymentModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
