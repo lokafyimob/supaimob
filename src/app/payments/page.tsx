@@ -642,19 +642,16 @@ export default function Payments() {
   if (loading) {
     return (
       <DashboardLayout>
-        <>
-          <div className="flex items-center justify-center h-64">
-            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-          </div>
-        </>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
       </DashboardLayout>
     )
   }
 
   return (
     <DashboardLayout>
-      <>
-        <div className="space-y-6">
+      <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -1586,8 +1583,7 @@ export default function Payments() {
             animation: animate-in 0.3s ease-out;
           }
         `}</style>
-        </div>
-      </>
+      </div>
     </DashboardLayout>
   )
 }
