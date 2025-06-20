@@ -162,16 +162,6 @@ export default function Payments() {
 
   if (loading) return <div style={{ padding: '20px' }}>Carregando pagamentos...</div>
 
-  if (!payments || payments.length === 0) {
-    return (
-      <div style={{ padding: '20px' }}>
-        <h1>Pagamentos</h1>
-        <p>Nenhum pagamento encontrado.</p>
-        <button onClick={() => fetchPayments()}>Tentar novamente</button>
-      </div>
-    )
-  }
-
   return (
     <DashboardLayout>
       <div style={{ padding: '20px' }}>
