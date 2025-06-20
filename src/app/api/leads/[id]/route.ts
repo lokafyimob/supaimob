@@ -80,7 +80,8 @@ export async function PUT(
         notes: data.notes || null,
         status: data.status,
         lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
-        matchedPropertyId: data.matchedPropertyId || null
+        matchedPropertyId: data.matchedPropertyId || null,
+        needsFinancing: data.needsFinancing || false
       },
       include: {
         matchedProperty: true,

@@ -84,6 +84,11 @@ export async function checkForLeadMatches(propertyId: string) {
         }
       }
       
+      // Verificar financiamento (apenas para compra)
+      if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+        isMatch = false
+      }
+      
       if (isMatch) {
         console.log(`✅ Match encontrado! Lead ${lead.name} x Propriedade ${property.title}`)
         
@@ -249,6 +254,11 @@ export async function checkForPartnershipOpportunities(propertyId: string, userI
             isMatch = false
           }
         }
+      }
+      
+      // Verificar financiamento (apenas para compra)
+      if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+        isMatch = false
       }
       
       if (isMatch) {
@@ -481,6 +491,11 @@ async function isPropertyLeadMatch(property: any, lead: any): Promise<boolean> {
           return false
         }
       }
+    }
+    
+    // Verificar financiamento (apenas para compra)
+    if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+      return false
     }
     
     return true

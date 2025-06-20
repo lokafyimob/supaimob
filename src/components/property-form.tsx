@@ -35,7 +35,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
     ownerId: '',
     images: [] as string[],
     amenities: [] as string[],
-    acceptsPartnership: false
+    acceptsPartnership: false,
+    acceptsFinancing: false
   })
 
   const [displayValues, setDisplayValues] = useState({
@@ -95,7 +96,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             ownerId: property.owner?.id || property.ownerId || '',
             images: images,
             amenities: amenities,
-            acceptsPartnership: property.acceptsPartnership || false
+            acceptsPartnership: property.acceptsPartnership || false,
+            acceptsFinancing: property.acceptsFinancing || false
           })
         } catch (error) {
           console.error('Error parsing property data:', error)
@@ -146,7 +148,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
         salePrice: formData.availableFor.includes('SALE') && formData.salePrice ? parseFloat(formData.salePrice) : null,
         images: formData.images,
         amenities: formData.amenities,
-        acceptsPartnership: formData.acceptsPartnership
+        acceptsPartnership: formData.acceptsPartnership,
+        acceptsFinancing: formData.acceptsFinancing
       }
       
 
@@ -179,7 +182,8 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
       ownerId: '',
       images: [],
       amenities: [],
-      acceptsPartnership: false
+      acceptsPartnership: false,
+      acceptsFinancing: false
     })
     setDisplayValues({
       rentPrice: '',
@@ -566,6 +570,28 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
                     <span className="text-sm text-gray-700 font-medium">Aceito parceria com outros usuários</span>
                     <p className="text-xs text-gray-500 mt-1">
                       Se marcado, outros usuários com leads que fazem match serão notificados para fazer parceria
+                    </p>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                🏦 Financiamento Bancário
+              </label>
+              <div className="space-y-2">
+                <label className="flex items-center">
+                  <input
+                    type="checkbox"
+                    checked={formData.acceptsFinancing}
+                    onChange={(e) => setFormData(prev => ({ ...prev, acceptsFinancing: e.target.checked }))}
+                    className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                  />
+                  <div>
+                    <span className="text-sm text-gray-700 font-medium">Aceito financiamento bancário</span>
+                    <p className="text-xs text-gray-500 mt-1">
+                      Se marcado, indica que o proprietário aceita vendas com financiamento bancário
                     </p>
                   </div>
                 </label>

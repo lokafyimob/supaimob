@@ -89,7 +89,8 @@ export async function POST(request: NextRequest) {
         userId: user.id,
         images: data.images || "[]",
         amenities: data.amenities || "[]",
-        acceptsPartnership: data.acceptsPartnership || false
+        acceptsPartnership: data.acceptsPartnership || false,
+        acceptsFinancing: data.acceptsFinancing || false
       },
       include: {
         owner: true

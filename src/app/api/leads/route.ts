@@ -85,7 +85,8 @@ export async function POST(request: NextRequest) {
         status: data.status || 'ACTIVE',
         companyId: userData.companyId,
         userId: user.id,
-        lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null
+        lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
+        needsFinancing: data.needsFinancing || false
       },
       include: {
         matchedProperty: true,

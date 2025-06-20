@@ -75,7 +75,8 @@ export async function PUT(
         ownerId: data.ownerId,
         images: data.images || "[]",
         amenities: data.amenities || "[]",
-        acceptsPartnership: data.acceptsPartnership || false
+        acceptsPartnership: data.acceptsPartnership || false,
+        acceptsFinancing: data.acceptsFinancing || false
       },
       include: {
         owner: true

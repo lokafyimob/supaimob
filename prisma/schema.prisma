@@ -85,6 +85,7 @@ model Property {
   images       String         // JSON string for SQLite
   amenities    String         // JSON string for SQLite
   acceptsPartnership Boolean    @default(false) // Aceita parceria com outros usuários
+  acceptsFinancing   Boolean    @default(false) // Aceita financiamento bancário
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
   contracts     Contract[]
@@ -408,6 +409,7 @@ model Lead {
   userId            String
   lastContactDate   DateTime?
   matchedPropertyId String?      // When a match is found
+  needsFinancing    Boolean      @default(false) // Precisa de financiamento bancário
   createdAt         DateTime     @default(now())
   updatedAt         DateTime     @updatedAt
   

@@ -180,6 +180,11 @@ async function checkDetailedMatch(property: any, lead: any): Promise<boolean> {
       }
     }
     
+    // Verificar financiamento (apenas para compra)
+    if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+      return false
+    }
+    
     return true
   } catch (error) {
     console.error('Erro ao verificar match:', error)

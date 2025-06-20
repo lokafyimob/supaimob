@@ -49,7 +49,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     amenities: [] as string[],
     notes: '',
     status: 'ACTIVE',
-    lastContactDate: ''
+    lastContactDate: '',
+    needsFinancing: false
   })
 
   const [loading, setLoading] = useState(false)
@@ -127,7 +128,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
           amenities: JSON.parse(lead.amenities || '[]'),
           notes: lead.notes || '',
           status: lead.status || 'ACTIVE',
-          lastContactDate: lead.lastContactDate ? lead.lastContactDate.split('T')[0] : ''
+          lastContactDate: lead.lastContactDate ? lead.lastContactDate.split('T')[0] : '',
+          needsFinancing: lead.needsFinancing || false
         })
         
         setDisplayValues({
@@ -163,7 +165,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
       amenities: [],
       notes: '',
       status: 'ACTIVE',
-      lastContactDate: ''
+      lastContactDate: '',
+      needsFinancing: false
     })
     setDisplayValues({
       phone: '',
@@ -329,7 +332,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
           {/* Interesse e Tipo */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Interesse do Cliente</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Interesse *
@@ -343,6 +346,28 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
                   <option value="RENT">Aluguel</option>
                   <option value="BUY">Compra</option>
                 </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🏦 Financiamento Bancário
+                </label>
+                <div className="space-y-2">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={formData.needsFinancing}
+                      onChange={(e) => setFormData(prev => ({ ...prev, needsFinancing: e.target.checked }))}
+                      className="rounded border-gray-300 text-blue-600 focus:ring-blue-500 mr-2"
+                    />
+                    <div>
+                      <span className="text-sm text-gray-700 font-medium">Preciso de financiamento bancário</span>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Se marcado, indica que o cliente precisa de financiamento para a compra
+                      </p>
+                    </div>
+                  </label>
+                </div>
               </div>
 
               <div>
