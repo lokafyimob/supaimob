@@ -81,7 +81,11 @@ export async function POST(request: NextRequest) {
 
               const targetPrice = lead.interest === 'RENT' ? property.rentPrice : (property.salePrice || 0)
               
+              // Criar título detalhado
+              const detailedTitle = `${property.title} - ${property.bedrooms}Q ${property.bathrooms}B ${property.area}m² - ${property.city}`
+              
               console.log(`📨 Criando notificação: ${lead.user.name} → ${property.user.name}`)
+              console.log(`🏠 Detalhes: ${detailedTitle}`)
               
               // Criar notificação
               await prisma.partnershipNotification.create({
@@ -95,7 +99,7 @@ export async function POST(request: NextRequest) {
                   fromUserEmail: lead.user.email || '',
                   leadName: lead.name,
                   leadPhone: lead.phone,
-                  propertyTitle: property.title,
+                  propertyTitle: detailedTitle,
                   propertyPrice: targetPrice,
                   matchType: lead.interest,
                   sent: false
