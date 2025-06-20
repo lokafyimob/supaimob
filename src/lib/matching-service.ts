@@ -101,8 +101,8 @@ export async function checkForLeadMatches(propertyId: string) {
               leadId: lead.id,
               propertyId: property.id,
               type: 'PROPERTY_MATCH',
-              title: `Match Encontrado: ${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms}`,
-              message: `A propriedade "${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}" faz match com o lead "${lead.name}"!`,
+              title: `Match Encontrado: ${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁`,
+              message: `A propriedade "${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁 - ${property.city}" faz match com o lead "${lead.name}"!`,
               sent: false
             }
           })
@@ -142,7 +142,7 @@ export async function checkForLeadMatches(propertyId: string) {
             const targetPrice = lead.interest === 'RENT' ? property.rentPrice : (property.salePrice || 0)
             
             // Criar título detalhado com quartos, banheiros e área
-            const detailedTitle = `${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}`
+            const detailedTitle = `${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁 - ${property.city}`
             
             await prisma.partnershipNotification.create({
               data: {
@@ -302,7 +302,7 @@ export async function checkForPartnershipOpportunities(propertyId: string, userI
               fromUserEmail: lead.user.email || '',
               leadName: lead.name,
               leadPhone: lead.phone,
-              propertyTitle: `${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}`,
+              propertyTitle: `${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁 - ${property.city}`,
               propertyPrice: targetPrice,
               matchType: lead.interest,
               sent: false
@@ -378,8 +378,8 @@ export async function checkForMatches(leadId: string) {
             leadId: lead.id,
             propertyId: property.id,
             type: 'PROPERTY_MATCH',
-            title: `Match Encontrado: ${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms}`,
-            message: `A propriedade "${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}" faz match com o lead "${lead.name}"!`
+            title: `Match Encontrado: ${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁`,
+            message: `A propriedade "${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁 - ${property.city}" faz match com o lead "${lead.name}"!`
           }
         })
 
@@ -431,7 +431,7 @@ export async function checkForMatches(leadId: string) {
               fromUserEmail: lead.user.email || '',
               leadName: lead.name,
               leadPhone: lead.phone,
-              propertyTitle: `${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}`,
+              propertyTitle: `${property.title} - ${property.bedrooms}🛏 ${property.bathrooms}🛁 - ${property.city}`,
               propertyPrice: targetPrice,
               matchType: lead.interest
             }
