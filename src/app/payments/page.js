@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { DashboardLayout } from '@/components/dashboard-layout'
 
 export default function Payments() {
   const [payments, setPayments] = useState([])
@@ -150,8 +151,9 @@ export default function Payments() {
   }
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h1>Pagamentos</h1>
+    <DashboardLayout>
+      <div style={{ padding: '20px' }}>
+        <h1>Pagamentos</h1>
       
       <div style={{ marginBottom: '20px' }}>
         <button 
@@ -331,6 +333,7 @@ export default function Payments() {
           </div>
         </div>
       )}
-    </div>
+      </div>
+    </DashboardLayout>
   )
 }
