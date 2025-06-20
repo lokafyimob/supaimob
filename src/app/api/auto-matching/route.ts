@@ -82,7 +82,7 @@ export async function POST(request: NextRequest) {
               const targetPrice = lead.interest === 'RENT' ? property.rentPrice : (property.salePrice || 0)
               
               // Criar título detalhado
-              const detailedTitle = `${property.title} - ${property.bedrooms}Q ${property.bathrooms}B ${property.area}m² - ${property.city}`
+              const detailedTitle = `${property.title} - 🛏️${property.bedrooms} 🚿${property.bathrooms} - ${property.city}`
               
               console.log(`📨 Criando notificação: ${lead.user.name} → ${property.user.name}`)
               console.log(`🏠 Detalhes: ${detailedTitle}`)
