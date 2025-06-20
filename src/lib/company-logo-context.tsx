@@ -14,11 +14,12 @@ const CompanyLogoContext = createContext<CompanyLogoContextType | undefined>(und
 export function CompanyLogoProvider({ children }: { children: React.ReactNode }) {
   const [companyLogo, setCompanyLogo] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const { data: session } = useSession()
+  const session = useSession()
+  const sessionData = session?.data
 
   useEffect(() => {
     const loadCompanyLogo = async () => {
-      if (!session?.user) {
+      if (!sessionData?.user) {
         setIsLoading(false)
         return
       }
@@ -39,7 +40,7 @@ export function CompanyLogoProvider({ children }: { children: React.ReactNode })
     }
 
     loadCompanyLogo()
-  }, [session])
+  }, [sessionData])
 
   return (
     <CompanyLogoContext.Provider value={{
