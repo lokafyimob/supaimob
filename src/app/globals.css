@@ -9,11 +9,11 @@
   font-display: swap;
 }
 
-/* Alliance No.2 ExtraBold Font - For "SISTEM" */
+/* Alliance No.2 Font - For "SISTEM" (Light weight) */
 @font-face {
   font-family: 'Alliance No.2';
   src: url('/fonts/Alliance No.2 ExtraBold.otf') format('opentype');
-  font-weight: 600;
+  font-weight: 300;
   font-style: normal;
   font-display: swap;
 }
