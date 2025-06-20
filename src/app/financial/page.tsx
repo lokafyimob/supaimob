@@ -8,7 +8,6 @@ import {
   TrendingUp,
   TrendingDown,
   Percent,
-  Calendar,
   AlertCircle,
   CheckCircle
 } from 'lucide-react'
@@ -283,22 +282,11 @@ export default function Financial() {
       <div className="space-y-6">
         {/* Header */}
         <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financeiro</h1>
-              <p className="text-gray-600 dark:text-gray-400 mt-1">
-                Controle financeiro completo da imobiliária
-              </p>
-            </div>
-            <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-              <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-                <Calendar className="w-4 h-4" />
-                <span>{new Date().toLocaleDateString('pt-BR', { 
-                  month: 'long', 
-                  year: 'numeric' 
-                })}</span>
-              </div>
-            </div>
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Financeiro</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-1">
+              Controle financeiro completo da imobiliária
+            </p>
           </div>
         </div>
 
