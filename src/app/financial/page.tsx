@@ -10,8 +10,7 @@ import {
   Percent,
   Calendar,
   AlertCircle,
-  CheckCircle,
-  RefreshCw
+  CheckCircle
 } from 'lucide-react'
 
 interface FinancialStats {
@@ -49,25 +48,9 @@ export default function Financial() {
   })
   const [transactions, setTransactions] = useState<Transaction[]>([])
   const [loading, setLoading] = useState(true)
-  const [refreshing, setRefreshing] = useState(false)
   
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
-  const refreshData = async () => {
-    try {
-      setRefreshing(true)
-      showSuccess('Atualizando dados...', 'Os dados financeiros estão sendo atualizados.')
-      
-      // Simulate refresh delay
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      window.location.reload()
-    } catch {
-      showError('Erro ao atualizar', 'Não foi possível atualizar os dados.')
-    } finally {
-      setRefreshing(false)
-    }
-  }
 
   useEffect(() => {
     const fetchFinancialData = async () => {
@@ -308,20 +291,6 @@ export default function Financial() {
               </p>
             </div>
             <div className="mt-4 sm:mt-0 flex items-center space-x-4">
-              <button
-                onClick={refreshData}
-                disabled={refreshing}
-                className={`inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-lg text-sm ${
-                  refreshing ? 'opacity-50 cursor-not-allowed' : ''
-                }`}
-              >
-                {refreshing ? (
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-                ) : (
-                  <RefreshCw className="w-4 h-4 mr-2" />
-                )}
-                {refreshing ? 'Atualizando...' : 'Atualizar Dados'}
-              </button>
               <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
                 <Calendar className="w-4 h-4" />
                 <span>{new Date().toLocaleDateString('pt-BR', { 

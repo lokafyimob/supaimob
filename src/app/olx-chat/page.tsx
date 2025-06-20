@@ -12,8 +12,7 @@ import {
   Eye,
   EyeOff,
   CheckCircle,
-  XCircle,
-  RefreshCw
+  XCircle
 } from 'lucide-react'
 
 interface OLXSettings {
@@ -170,13 +169,6 @@ export default function OLXChatPage() {
               )}
             </div>
 
-            <button
-              onClick={checkConnection}
-              className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded-lg"
-              title="Atualizar status"
-            >
-              <RefreshCw className="w-4 h-4" />
-            </button>
           </div>
         </div>
 
