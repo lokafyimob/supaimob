@@ -168,46 +168,35 @@ export default function Payments() {
     try {
       let receiptUrl = ''
       
-      // Upload file if exists
+      // Simulate file upload if exists
       if (uploadedFile) {
-        const formData = new FormData()
-        formData.append('file', uploadedFile)
-        formData.append('paymentId', selectedPayment.id)
-        
-        const uploadResponse = await fetch('/api/payments/upload-receipt', {
-          method: 'POST',
-          body: formData
-        })
-        
-        if (uploadResponse.ok) {
-          const uploadData = await uploadResponse.json()
-          receiptUrl = uploadData.fileUrl
-        } else {
-          alert('Erro ao fazer upload do comprovante')
-          return
+        // Create a simulated file URL for demo purposes
+        receiptUrl = uploadedFileUrl || `/uploads/receipts/comprovante-${selectedPayment.id}-${Date.now()}.${uploadedFile.type.split('/')[1]}`
+      }
+
+      // Simulate API call - update payment in local state
+      const updatedPayments = payments.map(payment => {
+        if (payment.id === selectedPayment.id) {
+          return {
+            ...payment,
+            status: 'paid',
+            paidAt: new Date().toISOString().split('T')[0],
+            receiptUrl,
+            paymentMethod,
+            notes
+          }
         }
-      }
-
-      const response = await fetch('/api/payments/mark-paid', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          paymentId: selectedPayment.id,
-          paymentMethod,
-          notes,
-          includeInterest,
-          receiptUrl
-        })
+        return payment
       })
-
-      if (response.ok) {
-        setShowModal(false)
-        setSelectedPayment(null)
-        setNotes('')
-        removeUploadedFile()
-        fetchPayments()
-        alert('Pagamento marcado como pago!')
-      }
+      
+      setPayments(updatedPayments)
+      setShowModal(false)
+      setSelectedPayment(null)
+      setNotes('')
+      setPaymentMethod('dinheiro')
+      removeUploadedFile()
+      alert('Pagamento marcado como pago!')
+      
     } catch (error) {
       console.error('Erro ao marcar pagamento:', error)
       alert('Erro ao processar pagamento')
@@ -707,6 +696,10 @@ export default function Payments() {
                 onClick={() => {
                   setShowModal(false)
                   setSelectedPayment(null)
+                  setNotes('')
+                  setPaymentMethod('dinheiro')
+                  setIncludeInterest(true)
+                  removeUploadedFile()
                 }}
                 style={{
                   padding: '10px 20px',
