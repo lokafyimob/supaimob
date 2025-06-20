@@ -168,7 +168,7 @@ export default function Login() {
             </h1>
             <h2 className="text-2xl font-bold mb-4">Sua Imobiliária agora fala com seus Leads!</h2>
             <p className="text-lg opacity-90 leading-relaxed">
-              Sistema completo para gestão de imóveis, contratos, pagamentos e muito mais.
+              Sistema completo para gestão de imóveis, contratos, pagamentos e muito mais!
             </p>
             <div className="mt-8 space-y-4 text-base opacity-90">
               <div className="flex items-center justify-start space-x-3 animate-pulse-slow">
