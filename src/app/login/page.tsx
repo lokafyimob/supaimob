@@ -162,7 +162,7 @@ export default function Login() {
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="text-center text-white p-8 max-w-md">
             <Building className="w-16 h-16 mx-auto mb-6 opacity-90" />
-            <h1 className="text-5xl font-extrabold mb-2 tracking-wide" style={{fontFamily: 'Montserrat, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)'}}>
+            <h1 className="text-5xl font-extrabold mb-2 tracking-wide" style={{fontFamily: 'Montserrat, Inter, system-ui, sans-serif', textShadow: '2px 2px 4px rgba(0,0,0,0.3)'}}>
               Imolex
             </h1>
             <h2 className="text-3xl font-bold mb-4">Gerencie seu Negócio Imobiliário</h2>
