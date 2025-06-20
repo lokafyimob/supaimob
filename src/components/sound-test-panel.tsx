@@ -8,12 +8,12 @@ export function SoundTestPanel() {
   const [isMuted, setIsMuted] = useState(false)
 
   const sounds = [
-    { type: 'match' as const, name: 'Match de Lead', color: 'bg-green-500', icon: '🎯' },
+    { type: 'urgent' as const, name: 'Match de Lead', color: 'bg-green-500', icon: '🎯' },
     { type: 'partnership' as const, name: 'Parceria', color: 'bg-blue-500', icon: '🤝' },
     { type: 'vip-gold' as const, name: 'VIP Gold', color: 'bg-yellow-500', icon: '👑' },
     { type: 'vip-platinum' as const, name: 'VIP Platinum', color: 'bg-gray-400', icon: '⭐' },
     { type: 'vip-diamond' as const, name: 'VIP Diamond', color: 'bg-cyan-500', icon: '💎' },
-    { type: 'urgent' as const, name: 'Lead Urgente', color: 'bg-red-500', icon: '🚨' },
+    { type: 'match' as const, name: 'Som Original Match', color: 'bg-gray-500', icon: '🔊' },
     { type: 'night' as const, name: 'Lead Noturno', color: 'bg-purple-600', icon: '🌙' },
     { type: 'high-value' as const, name: 'Alto Valor', color: 'bg-orange-500', icon: '💰' },
   ]
