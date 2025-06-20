@@ -1,7 +1,12 @@
 @import "tailwindcss";
 
-/* Import Adobe Fonts - Gia Variable */
-@import url('https://use.typekit.net/css?family=gia-variable:n9');
+/* Gia Variable Font Face - Weight 900 */
+@font-face {
+  font-family: 'Gia Variable';
+  src: url('https://fonts.adobe.com/fonts/gia-variable?vf-axes=wght%2C900&vf-font-size=100&vf-font=GiaVariable-UltraLite') format('woff2');
+  font-weight: 900;
+  font-display: swap;
+}
 
 /* Import Google Fonts */
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700&family=Poppins:wght@600;700;800&family=Nunito:wght@700;800;900&family=Inter:wght@700;800;900&display=swap');
