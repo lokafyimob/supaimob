@@ -171,17 +171,17 @@ export default function Login() {
               Sistema completo para gestão de imóveis, contratos, pagamentos e muito mais.
             </p>
             <div className="mt-8 space-y-3 text-sm opacity-80">
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span>Leads certos, na hora certa: oportunidades reais!</span>
+              <div className="flex items-center justify-center space-x-2 animate-pulse-slow">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce-delayed"></div>
+                <span className="animate-slide-in-right">Leads certos, na hora certa: oportunidades reais!</span>
               </div>
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span>Seu Lead levado a Sério!</span>
+              <div className="flex items-center justify-center space-x-2 animate-pulse-slow-2">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce-delayed-2"></div>
+                <span className="animate-slide-in-right-2">Seu Lead levado a Sério!</span>
               </div>
-              <div className="flex items-center justify-center space-x-2">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
-                <span>Mais Lead, mais crescimento!</span>
+              <div className="flex items-center justify-center space-x-2 animate-pulse-slow-3">
+                <div className="w-2 h-2 bg-white rounded-full animate-bounce-delayed-3"></div>
+                <span className="animate-slide-in-right-3">Mais Lead, mais crescimento!</span>
               </div>
             </div>
           </div>

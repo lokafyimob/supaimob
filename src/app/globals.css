@@ -129,3 +129,75 @@ body {
 .animate-progress-pulse-error {
   animation: progressPulseError 1.5s ease-in-out infinite;
 }
+
+/* Custom animations for lead generation bullets */
+@keyframes slideInRight {
+  0% {
+    opacity: 0;
+    transform: translateX(50px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes bounceDelayed {
+  0%, 20%, 50%, 80%, 100% {
+    transform: translateY(0);
+  }
+  40% {
+    transform: translateY(-10px);
+  }
+  60% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.05);
+  }
+}
+
+/* Animation classes with delays */
+.animate-slide-in-right {
+  animation: slideInRight 0.8s ease-out 0.5s both;
+}
+
+.animate-slide-in-right-2 {
+  animation: slideInRight 0.8s ease-out 1s both;
+}
+
+.animate-slide-in-right-3 {
+  animation: slideInRight 0.8s ease-out 1.5s both;
+}
+
+.animate-bounce-delayed {
+  animation: bounceDelayed 2s infinite 0.5s;
+}
+
+.animate-bounce-delayed-2 {
+  animation: bounceDelayed 2s infinite 1s;
+}
+
+.animate-bounce-delayed-3 {
+  animation: bounceDelayed 2s infinite 1.5s;
+}
+
+.animate-pulse-slow {
+  animation: pulseGlow 3s ease-in-out infinite 0.5s;
+}
+
+.animate-pulse-slow-2 {
+  animation: pulseGlow 3s ease-in-out infinite 1s;
+}
+
+.animate-pulse-slow-3 {
+  animation: pulseGlow 3s ease-in-out infinite 1.5s;
+}
