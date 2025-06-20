@@ -99,18 +99,24 @@ export async function POST(request: NextRequest) {
     console.log('🏠 Propriedade criada:', property.id, property.title)
     console.log('🤝 Aceita parceria:', data.acceptsPartnership)
     
-    // Check for lead matches
-    console.log('🔍 Iniciando checkForLeadMatches...')
-    await checkForLeadMatches(property.id)
-    console.log('✅ checkForLeadMatches concluído')
-    
-    // Check for partnership opportunities if property accepts partnership
-    if (data.acceptsPartnership) {
-      console.log('🤝 Iniciando checkForPartnershipOpportunities...')
-      await checkForPartnershipOpportunities(property.id, user.id)
-      console.log('✅ checkForPartnershipOpportunities concluído')
-    } else {
-      console.log('❌ Propriedade não aceita parceria, pulando check')
+    // Executar auto-matching
+    try {
+      console.log('🤖 Executando auto-matching...')
+      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
+        method: 'POST',
+        headers: {
+          'Cookie': request.headers.get('Cookie') || ''
+        }
+      })
+      
+      if (matchingResponse.ok) {
+        const result = await matchingResponse.json()
+        console.log('✅ Auto-matching concluído:', result.message)
+      } else {
+        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
+      }
+    } catch (error) {
+      console.log('❌ Erro no auto-matching:', error)
     }
 
     // Format response for SQLite compatibility

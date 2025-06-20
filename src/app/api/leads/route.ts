@@ -97,8 +97,25 @@ export async function POST(request: NextRequest) {
       }
     })
 
-    // Check for immediate matches
-    await checkForMatches(lead.id)
+    // Executar auto-matching
+    try {
+      console.log('🤖 Lead criado, executando auto-matching...')
+      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
+        method: 'POST',
+        headers: {
+          'Cookie': request.headers.get('Cookie') || ''
+        }
+      })
+      
+      if (matchingResponse.ok) {
+        const result = await matchingResponse.json()
+        console.log('✅ Auto-matching concluído:', result.message)
+      } else {
+        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
+      }
+    } catch (error) {
+      console.log('❌ Erro no auto-matching:', error)
+    }
 
     return NextResponse.json(lead, { status: 201 })
   } catch (error) {
