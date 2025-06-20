@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* Gia Variable Font - Local OTF file */
+/* Gia Variable Font - For "AV" */
 @font-face {
   font-family: 'Gia Variable';
   src: url('/fonts/Gia_Variable.otf') format('opentype');
@@ -9,7 +9,7 @@
   font-display: swap;
 }
 
-/* Alliance No.2 ExtraBold Font - Local OTF file */
+/* Alliance No.2 ExtraBold Font - For "SISTEM" */
 @font-face {
   font-family: 'Alliance No.2';
   src: url('/fonts/Alliance No.2 ExtraBold.otf') format('opentype');
