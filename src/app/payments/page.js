@@ -2,6 +2,16 @@
 
 import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
+import { 
+  DollarSign, 
+  Calendar,
+  User,
+  CheckCircle,
+  Clock,
+  AlertTriangle,
+  CreditCard,
+  Search
+} from 'lucide-react'
 
 export default function Payments() {
   const [payments, setPayments] = useState([
@@ -10,21 +20,32 @@ export default function Payments() {
       amount: 1500.00,
       dueDate: '2025-01-15',
       status: 'pending',
-      tenant: { name: 'João Silva' }
+      tenant: { name: 'João Silva', email: 'joao@email.com' },
+      property: { title: 'Apartamento Centro', address: 'Rua A, 123' }
     },
     {
       id: 2,
       amount: 2200.00,
       dueDate: '2025-01-10',
       status: 'pending',
-      tenant: { name: 'Maria Santos' }
+      tenant: { name: 'Maria Santos', email: 'maria@email.com' },
+      property: { title: 'Casa Jardim América', address: 'Rua B, 456' }
     },
     {
       id: 3,
       amount: 1800.00,
       dueDate: '2024-12-20',
       status: 'paid',
-      tenant: { name: 'Pedro Oliveira' }
+      tenant: { name: 'Pedro Oliveira', email: 'pedro@email.com' },
+      property: { title: 'Sala Comercial', address: 'Av. Principal, 789' }
+    },
+    {
+      id: 4,
+      amount: 1200.00,
+      dueDate: '2024-12-15',
+      status: 'overdue',
+      tenant: { name: 'Ana Costa', email: 'ana@email.com' },
+      property: { title: 'Studio Downtown', address: 'Rua C, 321' }
     }
   ])
   const [loading, setLoading] = useState(false)
@@ -33,34 +54,8 @@ export default function Payments() {
   const [includeInterest, setIncludeInterest] = useState(true)
   const [paymentMethod, setPaymentMethod] = useState('dinheiro')
   const [notes, setNotes] = useState('')
-
-  useEffect(() => {
-    // Força dados de teste imediatamente
-    setPayments([
-      {
-        id: 1,
-        amount: 1500.00,
-        dueDate: '2025-01-15',
-        status: 'pending',
-        tenant: { name: 'João Silva' }
-      },
-      {
-        id: 2,
-        amount: 2200.00,
-        dueDate: '2025-01-10',
-        status: 'pending',
-        tenant: { name: 'Maria Santos' }
-      },
-      {
-        id: 3,
-        amount: 1800.00,
-        dueDate: '2024-12-20',
-        status: 'paid',
-        tenant: { name: 'Pedro Oliveira' }
-      }
-    ])
-    setLoading(false)
-  }, [])
+  const [searchTerm, setSearchTerm] = useState('')
+  const [filterStatus, setFilterStatus] = useState('all')
 
   const fetchPayments = async () => {
     try {
@@ -160,67 +155,307 @@ export default function Payments() {
     return payment.amount + penalty + interest
   }
 
-  if (loading) return <div style={{ padding: '20px' }}>Carregando pagamentos...</div>
+  // Helper functions
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('pt-BR')
+  }
+
+  const getStatusIcon = (status) => {
+    switch (status) {
+      case 'paid':
+        return <CheckCircle className="w-5 h-5 text-green-600" />
+      case 'overdue':
+        return <AlertTriangle className="w-5 h-5 text-red-600" />
+      case 'pending':
+        return <Clock className="w-5 h-5 text-yellow-600" />
+      default:
+        return <Clock className="w-5 h-5 text-gray-600" />
+    }
+  }
+
+  const getStatusText = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'Pago'
+      case 'overdue':
+        return 'Em Atraso'
+      case 'pending':
+        return 'Pendente'
+      default:
+        return status
+    }
+  }
+
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800'
+      case 'overdue':
+        return 'bg-red-100 text-red-800'
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800'
+      default:
+        return 'bg-gray-100 text-gray-800'
+    }
+  }
+
+  const isOverdue = (dueDate) => {
+    const today = new Date()
+    const due = new Date(dueDate)
+    return today > due
+  }
+
+  const getDaysOverdue = (dueDate) => {
+    const today = new Date()
+    const due = new Date(dueDate)
+    const diffTime = today.getTime() - due.getTime()
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+    return diffDays > 0 ? diffDays : 0
+  }
+
+  const filteredPayments = payments.filter(payment => {
+    const matchesSearch = 
+      payment.tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      payment.property.title.toLowerCase().includes(searchTerm.toLowerCase())
+    
+    const matchesStatus = filterStatus === 'all' || payment.status === filterStatus
+
+    return matchesSearch && matchesStatus
+  })
+
+  // Stats calculation
+  const stats = {
+    total: payments.length,
+    pending: payments.filter(p => p.status === 'pending').length,
+    overdue: payments.filter(p => p.status === 'overdue').length,
+    paid: payments.filter(p => p.status === 'paid').length,
+    totalAmount: payments
+      .filter(p => p.status === 'pending' || p.status === 'overdue')
+      .reduce((sum, p) => sum + p.amount, 0),
+    paidAmount: payments
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + p.amount, 0)
+  }
+
+  if (loading) {
+    return (
+      <DashboardLayout>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+        </div>
+      </DashboardLayout>
+    )
+  }
 
   return (
     <DashboardLayout>
-      <div style={{ padding: '20px' }}>
-        <h1>Pagamentos</h1>
-      
-      <div style={{ marginBottom: '20px' }}>
-        <button 
-          onClick={() => fetchPayments()}
-          style={{
-            padding: '10px 20px',
-            backgroundColor: '#007bff',
-            color: 'white',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer'
-          }}
-        >
-          Atualizar
-        </button>
-      </div>
+      <div className="space-y-6">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Pagamentos</h1>
+            <p className="text-gray-600 mt-1">
+              Gerencie todos os pagamentos de aluguel
+            </p>
+          </div>
+        </div>
 
-      <div style={{ display: 'grid', gap: '15px' }}>
-        {payments.map(payment => (
-          <div key={payment.id} style={{
-            border: '1px solid #ddd',
-            borderRadius: '8px',
-            padding: '15px',
-            backgroundColor: payment.status === 'paid' ? '#e8f5e8' : '#fff'
-          }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {/* Stats */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
               <div>
-                <h3>{payment.tenant?.name || 'Inquilino'}</h3>
-                <p>Valor: R$ {payment.amount?.toFixed(2)}</p>
-                <p>Vencimento: {new Date(payment.dueDate).toLocaleDateString('pt-BR')}</p>
-                <p>Status: {payment.status === 'paid' ? 'Pago' : 'Pendente'}</p>
+                <p className="text-sm font-medium text-gray-600">Total de Pagamentos</p>
+                <p className="text-2xl font-bold text-gray-900 mt-2">{stats.total}</p>
               </div>
-              
-              {payment.status !== 'paid' && (
-                <button
-                  onClick={() => {
-                    setSelectedPayment(payment)
-                    setShowModal(true)
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    backgroundColor: '#28a745',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '5px',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Marcar como Pago
-                </button>
-              )}
+              <div className="bg-blue-50 p-3 rounded-lg">
+                <DollarSign className="w-6 h-6 text-blue-600" />
+              </div>
             </div>
           </div>
-        ))}
-      </div>
+          
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Pendentes</p>
+                <p className="text-2xl font-bold text-yellow-900 mt-2">{stats.pending}</p>
+              </div>
+              <div className="bg-yellow-50 p-3 rounded-lg">
+                <Clock className="w-6 h-6 text-yellow-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Em Atraso</p>
+                <p className="text-2xl font-bold text-red-900 mt-2">{stats.overdue}</p>
+              </div>
+              <div className="bg-red-50 p-3 rounded-lg">
+                <AlertTriangle className="w-6 h-6 text-red-600" />
+              </div>
+            </div>
+          </div>
+          
+          <div className="bg-white rounded-xl shadow-sm p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Valor em Aberto</p>
+                <p className="text-2xl font-bold text-gray-900 mt-2">
+                  R$ {stats.totalAmount.toLocaleString('pt-BR')}
+                </p>
+              </div>
+              <div className="bg-purple-50 p-3 rounded-lg">
+                <DollarSign className="w-6 h-6 text-purple-600" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="bg-white rounded-xl shadow-sm p-6">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+            <div className="flex-1 relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <input
+                type="text"
+                placeholder="Buscar por inquilino ou imóvel..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <div className="flex space-x-4">
+              <select
+                value={filterStatus}
+                onChange={(e) => setFilterStatus(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="all">Todos os Status</option>
+                <option value="pending">Pendente</option>
+                <option value="overdue">Em Atraso</option>
+                <option value="paid">Pago</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* Payments List */}
+        <div className="space-y-4">
+          {filteredPayments.map((payment) => {
+            const daysOverdue = getDaysOverdue(payment.dueDate)
+            const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid'
+            
+            return (
+              <div key={payment.id} className="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 flex-1">
+                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                      <DollarSign className="w-5 h-5" style={{color: '#ff4352'}} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <h3 className="text-sm font-semibold text-gray-900 truncate">
+                          {payment.property.title}
+                        </h3>
+                        <div className="flex items-center space-x-2 ml-4">
+                          {getStatusIcon(payment.status)}
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                            {getStatusText(payment.status)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Inquilino:</div>
+                          <div className="flex items-center text-gray-900">
+                            <User className="w-4 h-4 mr-2" />
+                            <span className="truncate font-medium">{payment.tenant.name}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Vencimento:</div>
+                          <div className="flex items-center text-gray-900">
+                            <Calendar className="w-4 h-4 mr-2" />
+                            <span className="truncate font-medium">{formatDate(payment.dueDate)}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Valor:</div>
+                          <div className="flex items-center text-gray-900">
+                            <span className="font-bold">R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                          </div>
+                        </div>
+                        <div>
+                          <div className="text-xs text-gray-500 mb-1">Endereço:</div>
+                          <div className="flex items-center text-gray-900">
+                            <span className="truncate text-sm">{payment.property.address}</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {paymentIsOverdue && (
+                  <div className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2">
+                    <div className="flex items-center">
+                      <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
+                      <span className="text-xs text-red-800">
+                        Em atraso há {daysOverdue} dias
+                      </span>
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-end mt-3">
+                  <div className="flex space-x-2">
+                    {payment.status !== 'paid' && (
+                      <button 
+                        onClick={() => {
+                          setSelectedPayment(payment)
+                          setShowModal(true)
+                        }}
+                        className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-all duration-200 transform hover:scale-110"
+                        title="Marcar como pago"
+                      >
+                        <CreditCard className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                  {payment.status !== 'paid' && (
+                    <button 
+                      onClick={() => {
+                        setSelectedPayment(payment)
+                        setShowModal(true)
+                      }}
+                      className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
+                    >
+                      Marcar como Pago
+                    </button>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {filteredPayments.length === 0 && (
+          <div className="text-center py-12">
+            <div className="w-24 h-24 mx-auto bg-gray-100 rounded-full flex items-center justify-center mb-4">
+              <DollarSign className="w-12 h-12 text-gray-400" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              Nenhum pagamento encontrado
+            </h3>
+            <p className="text-gray-600">
+              {searchTerm || filterStatus !== 'all'
+                ? 'Tente ajustar os filtros de busca.'
+                : 'Nenhum pagamento foi encontrado no sistema.'}
+            </p>
+          </div>
+        )}
 
       {showModal && selectedPayment && (
         <div style={{
