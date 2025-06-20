@@ -12,7 +12,31 @@ export default function Payments() {
   const [notes, setNotes] = useState('')
 
   useEffect(() => {
-    fetchPayments()
+    // Força dados de teste imediatamente
+    setPayments([
+      {
+        id: 1,
+        amount: 1500.00,
+        dueDate: '2025-01-15',
+        status: 'pending',
+        tenant: { name: 'João Silva' }
+      },
+      {
+        id: 2,
+        amount: 2200.00,
+        dueDate: '2025-01-10',
+        status: 'pending',
+        tenant: { name: 'Maria Santos' }
+      },
+      {
+        id: 3,
+        amount: 1800.00,
+        dueDate: '2024-12-20',
+        status: 'paid',
+        tenant: { name: 'Pedro Oliveira' }
+      }
+    ])
+    setLoading(false)
   }, [])
 
   const fetchPayments = async () => {
@@ -113,7 +137,17 @@ export default function Payments() {
     return payment.amount + penalty + interest
   }
 
-  if (loading) return <div style={{ padding: '20px' }}>Carregando...</div>
+  if (loading) return <div style={{ padding: '20px' }}>Carregando pagamentos...</div>
+
+  if (!payments || payments.length === 0) {
+    return (
+      <div style={{ padding: '20px' }}>
+        <h1>Pagamentos</h1>
+        <p>Nenhum pagamento encontrado.</p>
+        <button onClick={() => fetchPayments()}>Tentar novamente</button>
+      </div>
+    )
+  }
 
   return (
     <div style={{ padding: '20px' }}>
