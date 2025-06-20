@@ -168,10 +168,9 @@ export default function Payments() {
     try {
       let receiptUrl = ''
       
-      // Simulate file upload if exists
+      // Use the actual uploaded file URL for preview
       if (uploadedFile) {
-        // Create a simulated file URL for demo purposes
-        receiptUrl = uploadedFileUrl || `/uploads/receipts/comprovante-${selectedPayment.id}-${Date.now()}.${uploadedFile.type.split('/')[1]}`
+        receiptUrl = uploadedFileUrl || URL.createObjectURL(uploadedFile)
       }
 
       // Simulate API call - update payment in local state
@@ -194,7 +193,11 @@ export default function Payments() {
       setSelectedPayment(null)
       setNotes('')
       setPaymentMethod('dinheiro')
-      removeUploadedFile()
+      
+      // Don't revoke the URL since it's now being used by the payment
+      setUploadedFile(null)
+      setUploadedFileUrl('')
+      
       alert('Pagamento marcado como pago!')
       
     } catch (error) {
@@ -804,16 +807,27 @@ export default function Payments() {
                     </a>
                   </div>
                 ) : (
-                  <img 
-                    src={viewingReceipt.receiptUrl} 
-                    alt="Comprovante de pagamento" 
-                    style={{
-                      maxWidth: '100%',
-                      maxHeight: '500px',
-                      borderRadius: '5px',
-                      border: '1px solid #ddd'
-                    }}
-                  />
+                  <div>
+                    <img 
+                      src={viewingReceipt.receiptUrl} 
+                      alt="Comprovante de pagamento" 
+                      style={{
+                        maxWidth: '100%',
+                        maxHeight: '500px',
+                        borderRadius: '5px',
+                        border: '1px solid #ddd'
+                      }}
+                      onError={(e) => {
+                        e.target.style.display = 'none'
+                        e.target.nextSibling.style.display = 'block'
+                      }}
+                    />
+                    <div style={{ display: 'none', textAlign: 'center', padding: '40px' }}>
+                      <FileText size={48} style={{ margin: '20px auto', color: '#666' }} />
+                      <p>Não foi possível carregar a imagem</p>
+                      <small style={{ color: '#666' }}>{viewingReceipt.receiptUrl}</small>
+                    </div>
+                  </div>
                 )}
               </div>
             )}
