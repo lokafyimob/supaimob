@@ -1,11 +1,41 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import bcrypt from 'bcryptjs'
+import { getServerSession } from 'next-auth'
+import { authOptions } from '@/lib/auth'
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
+    // 🔒 PROTEÇÃO: Verificar se usuário está autenticado
+    const session = await getServerSession(authOptions)
+    
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Acesso negado. Faça login.' },
+        { status: 401 }
+      )
+    }
+
+    // 🔒 PROTEÇÃO: Só ADMIN pode listar todos os usuários
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Acesso negado. Apenas administradores.' },
+        { status: 403 }
+      )
+    }
+
     const users = await prisma.user.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+        isActive: true,
+        isBlocked: true,
+        lastLogin: true,
+        createdAt: true,
+        // 🔒 SEGURANÇA: NÃO retornar senha
+        // password: false - implícito por não estar no select
         company: {
           select: {
             id: true,
@@ -31,6 +61,24 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // 🔒 PROTEÇÃO: Verificar se usuário está autenticado para criar novos usuários
+    const session = await getServerSession(authOptions)
+    
+    if (!session || !session.user) {
+      return NextResponse.json(
+        { error: 'Acesso negado. Faça login.' },
+        { status: 401 }
+      )
+    }
+
+    // 🔒 PROTEÇÃO: Só ADMIN pode criar novos usuários
+    if (session.user.role !== 'ADMIN') {
+      return NextResponse.json(
+        { error: 'Acesso negado. Apenas administradores podem criar usuários.' },
+        { status: 403 }
+      )
+    }
+
     const data = await request.json()
     
     // Hash da senha
