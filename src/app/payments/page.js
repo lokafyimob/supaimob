@@ -12,10 +12,10 @@ export default function Payments() {
   }
 
   const handleSave = () => {
-    // TODO: API call will be added later
     console.log('Payment method:', paymentMethod)
     console.log('Include interest:', includeInterest)
     setShowModal(false)
+    alert('Pagamento marcado como pago! (Demo)')
   }
 
   return (
