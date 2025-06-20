@@ -304,6 +304,51 @@ export default function Settings() {
     return numbers.replace(/(\d{5})(\d{0,3})/, '$1-$2')
   }
 
+  const handleLogoUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+
+    // File validation
+    if (!file.type.startsWith('image/')) {
+      showError('Por favor, selecione apenas arquivos de imagem')
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showError('Arquivo muito grande (máximo 5MB)')
+      return
+    }
+
+    try {
+      setSaveStatus('saving')
+      
+      // Convert to base64
+      const logoData = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            resolve(reader.result)
+          } else {
+            reject(new Error('Erro ao converter arquivo'))
+          }
+        }
+        reader.onerror = () => reject(new Error('Erro ao ler arquivo'))
+        reader.readAsDataURL(file)
+      })
+
+      // Update logo state
+      setCompanySettings(prev => ({ ...prev, logo: logoData }))
+      showSuccess('Logo carregado com sucesso!')
+      
+    } catch (error) {
+      console.error('Erro ao fazer upload do logo:', error)
+      showError('Erro ao processar imagem')
+    } finally {
+      setSaveStatus('idle')
+      event.target.value = '' // Clear input
+    }
+  }
+
   const tabs = [
     { id: 'profile', name: 'Meu Perfil', icon: User },
     { id: 'company', name: 'Empresa', icon: Building2 },
@@ -664,22 +709,45 @@ export default function Settings() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Logo da Empresa
                   </label>
                   <div className="flex items-center space-x-4">
-                    <div className="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center">
+                    <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center border-2 border-dashed border-gray-300 dark:border-gray-600">
                       {companySettings.logo ? (
                         <img src={companySettings.logo} alt="Logo" className="w-full h-full object-cover rounded-lg" />
                       ) : (
                         <Building2 className="w-8 h-8 text-gray-400" />
                       )}
                     </div>
-                    <button className="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Fazer Upload
-                    </button>
+                    <div className="flex flex-col space-y-2">
+                      <input
+                        type="file"
+                        id="logo-upload"
+                        accept="image/*"
+                        onChange={handleLogoUpload}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="logo-upload"
+                        className="inline-flex items-center px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 cursor-pointer transition-colors"
+                      >
+                        <Upload className="w-4 h-4 mr-2" />
+                        Fazer Upload
+                      </label>
+                      {companySettings.logo && (
+                        <button
+                          onClick={() => setCompanySettings(prev => ({ ...prev, logo: '' }))}
+                          className="inline-flex items-center px-4 py-2 text-sm font-medium text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                        >
+                          Remover Logo
+                        </button>
+                      )}
+                    </div>
                   </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                    Formato aceito: PNG, JPG, JPEG. Tamanho máximo: 2MB
+                  </p>
                 </div>
               </div>
             )}
