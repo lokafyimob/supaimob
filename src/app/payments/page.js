@@ -16,43 +16,8 @@ import {
 } from 'lucide-react'
 
 export default function Payments() {
-  const [payments, setPayments] = useState([
-    {
-      id: 1,
-      amount: 1500.00,
-      dueDate: '2025-01-15',
-      status: 'pending',
-      tenant: { name: 'João Silva', email: 'joao@email.com' },
-      property: { title: 'Apartamento Centro', address: 'Rua A, 123' }
-    },
-    {
-      id: 2,
-      amount: 2200.00,
-      dueDate: '2025-01-10',
-      status: 'pending',
-      tenant: { name: 'Maria Santos', email: 'maria@email.com' },
-      property: { title: 'Casa Jardim América', address: 'Rua B, 456' }
-    },
-    {
-      id: 3,
-      amount: 1800.00,
-      dueDate: '2024-12-20',
-      status: 'paid',
-      tenant: { name: 'Pedro Oliveira', email: 'pedro@email.com' },
-      property: { title: 'Sala Comercial', address: 'Av. Principal, 789' },
-      receiptUrl: '/uploads/receipts/comprovante-pedro.jpg',
-      paidAt: '2024-12-22'
-    },
-    {
-      id: 4,
-      amount: 1200.00,
-      dueDate: '2024-12-15',
-      status: 'overdue',
-      tenant: { name: 'Ana Costa', email: 'ana@email.com' },
-      property: { title: 'Studio Downtown', address: 'Rua C, 321' }
-    }
-  ])
-  const [loading, setLoading] = useState(false)
+  const [payments, setPayments] = useState([])
+  const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState(null)
   const [includeInterest, setIncludeInterest] = useState(true)
@@ -65,57 +30,19 @@ export default function Payments() {
   const [showReceiptModal, setShowReceiptModal] = useState(false)
   const [viewingReceipt, setViewingReceipt] = useState(null)
 
+  useEffect(() => {
+    fetchPayments()
+  }, [])
+
   const fetchPayments = async () => {
     try {
       const response = await fetch('/api/payments')
       if (response.ok) {
         const data = await response.json()
         setPayments(data)
-      } else {
-        // Se API falhar, usar dados de teste
-        setPayments([
-          {
-            id: 1,
-            amount: 1500.00,
-            dueDate: '2025-01-15',
-            status: 'pending',
-            tenant: { name: 'João Silva' }
-          },
-          {
-            id: 2,
-            amount: 2200.00,
-            dueDate: '2025-01-10',
-            status: 'pending',
-            tenant: { name: 'Maria Santos' }
-          },
-          {
-            id: 3,
-            amount: 1800.00,
-            dueDate: '2024-12-20',
-            status: 'paid',
-            tenant: { name: 'Pedro Oliveira' }
-          }
-        ])
       }
     } catch (error) {
       console.error('Erro ao carregar pagamentos:', error)
-      // Usar dados de teste em caso de erro
-      setPayments([
-        {
-          id: 1,
-          amount: 1500.00,
-          dueDate: '2025-01-15',
-          status: 'pending',
-          tenant: { name: 'João Silva' }
-        },
-        {
-          id: 2,
-          amount: 2200.00,
-          dueDate: '2025-01-10',
-          status: 'pending',
-          tenant: { name: 'Maria Santos' }
-        }
-      ])
     } finally {
       setLoading(false)
     }
@@ -173,32 +100,36 @@ export default function Payments() {
         receiptUrl = uploadedFileUrl || URL.createObjectURL(uploadedFile)
       }
 
-      // Simulate API call - update payment in local state
-      const updatedPayments = payments.map(payment => {
-        if (payment.id === selectedPayment.id) {
-          return {
-            ...payment,
-            status: 'paid',
-            paidAt: new Date().toISOString().split('T')[0],
-            receiptUrl,
-            paymentMethod,
-            notes
-          }
-        }
-        return payment
+      const response = await fetch('/api/payments/mark-paid', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          paymentId: selectedPayment.id,
+          paymentMethod,
+          notes,
+          includeInterest,
+          receiptUrl
+        })
       })
-      
-      setPayments(updatedPayments)
-      setShowModal(false)
-      setSelectedPayment(null)
-      setNotes('')
-      setPaymentMethod('dinheiro')
-      
-      // Don't revoke the URL since it's now being used by the payment
-      setUploadedFile(null)
-      setUploadedFileUrl('')
-      
-      alert('Pagamento marcado como pago!')
+
+      if (response.ok) {
+        // Refresh payments from API
+        await fetchPayments()
+        setShowModal(false)
+        setSelectedPayment(null)
+        setNotes('')
+        setPaymentMethod('dinheiro')
+        setIncludeInterest(true)
+        
+        // Don't revoke the URL since it's now being used by the payment
+        setUploadedFile(null)
+        setUploadedFileUrl('')
+        
+        alert('Pagamento marcado como pago!')
+      } else {
+        const errorData = await response.json()
+        alert(errorData.error || 'Erro ao marcar pagamento como pago')
+      }
       
     } catch (error) {
       console.error('Erro ao marcar pagamento:', error)
