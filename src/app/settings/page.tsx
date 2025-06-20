@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { useTheme } from '@/lib/theme-context'
+import { useCompanyLogo } from '@/lib/company-logo-context'
 import { ToastContainer, useToast } from '@/components/toast'
 import { 
   Building2, 
@@ -68,6 +69,7 @@ interface UserProfile {
 export default function Settings() {
   const { theme, setTheme } = useTheme()
   const { data: session } = useSession()
+  const { setCompanyLogo } = useCompanyLogo()
   const { toasts, removeToast, showSuccess, showError } = useToast()
   const [activeTab, setActiveTab] = useState('profile')
   const [loading, setLoading] = useState(false)
@@ -338,6 +340,8 @@ export default function Settings() {
 
       // Update logo state
       setCompanySettings(prev => ({ ...prev, logo: logoData }))
+      // Update global logo context
+      setCompanyLogo(logoData)
       showSuccess('Logo carregado com sucesso!')
       
     } catch (error) {

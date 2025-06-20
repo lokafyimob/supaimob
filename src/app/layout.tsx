@@ -3,6 +3,7 @@ import { Inter, Montserrat } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "@/providers/auth-provider";
 import { ThemeProvider } from "@/lib/theme-context";
+import { CompanyLogoProvider } from "@/lib/company-logo-context";
 
 const inter = Inter({ subsets: ["latin"] });
 const montserrat = Montserrat({ subsets: ["latin"] });
@@ -21,9 +22,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={`${inter.className} ${montserrat.className}`} suppressHydrationWarning>
         <ThemeProvider>
-          <AuthProvider>
-            {children}
-          </AuthProvider>
+          <CompanyLogoProvider>
+            <AuthProvider>
+              {children}
+            </AuthProvider>
+          </CompanyLogoProvider>
         </ThemeProvider>
       </body>
     </html>

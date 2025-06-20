@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { Sidebar } from './sidebar'
 import { SettingsDropdown } from './settings-dropdown'
+import { useCompanyLogo } from '@/lib/company-logo-context'
 import { Calendar } from 'lucide-react'
 
 interface DashboardLayoutProps {
@@ -13,6 +14,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { data: session, status } = useSession()
+  const { companyLogo } = useCompanyLogo()
   const router = useRouter()
 
   useEffect(() => {
@@ -72,10 +74,18 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
               {/* Avatar */}
               <div className="flex items-center space-x-3">
                 <div className="relative">
-                  <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 border-white" style={{background: 'linear-gradient(to bottom right, #ff4352, #e03e4d)'}}>
-                    <span className="text-white font-semibold text-sm">
-                      {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
-                    </span>
+                  <div className="w-10 h-10 rounded-full flex items-center justify-center shadow-sm border-2 border-white overflow-hidden" style={{background: companyLogo ? 'transparent' : 'linear-gradient(to bottom right, #ff4352, #e03e4d)'}}>
+                    {companyLogo ? (
+                      <img 
+                        src={companyLogo} 
+                        alt="Logo da Empresa" 
+                        className="w-full h-full object-cover rounded-full"
+                      />
+                    ) : (
+                      <span className="text-white font-semibold text-sm">
+                        {session?.user?.name?.charAt(0).toUpperCase() || 'U'}
+                      </span>
+                    )}
                   </div>
                   <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full"></div>
                 </div>
