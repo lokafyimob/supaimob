@@ -133,7 +133,11 @@ export function LeadMatchesModal({ isOpen, onClose, leadId, leadName }: LeadMatc
                   className="bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md transition-shadow duration-200 overflow-hidden"
                 >
                   {/* Property Image */}
-                  <div className="relative h-48 bg-gray-200">
+                  <div 
+                    className="relative h-48 bg-gray-200 cursor-pointer hover:opacity-90 transition-opacity"
+                    onClick={() => setSelectedProperty(property)}
+                    title="Clique para ver todas as fotos"
+                  >
                     {property.images && property.images.length > 0 ? (
                       <img
                         src={property.images[0]}
@@ -151,6 +155,14 @@ export function LeadMatchesModal({ isOpen, onClose, leadId, leadName }: LeadMatc
                       <Star className="w-3 h-3 inline mr-1" />
                       {property.matchScore}% match
                     </div>
+                    
+                    {/* Multiple Images Indicator */}
+                    {property.images && property.images.length > 1 && (
+                      <div className="absolute bottom-3 right-3 bg-black bg-opacity-60 text-white text-xs px-2 py-1 rounded-full">
+                        <Eye className="w-3 h-3 inline mr-1" />
+                        +{property.images.length - 1} fotos
+                      </div>
+                    )}
                   </div>
 
                   {/* Property Info */}
@@ -291,6 +303,8 @@ interface PropertyDetailModalProps {
 }
 
 function PropertyDetailModal({ property, onClose }: PropertyDetailModalProps) {
+  const [selectedImageIndex, setSelectedImageIndex] = useState(0)
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
@@ -316,16 +330,36 @@ function PropertyDetailModal({ property, onClose }: PropertyDetailModalProps) {
         <div className="p-6">
           {/* Images */}
           {property.images && property.images.length > 0 && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-              {property.images.map((image, index) => (
-                <div key={index} className="aspect-video bg-gray-200 rounded-lg overflow-hidden">
-                  <img
-                    src={image}
-                    alt={`${property.title} - Imagem ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+            <div className="mb-6">
+              {/* Main Image */}
+              <div className="aspect-video bg-gray-200 rounded-lg overflow-hidden mb-4">
+                <img
+                  src={property.images[selectedImageIndex]}
+                  alt={`${property.title} - Imagem ${selectedImageIndex + 1}`}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              
+              {/* Thumbnail Gallery */}
+              {property.images.length > 1 && (
+                <div className="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                  {property.images.map((image, index) => (
+                    <div 
+                      key={index} 
+                      className={`aspect-square bg-gray-200 rounded-lg overflow-hidden cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all ${
+                        selectedImageIndex === index ? 'ring-2 ring-blue-500' : ''
+                      }`}
+                      onClick={() => setSelectedImageIndex(index)}
+                    >
+                      <img
+                        src={image}
+                        alt={`${property.title} - Miniatura ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
           )}
 
