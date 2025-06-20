@@ -108,6 +108,22 @@ export default function Payments() {
   const [receipts, setReceipts] = useState<Array<{name: string, data: string, type: string}>>([])
   const [paymentWithInterest, setPaymentWithInterest] = useState(true) // true = com juros, false = sem juros
 
+  // Helper function to render days overdue
+  const renderDaysOverdue = (payment: Payment) => {
+    const lateFees = calculateLateFees(payment)
+    if (lateFees.daysPastDue > 0 && payment.status !== 'PAID') {
+      return (
+        <div className="text-xs text-orange-600 mt-1">
+          {lateFees.daysPastDue} dias de atraso
+          {lateFees.isInGracePeriod && (
+            <span className="text-blue-600"> (em carência)</span>
+          )}
+        </div>
+      )
+    }
+    return null
+  }
+
   // Função para calcular multa e juros em tempo real
   const calculateLateFees = (payment: Payment) => {
     if (payment.status === 'PAID') {
@@ -476,7 +492,7 @@ export default function Payments() {
       
       Array.from(files).forEach((file) => {
         const reader = new FileReader()
-        reader.onload = (e) => {
+        reader.onload = (e: ProgressEvent<FileReader>) => {
           const dataUrl = e.target?.result as string
           console.log('Arquivo carregado:', file.name)
           
@@ -626,16 +642,19 @@ export default function Payments() {
   if (loading) {
     return (
       <DashboardLayout>
-        <div className="flex items-center justify-center h-64">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
-        </div>
+        <>
+          <div className="flex items-center justify-center h-64">
+            <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+          </div>
+        </>
       </DashboardLayout>
     )
   }
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <>
+        <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -726,14 +745,14 @@ export default function Payments() {
                 type="text"
                 placeholder="Buscar por inquilino, imóvel ou código do boleto..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchTerm(e.target.value)}
                 className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               />
             </div>
             <div className="flex space-x-4">
               <select
                 value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setFilterStatus(e.target.value)}
                 className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
               >
                 <option value="all">Todos os Status</option>
@@ -803,20 +822,7 @@ export default function Payments() {
                           Pago em {new Date(payment.paidDate).toLocaleDateString('pt-BR')}
                         </div>
                       )}
-                      {(() => {
-                        const lateFees = calculateLateFees(payment)
-                        if (lateFees.daysPastDue > 0 && payment.status !== 'PAID') {
-                          return (
-                            <div className="text-xs text-orange-600 mt-1">
-                              {lateFees.daysPastDue} dias de atraso
-                              {lateFees.isInGracePeriod && (
-                                <span className="text-blue-600"> (em carência)</span>
-                              )}
-                            </div>
-                          )
-                        }
-                        return null
-                      })()}
+                      {renderDaysOverdue(payment)}
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-gray-900">
@@ -1146,7 +1152,7 @@ export default function Payments() {
                   </label>
                   <select
                     value={paymentMethod}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setPaymentMethod(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                     required
                   >
@@ -1580,7 +1586,8 @@ export default function Payments() {
             animation: animate-in 0.3s ease-out;
           }
         `}</style>
-      </div>
+        </div>
+      </>
     </DashboardLayout>
   )
 }
