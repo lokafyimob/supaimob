@@ -164,7 +164,7 @@ export default function Login() {
             <Building className="w-16 h-16 mx-auto mb-6 opacity-90" />
             <h1 className="text-5xl font-extrabold mb-2 tracking-wide" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3)', letterSpacing: '1px'}}>
               <span style={{fontFamily: '"Gia Variable", sans-serif'}}>AV</span>
-              <span style={{fontFamily: '"Alliance No.2", sans-serif'}}>SISTEM</span>
+              <span style={{fontFamily: '"Gia Variable", sans-serif'}}>SISTEM</span>
             </h1>
             <h2 className="text-2xl font-bold mb-4">Sua Imobiliária agora fala com seus Leads!</h2>
             <p className="text-lg opacity-90 leading-relaxed">
