@@ -4,8 +4,30 @@ import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 
 export default function Payments() {
-  const [payments, setPayments] = useState([])
-  const [loading, setLoading] = useState(true)
+  const [payments, setPayments] = useState([
+    {
+      id: 1,
+      amount: 1500.00,
+      dueDate: '2025-01-15',
+      status: 'pending',
+      tenant: { name: 'João Silva' }
+    },
+    {
+      id: 2,
+      amount: 2200.00,
+      dueDate: '2025-01-10',
+      status: 'pending',
+      tenant: { name: 'Maria Santos' }
+    },
+    {
+      id: 3,
+      amount: 1800.00,
+      dueDate: '2024-12-20',
+      status: 'paid',
+      tenant: { name: 'Pedro Oliveira' }
+    }
+  ])
+  const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [selectedPayment, setSelectedPayment] = useState(null)
   const [includeInterest, setIncludeInterest] = useState(true)
