@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     
     if (!session || !session.user) {
       return NextResponse.json(
-        { error: 'Acesso negado. Faça login.' },
+        { error: 'Acesso negado. Usuário deve estar logado para acessar esta API.' },
         { status: 401 }
       )
     }
