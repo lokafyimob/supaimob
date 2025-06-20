@@ -567,7 +567,6 @@ export default function Payments() {
 
   const currentMonthPayments = getCurrentMonthPaymentsByTenant()
   console.log('🎯 currentMonthPayments resultado:', currentMonthPayments.length)
-  // Force deploy trigger
   console.log('🎯 currentMonthPayments dados:', currentMonthPayments)
   
   const filteredPayments = currentMonthPayments.filter(payment => {

@@ -16,10 +16,39 @@ export async function GET(request: NextRequest) {
       )
     }
 
+    // Verificar se é para buscar apenas dados do usuário atual
+    const { searchParams } = new URL(request.url)
+    const me = searchParams.get('me')
+    
+    if (me === 'true') {
+      // Retornar apenas dados do usuário atual (não precisa ser admin)
+      const currentUser = await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          role: true,
+          isActive: true,
+          lastLogin: true,
+          createdAt: true,
+          company: {
+            select: {
+              id: true,
+              name: true,
+              tradeName: true
+            }
+          }
+        }
+      })
+      
+      return NextResponse.json([currentUser])
+    }
+
     // 🔒 PROTEÇÃO: Só ADMIN pode listar todos os usuários
     if (session.user.role !== 'ADMIN') {
       return NextResponse.json(
-        { error: 'Acesso negado. Apenas administradores.' },
+        { error: 'Acesso negado. Apenas administradores podem listar todos os usuários. Use ?me=true para ver seus dados.' },
         { status: 403 }
       )
     }
