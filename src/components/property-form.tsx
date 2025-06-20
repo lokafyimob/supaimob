@@ -468,7 +468,7 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
               <input
                 type="text"
                 value={formData.city}
-                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value }))}
+                onChange={(e) => setFormData(prev => ({ ...prev, city: e.target.value.toUpperCase() }))}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="São Paulo"
                 required

@@ -219,7 +219,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
   const updateCity = (index: number, value: string) => {
     setFormData(prev => ({
       ...prev,
-      preferredCities: prev.preferredCities.map((city, i) => i === index ? value : city)
+      preferredCities: prev.preferredCities.map((city, i) => i === index ? value.toUpperCase() : city)
     }))
   }
 

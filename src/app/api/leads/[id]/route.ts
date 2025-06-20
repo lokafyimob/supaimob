@@ -74,7 +74,7 @@ export async function PUT(
         maxBathrooms: data.maxBathrooms || null,
         minArea: data.minArea || null,
         maxArea: data.maxArea || null,
-        preferredCities: JSON.stringify(data.preferredCities || []),
+        preferredCities: JSON.stringify((data.preferredCities || []).map((city: string) => city.toUpperCase())),
         preferredStates: JSON.stringify(data.preferredStates || []),
         amenities: data.amenities ? JSON.stringify(data.amenities) : null,
         notes: data.notes || null,

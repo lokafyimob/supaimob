@@ -61,7 +61,7 @@ export async function PUT(
         title: data.title,
         description: data.description,
         address: data.address,
-        city: data.city,
+        city: data.city.toUpperCase(),
         state: data.state,
         zipCode: data.zipCode,
         bedrooms: parseInt(data.bedrooms),
