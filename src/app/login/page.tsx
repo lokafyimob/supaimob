@@ -148,14 +148,6 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo Credentials */}
-          <div className="text-center space-y-1">
-            <p className="text-xs text-gray-500">Credenciais de demonstração:</p>
-            <div className="text-xs text-gray-600 bg-gray-50 py-2 px-3 rounded-md">
-              <p><strong>Email:</strong> admin@crm.com</p>
-              <p><strong>Senha:</strong> admin123</p>
-            </div>
-          </div>
 
           {/* Footer */}
           <div className="text-center text-xs text-gray-400">
