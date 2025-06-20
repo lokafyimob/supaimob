@@ -33,7 +33,7 @@ export function SoundTestPanel() {
   return (
     <div className="fixed bottom-4 left-4 bg-white rounded-lg shadow-xl p-4 max-w-xs z-50 border">
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-bold text-sm">🎵 Test Sons</h3>
+        <h3 className="font-bold text-sm">🎵 Testar Sons</h3>
         <button
           onClick={() => setIsMuted(!isMuted)}
           className={`p-1 rounded ${isMuted ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'}`}
