@@ -10,10 +10,11 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request)
     console.log('👤 Usuário autenticado:', user.email)
     
-    const { paymentId, paymentMethod, receipts, notes } = await request.json()
+    const { paymentId, paymentMethod, receipts, notes, includeInterest = true } = await request.json()
     
     console.log('Payment ID:', paymentId)
     console.log('Payment Method:', paymentMethod)
+    console.log('Include Interest:', includeInterest)
     
     if (!paymentId || !paymentMethod) {
       return NextResponse.json(
@@ -84,7 +85,7 @@ export async function POST(request: NextRequest) {
     let penalty = 0
     let interest = 0
     
-    if (daysPastDue > 0) {
+    if (daysPastDue > 0 && includeInterest) {
       // Aplicar período de carência
       const effectiveDays = Math.max(0, daysPastDue - paymentSettings.gracePeriodDays)
       
@@ -95,12 +96,15 @@ export async function POST(request: NextRequest) {
         interest = payment.amount * (paymentSettings.dailyInterestRate / 100) * daysForInterest
         finalAmount = payment.amount + penalty + interest
         
-        console.log(`📊 Pagamento em atraso: ${daysPastDue} dias`)
+        console.log(`📊 Pagamento em atraso: ${daysPastDue} dias (COM juros)`)
         console.log(`💸 Multa: R$ ${penalty.toFixed(2)}`)
         console.log(`💸 Juros: R$ ${interest.toFixed(2)}`)
         console.log(`💰 Valor final: R$ ${finalAmount.toFixed(2)}`)
         console.log(`🔢 Valores arredondados: Amount=${Math.round(finalAmount * 100) / 100}, Penalty=${Math.round(penalty * 100) / 100}, Interest=${Math.round(interest * 100) / 100}`)
       }
+    } else if (daysPastDue > 0 && !includeInterest) {
+      console.log(`📊 Pagamento em atraso: ${daysPastDue} dias (SEM juros - por escolha do usuário)`)
+      console.log(`💰 Valor registrado: R$ ${finalAmount.toFixed(2)} (apenas valor original)`)
     } else {
       console.log('✅ Pagamento em dia, sem multa ou juros')
     }
@@ -117,7 +121,7 @@ export async function POST(request: NextRequest) {
         penalty: Math.round(penalty * 100) / 100,
         interest: Math.round(interest * 100) / 100,
         receipts: receipts ? JSON.stringify(receipts) : null,
-        notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}`
+        notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}${daysPastDue > 0 && !includeInterest ? ' - Pagamento sem juros por escolha' : ''}`
       },
       include: {
         contract: {

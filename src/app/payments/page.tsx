@@ -106,6 +106,7 @@ export default function Payments() {
   // Estado para o modal simplificado
   const [paymentMethod, setPaymentMethod] = useState('')
   const [receipts, setReceipts] = useState<Array<{name: string, data: string, type: string}>>([])
+  const [paymentWithInterest, setPaymentWithInterest] = useState(true) // true = com juros, false = sem juros
 
   // Função para calcular multa e juros em tempo real
   const calculateLateFees = (payment: Payment) => {
@@ -303,6 +304,7 @@ export default function Payments() {
     setShowPaymentModal(true)
     setPaymentMethod('')
     setReceipts([])
+    setPaymentWithInterest(true) // Por padrão, iniciar com juros
     
     console.log('Modal deve abrir agora')
     console.log('=== FIM DEBUG handleMarkAsPaid ====')
@@ -342,16 +344,18 @@ export default function Payments() {
       console.log('🚀 Enviando para API mark-paid...')
       console.log('URL:', '/api/payments/mark-paid')
       console.log('Payment ID enviado:', editingPayment.id)
+      console.log('Incluir juros:', paymentWithInterest)
       
       const requestBody = {
         paymentId: editingPayment.id,
         paymentMethod: paymentMethod,
+        includeInterest: paymentWithInterest, // Novo campo para indicar se deve incluir juros
         receipts: receipts.length > 0 ? receipts : [{
           name: 'comprovante-exemplo.jpg',
-          data: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
+          data: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAv/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/8QAFQEBAQAAAAAAAAAAAAAAAAAAAAX/xAAUEQEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIRAxEAPwCdABmX/9k=',
           type: 'image/jpeg'
         }],
-        notes: `Pagamento via ${paymentMethod} - Processado em ${new Date().toLocaleString('pt-BR')}`
+        notes: `Pagamento via ${paymentMethod} ${paymentWithInterest ? '(com juros)' : '(sem juros)'} - Processado em ${new Date().toLocaleString('pt-BR')}`
       }
       
       console.log('📋 Request body:', requestBody)
@@ -1065,9 +1069,75 @@ export default function Payments() {
                   <h3 className="font-medium text-gray-900 mb-2">Informações do Pagamento</h3>
                   <p><span className="font-medium">Inquilino:</span> {editingPayment.contract.tenant.name}</p>
                   <p><span className="font-medium">Imóvel:</span> {editingPayment.contract.property.title}</p>
-                  <p><span className="font-medium">Valor:</span> R$ {editingPayment.amount.toLocaleString('pt-BR')}</p>
+                  <p><span className="font-medium">Valor Original:</span> R$ {editingPayment.amount.toLocaleString('pt-BR')}</p>
                   <p><span className="font-medium">Vencimento:</span> {new Date(editingPayment.dueDate).toLocaleDateString('pt-BR')}</p>
+                  {(() => {
+                    const lateFees = calculateLateFees(editingPayment)
+                    if (lateFees.penalty > 0 || lateFees.interest > 0) {
+                      return (
+                        <>
+                          <p><span className="font-medium text-red-600">Multa:</span> R$ {lateFees.penalty.toLocaleString('pt-BR')}</p>
+                          <p><span className="font-medium text-red-600">Juros:</span> R$ {lateFees.interest.toLocaleString('pt-BR')} ({lateFees.daysPastDue} dias de atraso)</p>
+                          <p><span className="font-medium text-red-600">Total com multa/juros:</span> R$ {lateFees.total.toLocaleString('pt-BR')}</p>
+                        </>
+                      )
+                    }
+                    return null
+                  })()}
                 </div>
+
+                {/* Payment Amount Selection */}
+                {(() => {
+                  const lateFees = calculateLateFees(editingPayment)
+                  if (lateFees.penalty > 0 || lateFees.interest > 0) {
+                    return (
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-3">
+                          Valor a ser Registrado *
+                        </label>
+                        <div className="space-y-3">
+                          <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                              type="radio"
+                              name="paymentAmount"
+                              value="withInterest"
+                              checked={paymentWithInterest}
+                              onChange={() => setPaymentWithInterest(true)}
+                              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            />
+                            <div className="ml-3 flex-1">
+                              <div className="font-medium text-gray-900">
+                                Valor com multa e juros
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                R$ {lateFees.total.toLocaleString('pt-BR')} (recomendado)
+                              </div>
+                            </div>
+                          </label>
+                          <label className="flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                            <input
+                              type="radio"
+                              name="paymentAmount"
+                              value="withoutInterest"
+                              checked={!paymentWithInterest}
+                              onChange={() => setPaymentWithInterest(false)}
+                              className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                            />
+                            <div className="ml-3 flex-1">
+                              <div className="font-medium text-gray-900">
+                                Apenas valor original (sem juros)
+                              </div>
+                              <div className="text-sm text-gray-600">
+                                R$ {editingPayment.amount.toLocaleString('pt-BR')}
+                              </div>
+                            </div>
+                          </label>
+                        </div>
+                      </div>
+                    )
+                  }
+                  return null
+                })()}
 
                 {/* Payment Method */}
                 <div>
@@ -1412,6 +1482,7 @@ export default function Payments() {
                                     setShowPaymentModal(true)
                                     setPaymentMethod('')
                                     setReceipts([])
+                                    setPaymentWithInterest(true)
                                   }}
                                   className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all duration-200 transform hover:scale-110"
                                   title="Marcar como pago"
