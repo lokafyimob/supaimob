@@ -17,7 +17,7 @@ import {
   Image
 } from 'lucide-react'
 
-// Helper functions
+// Helper functions for payment management
 const getPaymentMethodText = (method?: string) => {
   switch (method) {
     case 'BOLETO': return 'Boleto'
