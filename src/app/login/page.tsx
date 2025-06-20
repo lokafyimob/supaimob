@@ -163,8 +163,8 @@ export default function Login() {
           <div className="text-center text-white p-8 max-w-md">
             <Building className="w-16 h-16 mx-auto mb-6 opacity-90" />
             <h1 className="text-5xl font-extrabold mb-2 tracking-wide" style={{textShadow: '2px 2px 4px rgba(0,0,0,0.3)', letterSpacing: '1px'}}>
-              <span style={{fontFamily: '"Gia Variable", sans-serif', fontWeight: '900'}}>AV</span>
-              <span style={{fontFamily: '"Alliance No.2", sans-serif', fontWeight: '800'}}>SISTEM</span>
+              <span style={{fontFamily: 'Impact, "Arial Black", sans-serif', fontWeight: '900', color: '#ffff00'}}>AV</span>
+              <span style={{fontFamily: '"Alliance No.2", "Arial Black", sans-serif', fontWeight: '800', color: '#00ff00'}}>SISTEM</span>
             </h1>
             <h2 className="text-3xl font-bold mb-4">Gerencie seu Negócio Imobiliário</h2>
             <p className="text-lg opacity-90 leading-relaxed">
