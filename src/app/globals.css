@@ -1,7 +1,13 @@
 @import "tailwindcss";
 
-/* Work Sans Black - Very similar to Gia Variable Weight 900 */
-@import url('https://fonts.googleapis.com/css2?family=Work+Sans:wght@900&display=swap');
+/* Gia Variable Font - Local OTF file */
+@font-face {
+  font-family: 'Gia Variable';
+  src: url('/fonts/Gia_Variable.otf') format('opentype');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
 
 /* Definir fonte personalizada para logo */
 @font-face {
