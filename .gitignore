@@ -60,7 +60,7 @@ logs
 /temp
 
 # Package managers
-package-lock.json
+# package-lock.json  # Commented out - Vercel needs this file!
 yarn.lock
 pnpm-lock.yaml
 
