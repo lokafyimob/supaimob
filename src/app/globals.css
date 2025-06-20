@@ -4,16 +4,14 @@
 @font-face {
   font-family: 'Gia Variable';
   src: url('/fonts/Gia_Variable.otf') format('opentype');
-  font-weight: 900;
   font-style: normal;
   font-display: swap;
 }
 
-/* Alliance No.2 Font - For "SISTEM" (Ultra Thin weight) */
+/* Alliance No.2 Font - For "SISTEM" */
 @font-face {
   font-family: 'Alliance No.2';
   src: url('/fonts/Alliance No.2 ExtraBold.otf') format('opentype');
-  font-weight: 100;
   font-style: normal;
   font-display: swap;
 }
