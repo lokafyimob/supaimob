@@ -5,49 +5,51 @@ import { checkForMatches } from '@/lib/matching-service'
 
 export async function GET(request: NextRequest) {
   try {
-    const user = await requireAuth(request)
+    console.log('=== STARTING GET LEADS ===')
     
-    console.log('=== FETCHING LEADS DEBUG ===')
-    console.log('User ID:', user.id)
+    // Step 1: Authentication
+    let user
+    try {
+      user = await requireAuth(request)
+      console.log('✅ Auth successful, User ID:', user.id)
+    } catch (authError) {
+      console.error('❌ Auth failed:', authError)
+      return NextResponse.json({ error: 'Authentication failed' }, { status: 401 })
+    }
     
-    // Try simple query first
-    const leadsSimple = await prisma.lead.findMany({
-      where: {
-        userId: user.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
-
-    console.log('Simple query found leads:', leadsSimple.length)
-    console.log('Leads IDs:', leadsSimple.map(l => l.id))
+    // Step 2: Simple query for user leads
+    let userLeads
+    try {
+      userLeads = await prisma.lead.findMany({
+        where: {
+          userId: user.id
+        },
+        orderBy: {
+          createdAt: 'desc'
+        }
+      })
+      console.log('✅ User leads query successful:', userLeads.length)
+    } catch (queryError) {
+      console.error('❌ User leads query failed:', queryError)
+      return NextResponse.json({ error: 'Database query failed', details: queryError instanceof Error ? queryError.message : 'Unknown error' }, { status: 500 })
+    }
     
-    // Also check all leads in database
-    const allLeads = await prisma.lead.findMany({
-      select: {
-        id: true,
-        name: true,
-        userId: true,
-        createdAt: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      take: 10
-    })
+    // Step 3: Count all leads (optional, in try-catch to not break if fails)
+    let totalCount = 0
+    try {
+      totalCount = await prisma.lead.count()
+      console.log('✅ Total leads count:', totalCount)
+    } catch (countError) {
+      console.log('⚠️ Count query failed:', countError)
+    }
     
-    console.log('All leads in database:', allLeads.length)
-    console.log('All leads:', allLeads.map(l => ({ id: l.id, name: l.name, userId: l.userId })))
-    
-    // Return with extra debug info
+    // Return simple response
     return NextResponse.json({
-      leads: leadsSimple,
+      leads: userLeads,
       debug: {
-        userLeadsCount: leadsSimple.length,
-        totalLeadsInDB: allLeads.length,
-        userId: user.id,
-        allLeadsPreview: allLeads
+        userLeadsCount: userLeads.length,
+        totalLeadsInDB: totalCount,
+        userId: user.id
       }
     })
   } catch (error) {
