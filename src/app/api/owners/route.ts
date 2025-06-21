@@ -11,7 +11,8 @@ export async function GET(request: NextRequest) {
         userId: user.id // Only return owners that belong to the current user
       },
       include: {
-        properties: true // Include related properties
+        properties: true, // Include related properties
+        bankAccount: true // Include bank account data
       },
       orderBy: {
         createdAt: 'desc'
@@ -126,7 +127,33 @@ export async function POST(request: NextRequest) {
     })
 
     console.log('✅ Owner created successfully:', owner.id)
-    return NextResponse.json(owner, { status: 201 })
+    
+    // Create bank account if provided
+    if (data.bankAccount && data.bankAccount.bankName) {
+      console.log('🏦 Creating bank account...')
+      await prisma.bankAccount.create({
+        data: {
+          ownerId: owner.id,
+          bankName: data.bankAccount.bankName,
+          accountType: data.bankAccount.accountType,
+          agency: data.bankAccount.agency,
+          account: data.bankAccount.account,
+          pixKey: data.bankAccount.pixKey || null
+        }
+      })
+      console.log('✅ Bank account created successfully')
+    }
+    
+    // Fetch the complete owner with bank account
+    const completeOwner = await prisma.owner.findUnique({
+      where: { id: owner.id },
+      include: {
+        properties: true,
+        bankAccount: true
+      }
+    })
+
+    return NextResponse.json(completeOwner, { status: 201 })
   } catch (error) {
     console.error('❌ Error creating owner:', error)
     if (user) console.error('👤 User data:', { id: user.id, companyId: user.companyId })
