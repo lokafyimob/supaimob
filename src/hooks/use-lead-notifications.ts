@@ -26,17 +26,22 @@ export function useLeadNotifications() {
       setLoading(true)
       setError(null)
       
+      console.log('🔍 Buscando notificações de leads...')
       const response = await fetch('/api/leads/notifications')
       const data = await response.json()
+      
+      console.log('📬 Resposta da API:', data)
       
       if (!response.ok) {
         throw new Error(data.error || 'Erro ao buscar notificações')
       }
       
-      setNotifications(data.notifications || [])
+      const notifications = data.notifications || []
+      console.log(`🔔 ${notifications.length} notificações encontradas:`, notifications)
+      setNotifications(notifications)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
-      console.error('Erro ao buscar notificações:', err)
+      console.error('❌ Erro ao buscar notificações:', err)
     } finally {
       setLoading(false)
     }
