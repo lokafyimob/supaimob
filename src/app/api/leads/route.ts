@@ -7,27 +7,49 @@ export async function GET(request: NextRequest) {
   try {
     const user = await requireAuth(request)
     
-    console.log('Fetching leads for user:', user.id)
+    console.log('=== FETCHING LEADS DEBUG ===')
+    console.log('User ID:', user.id)
     
-    const leads = await prisma.lead.findMany({
+    // Try simple query first
+    const leadsSimple = await prisma.lead.findMany({
       where: {
         userId: user.id
-      },
-      include: {
-        notifications: {
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }
       },
       orderBy: {
         createdAt: 'desc'
       }
     })
 
-    console.log('Found leads:', leads.length)
+    console.log('Simple query found leads:', leadsSimple.length)
+    console.log('Leads IDs:', leadsSimple.map(l => l.id))
     
-    return NextResponse.json(leads)
+    // Also check all leads in database
+    const allLeads = await prisma.lead.findMany({
+      select: {
+        id: true,
+        name: true,
+        userId: true,
+        createdAt: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      take: 10
+    })
+    
+    console.log('All leads in database:', allLeads.length)
+    console.log('All leads:', allLeads.map(l => ({ id: l.id, name: l.name, userId: l.userId })))
+    
+    // Return with extra debug info
+    return NextResponse.json({
+      leads: leadsSimple,
+      debug: {
+        userLeadsCount: leadsSimple.length,
+        totalLeadsInDB: allLeads.length,
+        userId: user.id,
+        allLeadsPreview: allLeads
+      }
+    })
   } catch (error) {
     console.error('Error fetching leads:', error)
     if (error instanceof Error && error.message === 'Unauthorized') {
