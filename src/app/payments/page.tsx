@@ -485,15 +485,21 @@ export default function Payments() {
 
                 <div className="flex items-center justify-end mt-3">
                   <div className="flex space-x-2">
-                    {payment.receiptUrl && (
+                    {payment.status === 'paid' && payment.receiptUrl && (
                       <button 
                         onClick={() => viewReceipt(payment)}
-                        className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110 relative"
-                        title="Ver comprovante"
+                        className="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-all duration-200 text-sm font-medium"
+                        title="Ver comprovante de pagamento"
                       >
-                        <Eye className="w-4 h-4" />
-                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                        <Eye className="w-4 h-4 mr-2" />
+                        Ver Comprovante
                       </button>
+                    )}
+                    {payment.status === 'paid' && !payment.receiptUrl && (
+                      <span className="inline-flex items-center px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm">
+                        <FileText className="w-4 h-4 mr-2" />
+                        Sem comprovante
+                      </span>
                     )}
                     {payment.status !== 'paid' && (
                       <button 
@@ -501,34 +507,14 @@ export default function Payments() {
                           setSelectedPayment(payment)
                           setShowModal(true)
                         }}
-                        className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 rounded-lg transition-all duration-200 transform hover:scale-110"
+                        className="inline-flex items-center px-3 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-all duration-200 text-sm font-medium"
                         title="Marcar como pago"
                       >
-                        <CheckCircle className="w-4 h-4" />
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        Marcar como Pago
                       </button>
                     )}
                   </div>
-                  
-                  {payment.status === 'paid' && payment.receiptUrl && (
-                    <button 
-                      onClick={() => viewReceipt(payment)}
-                      className="text-blue-600 hover:text-blue-800 text-sm font-medium ml-4"
-                    >
-                      Ver Comprovante
-                    </button>
-                  )}
-                  
-                  {payment.status !== 'paid' && (
-                    <button 
-                      onClick={() => {
-                        setSelectedPayment(payment)
-                        setShowModal(true)
-                      }}
-                      className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
-                    >
-                      Marcar como Pago
-                    </button>
-                  )}
                 </div>
               </div>
             )
@@ -639,43 +625,37 @@ export default function Payments() {
 
                       <div className="flex items-center justify-end mt-3">
                         <div className="flex space-x-2">
-                          {payment.receiptUrl && (
+                          {payment.status === 'paid' && payment.receiptUrl && (
                             <button 
                               onClick={() => viewReceipt(payment)}
-                              className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 transform hover:scale-110 relative"
-                              title="Ver comprovante"
+                              className="inline-flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-all duration-200 text-sm font-medium"
+                              title="Ver comprovante de pagamento"
                             >
-                              <Eye className="w-4 h-4" />
-                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                              <Eye className="w-4 h-4 mr-2" />
+                              Ver Comprovante
                             </button>
                           )}
-                          {payment.status !== 'paid' && payment.status !== 'PAID' && (
+                          {payment.status === 'paid' && !payment.receiptUrl && (
+                            <span className="inline-flex items-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-lg text-sm">
+                              <FileText className="w-4 h-4 mr-2" />
+                              Sem comprovante
+                            </span>
+                          )}
+                          {payment.status !== 'paid' && (
                             <button 
                               onClick={() => {
                                 setSelectedPayment(payment)
                                 setShowModal(true)
                                 setShowAllMonths(false)
                               }}
-                              className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                              className="inline-flex items-center px-3 py-2 bg-green-50 dark:bg-green-900/20 text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/40 rounded-lg transition-all duration-200 text-sm font-medium"
                               title="Marcar como pago"
                             >
-                              <CheckCircle className="w-4 h-4" />
+                              <CheckCircle className="w-4 h-4 mr-2" />
+                              Marcar como Pago
                             </button>
                           )}
                         </div>
-                        
-                        {payment.status !== 'paid' && payment.status !== 'PAID' && (
-                          <button 
-                            onClick={() => {
-                              setSelectedPayment(payment)
-                              setShowModal(true)
-                              setShowAllMonths(false)
-                            }}
-                            className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
-                          >
-                            Marcar como Pago
-                          </button>
-                        )}
                       </div>
                     </div>
                   )
