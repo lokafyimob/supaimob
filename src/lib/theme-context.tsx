@@ -2,83 +2,58 @@
 
 import { createContext, useContext, useEffect, useState } from 'react'
 
-type Theme = 'light' | 'dark' | 'auto'
+type Theme = 'light' | 'dark'
 
 interface ThemeContextType {
   theme: Theme
   setTheme: (theme: Theme) => void
-  actualTheme: 'light' | 'dark'
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const [theme, setTheme] = useState<Theme>('light')
-  const [actualTheme, setActualTheme] = useState<'light' | 'dark'>('light')
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedTheme = localStorage.getItem('theme') as Theme
-      if (savedTheme && ['light', 'dark', 'auto'].includes(savedTheme)) {
+      if (savedTheme && ['light', 'dark'].includes(savedTheme)) {
         setTheme(savedTheme)
-      } else {
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-        setTheme(prefersDark ? 'dark' : 'light')
       }
     }
   }, [])
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      let resolvedTheme: 'light' | 'dark' = 'light'
-
-      if (theme === 'auto') {
-        resolvedTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-      } else {
-        resolvedTheme = theme
-      }
-
-      setActualTheme(resolvedTheme)
-      
       const root = document.documentElement
       const body = document.body
       
-      if (resolvedTheme === 'dark') {
+      if (theme === 'dark') {
         root.classList.add('dark')
         body.classList.add('dark')
+        body.style.backgroundColor = '#000000'
+        body.style.color = '#ffffff'
       } else {
         root.classList.remove('dark')
         body.classList.remove('dark')
+        body.style.backgroundColor = '#ffffff'
+        body.style.color = '#000000'
       }
 
       localStorage.setItem('theme', theme)
     }
   }, [theme])
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && theme === 'auto') {
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-      const handleChange = () => {
-        setActualTheme(mediaQuery.matches ? 'dark' : 'light')
-        const root = document.documentElement
-        const body = document.body
-        if (mediaQuery.matches) {
-          root.classList.add('dark')
-          body.classList.add('dark')
-        } else {
-          root.classList.remove('dark')
-          body.classList.remove('dark')
-        }
-      }
-
-      mediaQuery.addEventListener('change', handleChange)
-      return () => mediaQuery.removeEventListener('change', handleChange)
-    }
-  }, [theme])
-
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, actualTheme }}>
-      <div suppressHydrationWarning>
+    <ThemeContext.Provider value={{ theme, setTheme }}>
+      <div 
+        suppressHydrationWarning
+        style={{
+          backgroundColor: theme === 'dark' ? '#000000' : '#ffffff',
+          color: theme === 'dark' ? '#ffffff' : '#000000',
+          minHeight: '100vh'
+        }}
+      >
         {children}
       </div>
     </ThemeContext.Provider>

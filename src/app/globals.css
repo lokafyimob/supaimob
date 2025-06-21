@@ -30,18 +30,86 @@
   --foreground: #171717;
 }
 
+/* Dark theme */
+.dark {
+  --background: #000000;
+  --foreground: #ffffff;
+}
+
+/* Theme variables */
+body.dark {
+  background-color: #000000 !important;
+  color: #ffffff !important;
+}
+
+/* Dark theme card backgrounds */
+.dark .bg-white {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+}
+
+.dark .bg-gray-50 {
+  background-color: #0a0a0a !important;
+}
+
+.dark .bg-gray-100 {
+  background-color: #1a1a1a !important;
+}
+
+.dark .text-gray-900 {
+  color: #ffffff !important;
+}
+
+.dark .text-gray-700 {
+  color: #d1d5db !important;
+}
+
+.dark .text-gray-600 {
+  color: #9ca3af !important;
+}
+
+.dark .text-gray-500 {
+  color: #6b7280 !important;
+}
+
+.dark .border-gray-200 {
+  border-color: #374151 !important;
+}
+
+.dark .border-gray-300 {
+  border-color: #4b5563 !important;
+}
+
+/* Dark theme input fields */
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #1a1a1a !important;
+  color: #ffffff !important;
+  border-color: #374151 !important;
+}
+
+.dark input:focus,
+.dark select:focus,
+.dark textarea:focus {
+  border-color: #ff4352 !important;
+  box-shadow: 0 0 0 2px rgba(255, 67, 82, 0.2) !important;
+}
+
+/* Dark theme shadows */
+.dark .shadow-sm {
+  box-shadow: 0 1px 2px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.dark .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1) !important;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
 }
 
 /* Classes personalizadas para a logo */
@@ -64,6 +132,7 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 /* Toast animations */

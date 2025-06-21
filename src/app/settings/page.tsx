@@ -17,7 +17,6 @@ import {
   Upload,
   Moon,
   Sun,
-  Globe,
   User
 } from 'lucide-react'
 
@@ -36,7 +35,7 @@ interface CompanySettings {
 }
 
 interface SystemSettings {
-  theme: 'light' | 'dark' | 'auto'
+  theme: 'light' | 'dark'
   language: 'pt' | 'en' | 'es'
   dateFormat: 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'YYYY-MM-DD'
   currency: 'BRL' | 'USD' | 'EUR'
@@ -789,18 +788,6 @@ export default function Settings() {
                         />
                         <Moon className="w-4 h-4 mr-2" />
                         Escuro
-                      </label>
-                      <label className="flex items-center text-gray-700 dark:text-gray-300">
-                        <input
-                          type="radio"
-                          name="theme"
-                          value="auto"
-                          checked={theme === 'auto'}
-                          onChange={(e) => setTheme(e.target.value as any)}
-                          className="mr-2"
-                        />
-                        <Globe className="w-4 h-4 mr-2" />
-                        Automático
                       </label>
                     </div>
                   </div>
