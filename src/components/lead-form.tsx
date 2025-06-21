@@ -138,11 +138,11 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         setDisplayValues({
           phone: lead.phone || '',
           document: lead.document || '',
-          minPrice: lead.minPrice ? (lead.minPrice * 100).toLocaleString('pt-BR', {
+          minPrice: lead.minPrice ? lead.minPrice.toLocaleString('pt-BR', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           }) : '',
-          maxPrice: lead.maxPrice ? (lead.maxPrice * 100).toLocaleString('pt-BR', {
+          maxPrice: lead.maxPrice ? lead.maxPrice.toLocaleString('pt-BR', {
             minimumFractionDigits: 2,
             maximumFractionDigits: 2
           }) : ''
@@ -197,8 +197,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
 
       const submitData = {
         ...formData,
-        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) / 100 : null,
-        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')) / 100,
+        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) : null,
+        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')),
         minBedrooms: formData.minBedrooms ? parseInt(formData.minBedrooms) : null,
         maxBedrooms: formData.maxBedrooms ? parseInt(formData.maxBedrooms) : null,
         minBathrooms: formData.minBathrooms ? parseInt(formData.minBathrooms) : null,
