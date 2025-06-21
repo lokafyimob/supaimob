@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Plus, Minus } from 'lucide-react'
+import { LocationSelector } from './location-selector'
 
 interface LeadFormProps {
   isOpen: boolean
@@ -46,6 +47,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     maxArea: '',
     preferredCities: [''],
     preferredStates: [] as string[],
+    preferredLocation: null as any,
     amenities: [] as string[],
     notes: '',
     status: 'ACTIVE',
@@ -192,6 +194,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         minArea: formData.minArea ? parseFloat(formData.minArea) : null,
         maxArea: formData.maxArea ? parseFloat(formData.maxArea) : null,
         preferredCities: formData.preferredCities.filter(city => city.trim() !== ''),
+        preferredLocation: formData.preferredLocation ? JSON.stringify(formData.preferredLocation) : null,
+        locationRadius: formData.preferredLocation?.radius || null,
         lastContactDate: formData.lastContactDate || null
       }
 
@@ -518,6 +522,21 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
           {/* Localização Preferida */}
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Localização Preferida</h3>
+            
+            {/* Localização no Mapa */}
+            <div className="mb-6">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Localização Específica (Opcional)
+              </label>
+              <LocationSelector
+                value={formData.preferredLocation}
+                onChange={(location) => setFormData(prev => ({ ...prev, preferredLocation: location }))}
+                placeholder="Clique para selecionar uma localização no mapa..."
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Selecione uma localização específica no mapa para receber notificações quando novos imóveis aparecerem na área
+              </p>
+            </div>
             
             {/* Cidades */}
             <div className="mb-4">

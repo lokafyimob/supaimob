@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 import { checkForLeadMatches, checkForPartnershipOpportunities } from '@/lib/matching-service'
+import { findLeadsForLocationNotification } from '@/lib/location-matching-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -118,6 +119,19 @@ export async function POST(request: NextRequest) {
       }
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
+    }
+
+    // Executar notificações por localização
+    try {
+      console.log('📍 Verificando leads por localização...')
+      const locationNotifications = await findLeadsForLocationNotification(property.id, user.id)
+      if (locationNotifications && locationNotifications.length > 0) {
+        console.log(`✅ ${locationNotifications.length} notificações de localização criadas`)
+      } else {
+        console.log('ℹ️ Nenhum lead encontrado para notificação por localização')
+      }
+    } catch (error) {
+      console.log('❌ Erro nas notificações por localização:', error)
     }
 
     // Format response for SQLite compatibility

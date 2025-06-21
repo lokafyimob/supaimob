@@ -1,12 +1,14 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { LeadForm } from '@/components/lead-form'
 import { LeadMatchesModal } from '@/components/lead-matches-modal'
 import { AIListingsModal } from '@/components/ai-listings-modal'
 import { MatchAlert } from '@/components/match-alert'
 import { PartnershipAlert } from '@/components/partnership-alert'
+import { LocationNotifications } from '@/components/location-notifications'
 import { ToastContainer, useToast } from '@/components/toast'
 import {
   Plus,
@@ -70,6 +72,8 @@ export default function Leads() {
   const [showAIListingsModal, setShowAIListingsModal] = useState(false)
   const [selectedLeadForListings, setSelectedLeadForListings] = useState<Lead | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
+  const [showLocationNotifications, setShowLocationNotifications] = useState(false)
+  const [locationNotificationCount, setLocationNotificationCount] = useState(0)
   const { toasts, removeToast, showSuccess, showError } = useToast()
   const [matchCounts, setMatchCounts] = useState<{[leadId: string]: number}>({})
   const [newMatches, setNewMatches] = useState<{
@@ -95,7 +99,21 @@ export default function Leads() {
   useEffect(() => {
     fetchLeads(true) // Suppress alerts on initial load
     fetchPartnershipNotifications() // Check for partnership notifications on load
+    fetchLocationNotificationCount() // Check for location notifications on load
   }, [])
+
+  const fetchLocationNotificationCount = async () => {
+    try {
+      const response = await fetch('/api/location-notifications')
+      if (response.ok) {
+        const data = await response.json()
+        const unreadCount = data.notifications.filter((n: any) => !n.isRead).length
+        setLocationNotificationCount(unreadCount)
+      }
+    } catch (error) {
+      console.error('Error fetching location notifications:', error)
+    }
+  }
 
   // Check for new matches and partnerships periodically
   useEffect(() => {
@@ -448,7 +466,26 @@ export default function Leads() {
                 Gerencie seus leads e encontre matches automáticos
               </p>
             </div>
-            <div className="mt-4 sm:mt-0">
+            <div className="mt-4 sm:mt-0 flex space-x-3">
+              <button
+                onClick={() => setShowLocationNotifications(true)}
+                className="relative inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Notificações
+                {locationNotificationCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
+                    {locationNotificationCount}
+                  </span>
+                )}
+              </button>
+              <Link
+                href="/leads/map"
+                className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              >
+                <MapPin className="w-4 h-4 mr-2" />
+                Ver Mapa
+              </Link>
               <button
                 onClick={() => {
                   setEditingLead(null)
@@ -947,6 +984,20 @@ export default function Leads() {
         onDismiss={handleDismissPartnershipAlert}
         onViewPartnerships={handleViewPartnerships}
       />
+
+      {/* Location Notifications Modal */}
+      {showLocationNotifications && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="w-full max-w-4xl mx-4">
+            <LocationNotifications
+              onClose={() => {
+                setShowLocationNotifications(false)
+                fetchLocationNotificationCount() // Refresh count after closing
+              }}
+            />
+          </div>
+        </div>
+      )}
     </DashboardLayout>
   )
 }

@@ -402,6 +402,8 @@ model Lead {
   maxArea           Float?
   preferredCities   String       // JSON array of cities
   preferredStates   String       // JSON array of states
+  preferredLocation String?      // JSON with {lat, lng, radius, address} for preferred area
+  locationRadius    Float?       // Radius in kilometers for location search
   amenities         String?      // JSON array of desired amenities
   notes             String?
   status            LeadStatus   @default(ACTIVE)
