@@ -190,7 +190,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
 
       const submitData = {
         ...formData,
-        minPrice: formData.minPrice ? parseFloat(formData.minPrice.replace(/\D/g, '')) / 100 : null,
+        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) / 100 : null,
         maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')) / 100,
         minBedrooms: formData.minBedrooms ? parseInt(formData.minBedrooms) : null,
         maxBedrooms: formData.maxBedrooms ? parseInt(formData.maxBedrooms) : null,

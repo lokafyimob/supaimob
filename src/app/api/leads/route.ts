@@ -13,6 +13,13 @@ export async function GET(request: NextRequest) {
       where: {
         userId: user.id
       },
+      include: {
+        notifications: {
+          orderBy: {
+            createdAt: 'desc'
+          }
+        }
+      },
       orderBy: {
         createdAt: 'desc'
       }
@@ -143,22 +150,17 @@ export async function POST(request: NextRequest) {
 
     console.log('Lead created successfully:', createdLead?.id)
 
-    // Executar auto-matching
+    // Executar auto-matching diretamente
     try {
       console.log('🤖 Lead criado, executando auto-matching...')
-      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
-        method: 'POST',
-        headers: {
-          'Cookie': request.headers.get('Cookie') || ''
-        }
-      })
       
-      if (matchingResponse.ok) {
-        const result = await matchingResponse.json()
-        console.log('✅ Auto-matching concluído:', result.message)
-      } else {
-        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
-      }
+      // Import matching service directly
+      const { checkForLeadMatches } = require('@/lib/matching-service')
+      
+      // Execute matching for the created lead
+      const matchResults = await checkForLeadMatches(createdLead.id, user.id)
+      console.log('✅ Auto-matching executado:', matchResults)
+      
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
     }
