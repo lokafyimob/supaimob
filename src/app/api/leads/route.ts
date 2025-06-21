@@ -71,15 +71,25 @@ export async function POST(request: NextRequest) {
           name: String(data.name),
           email: String(data.email),
           phone: String(data.phone),
-          interest: 'RENT' as any,
-          propertyType: 'APARTMENT' as any,
-          maxPrice: 1000.0,
-          preferredCities: '[]',
-          preferredStates: '[]',
-          status: 'ACTIVE' as any,
+          interest: data.interest || 'RENT',
+          propertyType: data.propertyType || 'APARTMENT',
+          maxPrice: data.maxPrice || 1000.0,
+          minPrice: data.minPrice || null,
+          minBedrooms: data.minBedrooms || null,
+          maxBedrooms: data.maxBedrooms || null,
+          minBathrooms: data.minBathrooms || null,
+          maxBathrooms: data.maxBathrooms || null,
+          minArea: data.minArea || null,
+          maxArea: data.maxArea || null,
+          preferredCities: JSON.stringify((data.preferredCities || []).filter((city: string) => city && city.trim()).map((city: string) => city.toUpperCase())),
+          preferredStates: JSON.stringify(Array.isArray(data.preferredStates) ? data.preferredStates : []),
+          amenities: data.amenities ? JSON.stringify(data.amenities) : null,
+          notes: data.notes || null,
+          status: data.status || 'ACTIVE',
           companyId: String(userData.companyId),
           userId: String(user.id),
-          needsFinancing: false
+          lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
+          needsFinancing: data.needsFinancing || false
         }
       })
       
@@ -113,15 +123,15 @@ export async function POST(request: NextRequest) {
         data.name,
         data.email,
         data.phone,
-        'RENT',
-        'APARTMENT', 
-        1000.0,
-        '[]',
-        '[]',
-        'ACTIVE',
+        data.interest || 'RENT',
+        data.propertyType || 'APARTMENT', 
+        data.maxPrice || 1000.0,
+        JSON.stringify((data.preferredCities || []).filter((city: string) => city && city.trim()).map((city: string) => city.toUpperCase())),
+        JSON.stringify(Array.isArray(data.preferredStates) ? data.preferredStates : []),
+        data.status || 'ACTIVE',
         userData.companyId,
         user.id,
-        false
+        data.needsFinancing || false
       ]
       
       const result = await client.query(insertQuery, values)
@@ -133,8 +143,25 @@ export async function POST(request: NextRequest) {
 
     console.log('Lead created successfully:', createdLead?.id)
 
-    // Skip auto-matching for now to avoid additional errors
-    // Will re-enable after basic creation works
+    // Executar auto-matching
+    try {
+      console.log('🤖 Lead criado, executando auto-matching...')
+      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
+        method: 'POST',
+        headers: {
+          'Cookie': request.headers.get('Cookie') || ''
+        }
+      })
+      
+      if (matchingResponse.ok) {
+        const result = await matchingResponse.json()
+        console.log('✅ Auto-matching concluído:', result.message)
+      } else {
+        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
+      }
+    } catch (error) {
+      console.log('❌ Erro no auto-matching:', error)
+    }
 
     return NextResponse.json(createdLead, { status: 201 })
   } catch (error) {
