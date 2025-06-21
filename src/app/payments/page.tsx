@@ -72,6 +72,12 @@ export default function Payments() {
   const [allPayments, setAllPayments] = useState<Payment[]>([])
   const [processingPayment, setProcessingPayment] = useState(false)
 
+  // Função helper para normalizar status - definida antes das funções de fetch
+  const isPaidStatus = (status: string) => {
+    const normalizedStatus = status?.toLowerCase()
+    return normalizedStatus === 'paid' || normalizedStatus === 'pago'
+  }
+
   useEffect(() => {
     fetchPayments()
   }, [])
@@ -84,6 +90,8 @@ export default function Payments() {
         
         const mappedPayments = data.map((payment: any) => ({
           ...payment,
+          // Normalizar status para sempre mostrar "Pago" em português
+          status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         }))
@@ -105,6 +113,8 @@ export default function Payments() {
         
         const mappedPayments = data.map((payment: any) => ({
           ...payment,
+          // Normalizar status para sempre mostrar "Pago" em português
+          status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         })).filter((payment: Payment) => payment.tenant?.name === tenantName)
@@ -227,11 +237,12 @@ export default function Payments() {
     }
   }
 
+
   const getStatusIcon = (status: string) => {
-    switch (status) {
-      case 'pago':
-      case 'paid':
-        return <CheckCircle className="w-5 h-5 text-green-600" />
+    if (isPaidStatus(status)) {
+      return <CheckCircle className="w-5 h-5 text-green-600" />
+    }
+    switch (status?.toLowerCase()) {
       case 'overdue':
         return <AlertTriangle className="w-5 h-5 text-red-600" />
       case 'pending':
@@ -242,10 +253,10 @@ export default function Payments() {
   }
 
   const getStatusText = (status: string) => {
-    switch (status) {
-      case 'pago':
-      case 'paid':
-        return 'Pago'
+    if (isPaidStatus(status)) {
+      return 'Pago'
+    }
+    switch (status?.toLowerCase()) {
       case 'overdue':
         return 'Em Atraso'
       case 'pending':
@@ -256,10 +267,10 @@ export default function Payments() {
   }
 
   const getStatusColor = (status: string) => {
-    switch (status) {
-      case 'pago':
-      case 'paid':
-        return 'bg-green-100 text-green-800'
+    if (isPaidStatus(status)) {
+      return 'bg-green-100 text-green-800'
+    }
+    switch (status?.toLowerCase()) {
       case 'overdue':
         return 'bg-red-100 text-red-800'
       case 'pending':
@@ -317,22 +328,22 @@ export default function Payments() {
       payment.property.title?.toLowerCase()?.includes(searchTerm.toLowerCase())
     
     const matchesStatus = filterStatus === 'all' || 
-                         payment.status === filterStatus || 
-                         (filterStatus === 'paid' && payment.status === 'pago')
+                         payment.status?.toLowerCase() === filterStatus || 
+                         (filterStatus === 'paid' && isPaidStatus(payment.status))
 
     return matchesSearch && matchesStatus
   })
 
   const stats = {
     total: payments.length,
-    pending: payments.filter(p => p?.status === 'pending').length,
-    overdue: payments.filter(p => p?.status === 'overdue').length,
-    paid: payments.filter(p => p?.status === 'paid' || p?.status === 'pago').length,
+    pending: payments.filter(p => p?.status?.toLowerCase() === 'pending').length,
+    overdue: payments.filter(p => p?.status?.toLowerCase() === 'overdue').length,
+    paid: payments.filter(p => isPaidStatus(p?.status)).length,
     totalAmount: payments
-      .filter(p => p?.status === 'pending' || p?.status === 'overdue')
+      .filter(p => p?.status?.toLowerCase() === 'pending' || p?.status?.toLowerCase() === 'overdue')
       .reduce((sum, p) => sum + (p?.amount || 0), 0),
     paidAmount: payments
-      .filter(p => p?.status === 'paid' || p?.status === 'pago')
+      .filter(p => isPaidStatus(p?.status))
       .reduce((sum, p) => sum + (p?.amount || 0), 0)
   }
 
@@ -486,13 +497,13 @@ export default function Payments() {
         <div className="space-y-6">
           {filteredPayments.map((payment) => {
             const daysOverdue = getDaysOverdue(payment.dueDate)
-            const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid' && payment.status !== 'pago'
+            const paymentIsOverdue = isOverdue(payment.dueDate) && !isPaidStatus(payment.status)
             
             const getStatusGradient = (status: string) => {
-              switch (status) {
-                case 'pago':
-                case 'paid':
-                  return 'from-emerald-500 to-green-600'
+              if (isPaidStatus(status)) {
+                return 'from-emerald-500 to-green-600'
+              }
+              switch (status?.toLowerCase()) {
                 case 'overdue':
                   return 'from-red-500 to-red-600'
                 case 'pending':
@@ -515,7 +526,7 @@ export default function Payments() {
                         <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center shadow-md">
                           <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        {(payment.status === 'paid' || payment.status === 'pago') && (
+                        {isPaidStatus(payment.status) && (
                           <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
                             <BadgeCheck className="w-3 h-3 text-white" />
                           </div>
@@ -598,7 +609,7 @@ export default function Payments() {
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      {(payment.status === 'paid' || payment.status === 'pago') && payment.receiptUrl && (
+                      {isPaidStatus(payment.status) && payment.receiptUrl && (
                         <button 
                           onClick={() => viewReceipt(payment)}
                           className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-xs font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
@@ -609,14 +620,14 @@ export default function Payments() {
                         </button>
                       )}
                       
-                      {(payment.status === 'paid' || payment.status === 'pago') && !payment.receiptUrl && (
+                      {isPaidStatus(payment.status) && !payment.receiptUrl && (
                         <div className="inline-flex items-center px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-xs font-medium">
                           <FileText className="w-3 h-3 mr-1" />
                           Sem comprovante
                         </div>
                       )}
                       
-                      {payment.status !== 'paid' && payment.status !== 'pago' && (
+                      {!isPaidStatus(payment.status) && (
                         <button 
                           onClick={() => {
                             setSelectedPayment(payment)
@@ -684,7 +695,7 @@ export default function Payments() {
               <div className="p-6 space-y-4">
                 {allPayments.map((payment) => {
                   const daysOverdue = getDaysOverdue(payment.dueDate)
-                  const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid' && payment.status !== 'pago'
+                  const paymentIsOverdue = isOverdue(payment.dueDate) && !isPaidStatus(payment.status)
                   
                   return (
                     <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
@@ -749,7 +760,7 @@ export default function Payments() {
 
                       <div className="flex items-center justify-end mt-3">
                         <div className="flex space-x-2">
-                          {(payment.status === 'paid' || payment.status === 'pago') && payment.receiptUrl && (
+                          {isPaidStatus(payment.status) && payment.receiptUrl && (
                             <button 
                               onClick={() => viewReceipt(payment)}
                               className="inline-flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-all duration-200 text-sm font-medium"
@@ -759,13 +770,13 @@ export default function Payments() {
                               Ver Comprovante
                             </button>
                           )}
-                          {(payment.status === 'paid' || payment.status === 'pago') && !payment.receiptUrl && (
+                          {isPaidStatus(payment.status) && !payment.receiptUrl && (
                             <span className="inline-flex items-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-lg text-sm">
                               <FileText className="w-4 h-4 mr-2" />
                               Sem comprovante
                             </span>
                           )}
-                          {payment.status !== 'paid' && payment.status !== 'pago' && (
+                          {!isPaidStatus(payment.status) && (
                             <button 
                               onClick={() => {
                                 setSelectedPayment(payment)
