@@ -175,6 +175,11 @@ export default function Payments() {
         setUploadedFile(null)
         setUploadedFileUrl('')
         
+        // Reabrir o histórico se havia um inquilino selecionado
+        if (selectedTenant) {
+          setShowAllMonths(true)
+        }
+        
         alert('Pagamento marcado como pago!')
       } else {
         const errorData = await response.json()
@@ -638,16 +643,15 @@ export default function Payments() {
                               <Eye className="w-4 h-4" />
                             </button>
                           )}
-                          {(console.log('Payment status check:', payment.status, payment.status !== 'paid', payment.status !== 'PAID')) && payment.status !== 'paid' && payment.status !== 'PAID' && (
+                          {payment.status !== 'paid' && payment.status !== 'PAID' && (
                             <button 
                               onClick={(e) => {
                                 e.preventDefault()
                                 e.stopPropagation()
-                                console.log('Button clicked for payment:', payment.id)
-                                console.log('Setting selectedPayment:', payment)
                                 setSelectedPayment(payment)
                                 setShowModal(true)
-                                console.log('showModal set to true')
+                                // Fechar o modal de histórico temporariamente
+                                setShowAllMonths(false)
                               }}
                               className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
                               title="Marcar como pago"
@@ -657,16 +661,15 @@ export default function Payments() {
                           )}
                         </div>
                         
-                        {(console.log('Payment status check text button:', payment.status)) && payment.status !== 'paid' && payment.status !== 'PAID' && (
+                        {payment.status !== 'paid' && payment.status !== 'PAID' && (
                           <button 
                             onClick={(e) => {
                               e.preventDefault()
                               e.stopPropagation()
-                              console.log('Text button clicked for payment:', payment.id)
-                              console.log('Setting selectedPayment:', payment)
                               setSelectedPayment(payment)
                               setShowModal(true)
-                              console.log('showModal set to true')
+                              // Fechar o modal de histórico temporariamente
+                              setShowAllMonths(false)
                             }}
                             className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
                           >
@@ -696,7 +699,7 @@ export default function Payments() {
           </div>
         )}
 
-      {showModal && selectedPayment && (console.log('Rendering payment modal:', { showModal, selectedPayment: selectedPayment?.id })) && (
+      {showModal && selectedPayment && (
         <div style={{
           position: 'fixed',
           top: 0,
@@ -857,6 +860,10 @@ export default function Payments() {
                   setPaymentMethod('dinheiro')
                   setIncludeInterest(true)
                   removeUploadedFile()
+                  // Reabrir o histórico se havia um inquilino selecionado
+                  if (selectedTenant) {
+                    setShowAllMonths(true)
+                  }
                 }}
                 style={{
                   padding: '10px 20px',
