@@ -41,6 +41,19 @@ export function useLeadNotifications() {
       const notifications = data.notifications || []
       console.log(`🔔 ${notifications.length} notificações encontradas:`, notifications)
       
+      // Debug extra para identificar o problema
+      if (notifications.length > 0) {
+        console.log('🔍 PRIMEIRA NOTIFICAÇÃO DETALHADA:', JSON.stringify(notifications[0], null, 2))
+        console.log('🎯 ESTRUTURA ESPERADA PELO MATCH ALERT:', {
+          leadId: 'string',
+          leadName: 'string', 
+          leadPhone: 'string',
+          propertyTitle: 'string',
+          propertyPrice: 'number',
+          matchType: 'RENT | BUY'
+        })
+      }
+      
       // Detectar novas notificações
       if (notifications.length > lastCount && lastCount > 0) {
         console.log(`🆕 ${notifications.length - lastCount} novas notificações detectadas!`)
