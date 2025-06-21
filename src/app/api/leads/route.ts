@@ -5,39 +5,43 @@ import { checkForMatches } from '@/lib/matching-service'
 
 export async function GET(request: NextRequest) {
   try {
+    console.log('=== GET LEADS with RAW SQL (like simple API) ===')
+    
     const user = await requireAuth(request)
-    console.log('Fetching leads for user:', user.id)
+    console.log('User authenticated:', user.id)
     
-    const leads = await prisma.lead.findMany({
-      where: {
-        userId: user.id
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
+    // Use the exact same approach as the working simple API
+    const { Client } = require('pg')
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     })
-
-    console.log('Found leads:', leads.length)
     
-    return NextResponse.json(leads)
+    await client.connect()
+    
+    const query = `
+      SELECT id, name, email, phone, interest, "propertyType", "maxPrice", "minPrice", 
+             "minBedrooms", "maxBedrooms", "minBathrooms", "maxBathrooms", 
+             "minArea", "maxArea", "preferredCities", "preferredStates", 
+             amenities, notes, status, "needsFinancing", "createdAt", "updatedAt"
+      FROM leads 
+      WHERE "userId" = $1 
+      ORDER BY "createdAt" DESC
+    `
+    
+    const result = await client.query(query, [user.id])
+    await client.end()
+    
+    console.log('Raw SQL found leads:', result.rows.length)
+    
+    return NextResponse.json(result.rows)
+    
   } catch (error) {
-    console.error('❌ UNEXPECTED ERROR in GET leads:', error)
-    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
-    
-    if (error instanceof Error && error.message === 'Unauthorized') {
-      return NextResponse.json(
-        { error: 'Não autorizado' },
-        { status: 401 }
-      )
-    }
-    return NextResponse.json(
-      { 
-        error: 'Erro ao buscar leads', 
-        details: error instanceof Error ? error.message : 'Unknown error',
-        stack: error instanceof Error ? error.stack : 'No stack trace'
-      },
-      { status: 500 }
-    )
+    console.error('❌ GET leads error:', error)
+    return NextResponse.json({
+      error: 'Failed to fetch leads',
+      details: error instanceof Error ? error.message : 'Unknown error'
+    }, { status: 500 })
   }
 }
 
