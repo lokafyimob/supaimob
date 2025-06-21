@@ -30,6 +30,7 @@ export default function Payments() {
   const [showAllMonths, setShowAllMonths] = useState(false)
   const [selectedTenant, setSelectedTenant] = useState(null)
   const [allPayments, setAllPayments] = useState([])
+  const [processingPayment, setProcessingPayment] = useState(false)
 
   useEffect(() => {
     fetchPayments()
@@ -134,8 +135,9 @@ export default function Payments() {
   }
 
   const handleMarkAsPaid = async () => {
-    if (!selectedPayment) return
+    if (!selectedPayment || processingPayment) return
 
+    setProcessingPayment(true)
     try {
       let receiptUrl = ''
       
@@ -189,6 +191,8 @@ export default function Payments() {
     } catch (error) {
       console.error('Erro ao marcar pagamento:', error)
       alert('Erro ao processar pagamento')
+    } finally {
+      setProcessingPayment(false)
     }
   }
 
@@ -859,6 +863,7 @@ export default function Payments() {
                   setNotes('')
                   setPaymentMethod('dinheiro')
                   setIncludeInterest(true)
+                  setProcessingPayment(false)
                   removeUploadedFile()
                   // Reabrir o histórico se havia um inquilino selecionado
                   if (selectedTenant) {
@@ -879,16 +884,18 @@ export default function Payments() {
               
               <button
                 onClick={handleMarkAsPaid}
+                disabled={processingPayment}
                 style={{
                   padding: '10px 20px',
-                  backgroundColor: '#28a745',
+                  backgroundColor: processingPayment ? '#6c757d' : '#28a745',
                   color: 'white',
                   border: 'none',
                   borderRadius: '5px',
-                  cursor: 'pointer'
+                  cursor: processingPayment ? 'not-allowed' : 'pointer',
+                  opacity: processingPayment ? 0.7 : 1
                 }}
               >
-                Confirmar Pagamento
+                {processingPayment ? 'Processando...' : 'Confirmar Pagamento'}
               </button>
             </div>
           </div>
