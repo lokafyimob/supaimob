@@ -156,17 +156,11 @@ export default function Leads() {
       const response = await fetch('/api/leads')
       if (response.ok) {
         const data = await response.json()
+        console.log('Leads fetched:', data)
         
-        // Handle new response structure with debug info
-        let leadsData = data
-        if (data.leads && Array.isArray(data.leads)) {
-          leadsData = data.leads
-          console.log('Debug info:', data.debug)
-        }
-        
-        setLeads(leadsData)
+        setLeads(data)
         // Fetch match counts for all leads
-        await fetchMatchCounts(leadsData, suppressAlerts)
+        await fetchMatchCounts(data, suppressAlerts)
       } else {
         console.error('Error fetching leads:', response.statusText)
       }

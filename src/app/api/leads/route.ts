@@ -5,53 +5,21 @@ import { checkForMatches } from '@/lib/matching-service'
 
 export async function GET(request: NextRequest) {
   try {
-    console.log('=== STARTING GET LEADS ===')
+    const user = await requireAuth(request)
+    console.log('Fetching leads for user:', user.id)
     
-    // Step 1: Authentication
-    let user
-    try {
-      user = await requireAuth(request)
-      console.log('✅ Auth successful, User ID:', user.id)
-    } catch (authError) {
-      console.error('❌ Auth failed:', authError)
-      return NextResponse.json({ error: 'Authentication failed' }, { status: 401 })
-    }
-    
-    // Step 2: Simple query for user leads
-    let userLeads
-    try {
-      userLeads = await prisma.lead.findMany({
-        where: {
-          userId: user.id
-        },
-        orderBy: {
-          createdAt: 'desc'
-        }
-      })
-      console.log('✅ User leads query successful:', userLeads.length)
-    } catch (queryError) {
-      console.error('❌ User leads query failed:', queryError)
-      return NextResponse.json({ error: 'Database query failed', details: queryError instanceof Error ? queryError.message : 'Unknown error' }, { status: 500 })
-    }
-    
-    // Step 3: Count all leads (optional, in try-catch to not break if fails)
-    let totalCount = 0
-    try {
-      totalCount = await prisma.lead.count()
-      console.log('✅ Total leads count:', totalCount)
-    } catch (countError) {
-      console.log('⚠️ Count query failed:', countError)
-    }
-    
-    // Return simple response
-    return NextResponse.json({
-      leads: userLeads,
-      debug: {
-        userLeadsCount: userLeads.length,
-        totalLeadsInDB: totalCount,
+    const leads = await prisma.lead.findMany({
+      where: {
         userId: user.id
+      },
+      orderBy: {
+        createdAt: 'desc'
       }
     })
+
+    console.log('Found leads:', leads.length)
+    
+    return NextResponse.json(leads)
   } catch (error) {
     console.error('❌ UNEXPECTED ERROR in GET leads:', error)
     console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
