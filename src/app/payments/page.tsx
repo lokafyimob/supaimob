@@ -78,11 +78,35 @@ export default function Payments() {
     return normalizedStatus === 'paid' || normalizedStatus === 'pago'
   }
 
-  // Função para download seguro de arquivos
-  const downloadFile = async (url: string, filename: string) => {
+  // Função para download automático de arquivos
+  const downloadFile = async (url: string, paymentId: string, tenantName?: string) => {
     try {
-      console.log('🔽 Iniciando download:', { url, filename })
+      // Gerar nome de arquivo mais descritivo
+      const date = new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')
+      const tenant = tenantName ? tenantName.replace(/[^a-zA-Z0-9]/g, '_') : 'inquilino'
+      const filename = `comprovante_${tenant}_${date}_${paymentId.slice(-4)}`
       
+      console.log('🔽 Iniciando download automático:', { filename })
+      
+      // Para data URLs (base64), fazer download direto
+      if (url.startsWith('data:')) {
+        const link = document.createElement('a')
+        link.href = url
+        
+        // Determinar extensão baseada no tipo MIME
+        const extension = url.includes('application/pdf') ? '.pdf' : 
+                         url.includes('image/png') ? '.png' : '.jpg'
+        link.download = filename + extension
+        
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        
+        console.log('✅ Download concluído:', filename + extension)
+        return
+      }
+      
+      // Para URLs normais
       const response = await fetch(url)
       if (!response.ok) {
         throw new Error(`Erro HTTP: ${response.status}`)
@@ -93,7 +117,7 @@ export default function Payments() {
       
       const link = document.createElement('a')
       link.href = downloadUrl
-      link.download = filename
+      link.download = filename + '.pdf'
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
@@ -1187,11 +1211,11 @@ export default function Payments() {
                         </div>
                       </div>
                       <button
-                        onClick={() => downloadFile(viewingReceipt.receiptUrl, `comprovante_${viewingReceipt.id}`)}
+                        onClick={() => downloadFile(viewingReceipt.receiptUrl, viewingReceipt.id, viewingReceipt.tenant?.name)}
                         className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
                         <Download className="w-3 h-3 mr-1" />
-                        Download
+                        Salvar
                       </button>
                     </div>
                     
