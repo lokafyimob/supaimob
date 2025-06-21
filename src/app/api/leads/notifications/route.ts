@@ -62,7 +62,35 @@ export async function GET(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   try {
     const user = await requireAuth(request)
-    const { notificationIds } = await request.json()
+    const { notificationIds, reset } = await request.json()
+    
+    // Se reset = true, resetar todas as notificações para sent = false
+    if (reset === true) {
+      const { Client } = require('pg')
+      const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      })
+      
+      await client.connect()
+      
+      const resetQuery = `
+        UPDATE lead_notifications 
+        SET sent = false, "sentAt" = NULL
+        WHERE "leadId" IN (
+          SELECT id FROM leads WHERE "userId" = $1
+        )
+      `
+      
+      const result = await client.query(resetQuery, [user.id])
+      await client.end()
+      
+      return NextResponse.json({
+        success: true,
+        message: `${result.rowCount} notificações resetadas para aparecer novamente!`,
+        resetCount: result.rowCount
+      })
+    }
     
     if (!Array.isArray(notificationIds) || notificationIds.length === 0) {
       return NextResponse.json({ error: 'IDs de notificação obrigatórios' }, { status: 400 })
