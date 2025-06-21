@@ -62,8 +62,8 @@ export async function checkForPropertyMatches(propertyId: string) {
     const userLeadsResult = await client.query(userLeadsQuery, [
       property.userId,
       property.propertyType,
-      property.rentPrice,
-      property.salePrice
+      property.rentPrice || 0,
+      property.salePrice || 0
     ])
     
     console.log(`👥 Leads do usuário encontrados: ${userLeadsResult.rows.length}`)
@@ -157,8 +157,8 @@ export async function checkForPropertyMatches(propertyId: string) {
       const partnershipResult = await client.query(partnershipLeadsQuery, [
         property.userId,
         property.propertyType,
-        property.rentPrice,
-        property.salePrice
+        property.rentPrice || 0,
+        property.salePrice || 0
       ])
       
       console.log(`🤝 Leads para parceria encontrados: ${partnershipResult.rows.length}`)
