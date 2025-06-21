@@ -67,42 +67,36 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating lead in database...')
     
+    const leadData = {
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      document: data.document || null,
+      interest: data.interest,
+      propertyType: data.propertyType,
+      minPrice: data.minPrice || null,
+      maxPrice: data.maxPrice,
+      minBedrooms: data.minBedrooms || null,
+      maxBedrooms: data.maxBedrooms || null,
+      minBathrooms: data.minBathrooms || null,
+      maxBathrooms: data.maxBathrooms || null,
+      minArea: data.minArea || null,
+      maxArea: data.maxArea || null,
+      preferredCities: JSON.stringify((data.preferredCities || []).filter((city: string) => city && city.trim()).map((city: string) => city.toUpperCase())),
+      preferredStates: JSON.stringify(Array.isArray(data.preferredStates) ? data.preferredStates : []),
+      amenities: data.amenities ? JSON.stringify(data.amenities) : null,
+      notes: data.notes || null,
+      status: data.status || 'ACTIVE',
+      companyId: userData.companyId,
+      userId: user.id,
+      lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
+      needsFinancing: data.needsFinancing || false
+    }
+
+    console.log('Lead data to create:', JSON.stringify(leadData, null, 2))
+
     const lead = await prisma.lead.create({
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        document: data.document || null,
-        interest: data.interest,
-        propertyType: data.propertyType,
-        minPrice: data.minPrice || null,
-        maxPrice: data.maxPrice,
-        minBedrooms: data.minBedrooms || null,
-        maxBedrooms: data.maxBedrooms || null,
-        minBathrooms: data.minBathrooms || null,
-        maxBathrooms: data.maxBathrooms || null,
-        minArea: data.minArea || null,
-        maxArea: data.maxArea || null,
-        preferredCities: JSON.stringify((data.preferredCities || []).map((city: string) => city.toUpperCase())),
-        preferredStates: JSON.stringify(data.preferredStates || []),
-        // preferredLocation: data.preferredLocation || null,
-        // locationRadius: data.locationRadius || null,
-        amenities: data.amenities ? JSON.stringify(data.amenities) : null,
-        notes: data.notes || null,
-        status: data.status || 'ACTIVE',
-        companyId: userData.companyId,
-        userId: user.id,
-        lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
-        needsFinancing: data.needsFinancing || false
-      },
-      include: {
-        matchedProperty: true,
-        notifications: {
-          include: {
-            property: true
-          }
-        }
-      }
+      data: leadData
     })
     
     console.log('Lead created successfully:', lead.id)
