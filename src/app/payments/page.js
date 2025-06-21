@@ -159,6 +159,12 @@ export default function Payments() {
       if (response.ok) {
         // Refresh payments from API
         await fetchPayments()
+        
+        // Se estiver no histórico, também atualizar os pagamentos do histórico
+        if (showAllMonths && selectedTenant) {
+          await fetchAllPaymentsByTenant(selectedTenant)
+        }
+        
         setShowModal(false)
         setSelectedPayment(null)
         setNotes('')
@@ -691,7 +697,7 @@ export default function Payments() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1100
         }}>
           <div style={{
             backgroundColor: 'white',
@@ -884,7 +890,7 @@ export default function Payments() {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          zIndex: 1000
+          zIndex: 1200
         }}>
           <div style={{
             backgroundColor: 'white',
