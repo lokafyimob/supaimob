@@ -39,7 +39,21 @@ export default function Payments() {
       const response = await fetch('/api/payments')
       if (response.ok) {
         const data = await response.json()
-        setPayments(data)
+        
+        // Mapear os dados para o formato esperado pelo frontend
+        const mappedPayments = data.map(payment => ({
+          ...payment,
+          property: payment.contract?.property || {},
+          tenant: payment.contract?.tenant || {}
+        }))
+        
+        console.log('Payments received:', data.length)
+        console.log('Mapped payments:', mappedPayments.length)
+        if (mappedPayments.length > 0) {
+          console.log('First payment:', mappedPayments[0])
+        }
+        
+        setPayments(mappedPayments)
       }
     } catch (error) {
       console.error('Erro ao carregar pagamentos:', error)
