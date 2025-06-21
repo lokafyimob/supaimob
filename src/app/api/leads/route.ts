@@ -67,51 +67,87 @@ export async function POST(request: NextRequest) {
 
     console.log('Creating lead in database...')
     
-    // Use the exact same structure that works in raw SQL
-    const leadData = {
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      interest: 'RENT',
-      propertyType: 'APARTMENT',
-      maxPrice: 1000.0,
-      preferredCities: '[]',
-      preferredStates: '[]',
-      status: 'ACTIVE',
-      companyId: userData.companyId,
-      userId: user.id,
-      needsFinancing: false
-    }
-
-    console.log('Creating lead with minimal Prisma data:', JSON.stringify(leadData, null, 2))
-
-    const lead = await prisma.lead.create({
-      data: leadData
-    })
+    // Generate ID manually like in raw SQL
+    const leadId = 'lead_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
     
-    console.log('Lead created successfully:', lead.id)
-
-    // Executar auto-matching
+    let createdLead = null
+    
+    // Try Prisma first, fallback to raw SQL
     try {
-      console.log('🤖 Lead criado, executando auto-matching...')
-      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
-        method: 'POST',
-        headers: {
-          'Cookie': request.headers.get('Cookie') || ''
+      console.log('🔄 Attempting Prisma lead creation...')
+      
+      createdLead = await prisma.lead.create({
+        data: {
+          id: leadId,
+          name: String(data.name),
+          email: String(data.email),
+          phone: String(data.phone),
+          interest: 'RENT' as any,
+          propertyType: 'APARTMENT' as any,
+          maxPrice: 1000.0,
+          preferredCities: '[]',
+          preferredStates: '[]',
+          status: 'ACTIVE' as any,
+          companyId: String(userData.companyId),
+          userId: String(user.id),
+          needsFinancing: false
         }
       })
       
-      if (matchingResponse.ok) {
-        const result = await matchingResponse.json()
-        console.log('✅ Auto-matching concluído:', result.message)
-      } else {
-        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
-      }
-    } catch (error) {
-      console.log('❌ Erro no auto-matching:', error)
+      console.log('✅ Prisma lead created:', createdLead.id)
+      
+    } catch (prismaError) {
+      console.error('❌ Prisma failed, trying raw SQL fallback...')
+      console.error('Prisma error details:', prismaError)
+      
+      // Fallback to raw SQL if Prisma fails
+      const { Client } = require('pg')
+      const client = new Client({
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
+      })
+      
+      await client.connect()
+      
+      const insertQuery = `
+        INSERT INTO leads (
+          id, name, email, phone, interest, "propertyType", "maxPrice", 
+          "preferredCities", "preferredStates", status, "companyId", "userId", 
+          "needsFinancing", "createdAt", "updatedAt"
+        ) VALUES (
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
+        ) RETURNING *
+      `
+      
+      const values = [
+        leadId,
+        data.name,
+        data.email,
+        data.phone,
+        'RENT',
+        'APARTMENT', 
+        1000.0,
+        '[]',
+        '[]',
+        'ACTIVE',
+        userData.companyId,
+        user.id,
+        false
+      ]
+      
+      const result = await client.query(insertQuery, values)
+      await client.end()
+      
+      console.log('✅ Fallback SQL lead created:', result.rows[0].id)
+      createdLead = result.rows[0]
     }
 
-    return NextResponse.json(lead, { status: 201 })
+    console.log('Lead created successfully:', createdLead?.id)
+
+    // Skip auto-matching for now to avoid additional errors
+    // Will re-enable after basic creation works
+
+    return NextResponse.json(createdLead, { status: 201 })
   } catch (error) {
     console.error('Error creating lead:', error)
     if (error instanceof Error && error.message === 'Unauthorized') {
