@@ -138,6 +138,7 @@ export default function Payments() {
   }
 
   const calculateTotal = (payment) => {
+    if (!payment || !payment.amount) return 0
     if (!includeInterest) return payment.amount
 
     const today = new Date()
@@ -154,7 +155,12 @@ export default function Payments() {
 
   // Helper functions
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('pt-BR')
+    if (!dateString) return 'Data inválida'
+    try {
+      return new Date(dateString).toLocaleDateString('pt-BR')
+    } catch (error) {
+      return 'Data inválida'
+    }
   }
 
   const getStatusIcon = (status) => {
@@ -179,7 +185,7 @@ export default function Payments() {
       case 'pending':
         return 'Pendente'
       default:
-        return status
+        return status || 'Indefinido'
     }
   }
 
@@ -197,23 +203,35 @@ export default function Payments() {
   }
 
   const isOverdue = (dueDate) => {
-    const today = new Date()
-    const due = new Date(dueDate)
-    return today > due
+    if (!dueDate) return false
+    try {
+      const today = new Date()
+      const due = new Date(dueDate)
+      return today > due
+    } catch (error) {
+      return false
+    }
   }
 
   const getDaysOverdue = (dueDate) => {
-    const today = new Date()
-    const due = new Date(dueDate)
-    const diffTime = today.getTime() - due.getTime()
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
-    return diffDays > 0 ? diffDays : 0
+    if (!dueDate) return 0
+    try {
+      const today = new Date()
+      const due = new Date(dueDate)
+      const diffTime = today.getTime() - due.getTime()
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+      return diffDays > 0 ? diffDays : 0
+    } catch (error) {
+      return 0
+    }
   }
 
   const filteredPayments = payments.filter(payment => {
+    if (!payment || !payment.tenant || !payment.property) return false
+    
     const matchesSearch = 
-      payment.tenant.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      payment.property.title.toLowerCase().includes(searchTerm.toLowerCase())
+      payment.tenant.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
+      payment.property.title?.toLowerCase()?.includes(searchTerm.toLowerCase())
     
     const matchesStatus = filterStatus === 'all' || payment.status === filterStatus
 
@@ -223,15 +241,15 @@ export default function Payments() {
   // Stats calculation
   const stats = {
     total: payments.length,
-    pending: payments.filter(p => p.status === 'pending').length,
-    overdue: payments.filter(p => p.status === 'overdue').length,
-    paid: payments.filter(p => p.status === 'paid').length,
+    pending: payments.filter(p => p?.status === 'pending').length,
+    overdue: payments.filter(p => p?.status === 'overdue').length,
+    paid: payments.filter(p => p?.status === 'paid').length,
     totalAmount: payments
-      .filter(p => p.status === 'pending' || p.status === 'overdue')
-      .reduce((sum, p) => sum + p.amount, 0),
+      .filter(p => p?.status === 'pending' || p?.status === 'overdue')
+      .reduce((sum, p) => sum + (p?.amount || 0), 0),
     paidAmount: payments
-      .filter(p => p.status === 'paid')
-      .reduce((sum, p) => sum + p.amount, 0)
+      .filter(p => p?.status === 'paid')
+      .reduce((sum, p) => sum + (p?.amount || 0), 0)
   }
 
   if (loading) {
@@ -354,7 +372,7 @@ export default function Payments() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
                         <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                          {payment.property.title}
+                          {payment.property?.title || 'Título não disponível'}
                         </h3>
                         <div className="flex items-center space-x-2 ml-4">
                           {getStatusIcon(payment.status)}
@@ -368,26 +386,26 @@ export default function Payments() {
                           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Inquilino:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
                             <User className="w-4 h-4 mr-2" />
-                            <span className="truncate font-medium">{payment.tenant.name}</span>
+                            <span className="truncate font-medium">{payment.tenant?.name || 'Nome não disponível'}</span>
                           </div>
                         </div>
                         <div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vencimento:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
                             <Calendar className="w-4 h-4 mr-2" />
-                            <span className="truncate font-medium">{formatDate(payment.dueDate)}</span>
+                            <span className="truncate font-medium">{payment.dueDate ? formatDate(payment.dueDate) : 'Data não disponível'}</span>
                           </div>
                         </div>
                         <div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valor:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="font-bold">R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                            <span className="font-bold">R$ {(payment.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                           </div>
                         </div>
                         <div>
                           <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endereço:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="truncate text-sm">{payment.property.address}</span>
+                            <span className="truncate text-sm">{payment.property?.address || 'Endereço não disponível'}</span>
                           </div>
                         </div>
                       </div>
@@ -496,9 +514,9 @@ export default function Payments() {
             <h2>Confirmar Pagamento</h2>
             
             <div style={{ marginBottom: '20px' }}>
-              <p><strong>Inquilino:</strong> {selectedPayment.tenant?.name}</p>
-              <p><strong>Valor Original:</strong> R$ {selectedPayment.amount?.toFixed(2)}</p>
-              <p><strong>Vencimento:</strong> {new Date(selectedPayment.dueDate).toLocaleDateString('pt-BR')}</p>
+              <p><strong>Inquilino:</strong> {selectedPayment.tenant?.name || 'Nome não disponível'}</p>
+              <p><strong>Valor Original:</strong> R$ {(selectedPayment.amount || 0).toFixed(2)}</p>
+              <p><strong>Vencimento:</strong> {selectedPayment.dueDate ? formatDate(selectedPayment.dueDate) : 'Data não disponível'}</p>
             </div>
 
             <div style={{ marginBottom: '20px' }}>
@@ -511,7 +529,7 @@ export default function Payments() {
                   onChange={() => setIncludeInterest(true)}
                   style={{ marginRight: '8px' }}
                 />
-                Valor com multa e juros: R$ {calculateTotal(selectedPayment).toFixed(2)}
+                Valor com multa e juros: R$ {calculateTotal(selectedPayment)?.toFixed(2) || '0.00'}
               </label>
               
               <label style={{ display: 'block', marginBottom: '10px' }}>
@@ -522,7 +540,7 @@ export default function Payments() {
                   onChange={() => setIncludeInterest(false)}
                   style={{ marginRight: '8px' }}
                 />
-                Apenas valor original: R$ {selectedPayment.amount?.toFixed(2)}
+                Apenas valor original: R$ {(selectedPayment.amount || 0).toFixed(2)}
               </label>
             </div>
 
@@ -708,10 +726,10 @@ export default function Payments() {
             </div>
             
             <div style={{ marginBottom: '20px' }}>
-              <p><strong>Inquilino:</strong> {viewingReceipt.tenant.name}</p>
-              <p><strong>Imóvel:</strong> {viewingReceipt.property.title}</p>
-              <p><strong>Valor:</strong> R$ {viewingReceipt.amount.toFixed(2)}</p>
-              <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidAt ? new Date(viewingReceipt.paidAt).toLocaleDateString('pt-BR') : 'N/A'}</p>
+              <p><strong>Inquilino:</strong> {viewingReceipt.tenant?.name || 'Nome não disponível'}</p>
+              <p><strong>Imóvel:</strong> {viewingReceipt.property?.title || 'Título não disponível'}</p>
+              <p><strong>Valor:</strong> R$ {(viewingReceipt.amount || 0).toFixed(2)}</p>
+              <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidAt ? formatDate(viewingReceipt.paidAt) : 'N/A'}</p>
             </div>
 
             {viewingReceipt.receiptUrl && (
