@@ -123,11 +123,19 @@ export default function Payments() {
           // Normalizar status para sempre mostrar "Pago" em português
           status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           // Mapear receipts para receiptUrl para compatibilidade
-          receiptUrl: payment.receiptUrl || (payment.receipts ? (
-            typeof payment.receipts === 'string' 
-              ? JSON.parse(payment.receipts)?.[0]?.url 
-              : payment.receipts?.[0]?.url
-          ) : null),
+          receiptUrl: payment.receipts ? (() => {
+            try {
+              if (typeof payment.receipts === 'string') {
+                const parsed = JSON.parse(payment.receipts)
+                return parsed?.[0]?.url || null
+              } else {
+                return payment.receipts?.[0]?.url || null
+              }
+            } catch (error) {
+              console.warn('Erro ao parsear receipts:', error)
+              return null
+            }
+          })() : null,
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         }))
@@ -152,11 +160,19 @@ export default function Payments() {
           // Normalizar status para sempre mostrar "Pago" em português
           status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           // Mapear receipts para receiptUrl para compatibilidade
-          receiptUrl: payment.receiptUrl || (payment.receipts ? (
-            typeof payment.receipts === 'string' 
-              ? JSON.parse(payment.receipts)?.[0]?.url 
-              : payment.receipts?.[0]?.url
-          ) : null),
+          receiptUrl: payment.receipts ? (() => {
+            try {
+              if (typeof payment.receipts === 'string') {
+                const parsed = JSON.parse(payment.receipts)
+                return parsed?.[0]?.url || null
+              } else {
+                return payment.receipts?.[0]?.url || null
+              }
+            } catch (error) {
+              console.warn('Erro ao parsear receipts:', error)
+              return null
+            }
+          })() : null,
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         })).filter((payment: Payment) => payment.tenant?.name === tenantName)

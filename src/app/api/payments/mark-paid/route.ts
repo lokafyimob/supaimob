@@ -125,8 +125,7 @@ export async function POST(request: NextRequest) {
         amount: Math.round(finalAmount * 100) / 100, // Atualizar com valor total
         penalty: Math.round(penalty * 100) / 100,
         interest: Math.round(interest * 100) / 100,
-        receiptUrl: receiptUrl, // Salvar URL diretamente
-        receipts: receipts ? JSON.stringify(receipts) : null, // Manter compatibilidade
+        receipts: receipts ? JSON.stringify(receipts) : null, // Usar apenas receipts
         notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}${daysPastDue > 0 && !includeInterest ? ' - Pagamento sem juros por escolha' : ''}`
       },
       include: {
