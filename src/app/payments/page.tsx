@@ -12,7 +12,27 @@ import {
   Eye,
   X,
   FileText,
-  Download
+  Download,
+  Filter,
+  Receipt,
+  CreditCard,
+  TrendingUp,
+  Users,
+  Home,
+  ChevronRight,
+  Star,
+  MapPin,
+  Phone,
+  Mail,
+  Building,
+  Wallet,
+  BadgeCheck,
+  Timer,
+  ExternalLink,
+  Paperclip,
+  ImageIcon,
+  FileImage,
+  Zap
 } from 'lucide-react'
 
 interface Payment {
@@ -334,186 +354,285 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Enhanced Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-200/50 dark:border-blue-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Total de Pagamentos</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">{stats.total}</p>
+                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">Total de Pagamentos</p>
+                <p className="text-3xl font-bold text-blue-900 dark:text-white mt-2">{stats.total}</p>
+                <div className="flex items-center mt-2">
+                  <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+                  <span className="text-xs text-green-600 font-medium">+12% este mês</span>
+                </div>
               </div>
-              <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+              <div className="bg-blue-500 p-4 rounded-2xl shadow-lg">
+                <Receipt className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-amber-200/50 dark:border-amber-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Pendentes</p>
-                <p className="text-2xl font-bold text-yellow-900 dark:text-yellow-400 mt-2">{stats.pending}</p>
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Pendentes</p>
+                <p className="text-3xl font-bold text-amber-900 dark:text-white mt-2">{stats.pending}</p>
+                <div className="flex items-center mt-2">
+                  <Timer className="w-4 h-4 text-amber-500 mr-1" />
+                  <span className="text-xs text-amber-600 font-medium">Aguardando</span>
+                </div>
               </div>
-              <div className="bg-yellow-50 dark:bg-yellow-900/20 p-3 rounded-lg">
-                <Clock className="w-6 h-6 text-yellow-600 dark:text-yellow-400" />
+              <div className="bg-amber-500 p-4 rounded-2xl shadow-lg">
+                <Clock className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-red-200/50 dark:border-red-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Em Atraso</p>
-                <p className="text-2xl font-bold text-red-900 dark:text-red-400 mt-2">{stats.overdue}</p>
+                <p className="text-sm font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Em Atraso</p>
+                <p className="text-3xl font-bold text-red-900 dark:text-white mt-2">{stats.overdue}</p>
+                <div className="flex items-center mt-2">
+                  <AlertTriangle className="w-4 h-4 text-red-500 mr-1" />
+                  <span className="text-xs text-red-600 font-medium">Ação necessária</span>
+                </div>
               </div>
-              <div className="bg-red-50 dark:bg-red-900/20 p-3 rounded-lg">
-                <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+              <div className="bg-red-500 p-4 rounded-2xl shadow-lg">
+                <AlertTriangle className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-emerald-200/50 dark:border-emerald-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Valor em Aberto</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">Valor em Aberto</p>
+                <p className="text-2xl font-bold text-emerald-900 dark:text-white mt-2">
                   R$ {stats.totalAmount.toLocaleString('pt-BR')}
                 </p>
+                <div className="flex items-center mt-2">
+                  <Wallet className="w-4 h-4 text-emerald-500 mr-1" />
+                  <span className="text-xs text-emerald-600 font-medium">A receber</span>
+                </div>
               </div>
-              <div className="bg-purple-50 dark:bg-purple-900/20 p-3 rounded-lg">
-                <DollarSign className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+              <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg">
+                <DollarSign className="w-8 h-8 text-white" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-4">
+        {/* Enhanced Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filtros</h3>
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
+              <span>{filteredPayments.length} de {payments.length} resultados</span>
+            </div>
+          </div>
+          
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
             <div className="flex-1 relative">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
               <input
                 type="text"
-                placeholder="Buscar por inquilino ou imóvel..."
+                placeholder="Buscar por inquilino, imóvel ou endereço..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50"
               />
             </div>
-            <div className="flex space-x-4">
-              <select
-                value={filterStatus}
-                onChange={(e) => setFilterStatus(e.target.value)}
-                className="px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="all">Todos os Status</option>
-                <option value="pending">Pendente</option>
-                <option value="overdue">Em Atraso</option>
-                <option value="paid">Pago</option>
-              </select>
+            
+            <div className="flex flex-wrap gap-3">
+              <div className="relative">
+                <select
+                  value={filterStatus}
+                  onChange={(e) => setFilterStatus(e.target.value)}
+                  className="appearance-none px-4 py-3 pr-10 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium"
+                >
+                  <option value="all">🔍 Todos os Status</option>
+                  <option value="pending">⏱️ Pendentes</option>
+                  <option value="overdue">⚠️ Em Atraso</option>
+                  <option value="paid">✅ Pagos</option>
+                </select>
+                <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
+              </div>
+              
+              {(searchTerm || filterStatus !== 'all') && (
+                <button
+                  onClick={() => {
+                    setSearchTerm('')
+                    setFilterStatus('all')
+                  }}
+                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 font-medium"
+                >
+                  Limpar
+                </button>
+              )}
             </div>
           </div>
         </div>
 
-        {/* Payments List */}
-        <div className="space-y-4">
+        {/* Enhanced Payments List */}
+        <div className="space-y-6">
           {filteredPayments.map((payment) => {
             const daysOverdue = getDaysOverdue(payment.dueDate)
             const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid'
             
+            const getStatusGradient = (status: string) => {
+              switch (status) {
+                case 'paid':
+                  return 'from-emerald-500 to-green-600'
+                case 'overdue':
+                  return 'from-red-500 to-red-600'
+                case 'pending':
+                  return 'from-amber-500 to-orange-600'
+                default:
+                  return 'from-gray-500 to-gray-600'
+              }
+            }
+            
             return (
-              <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4 flex-1">
-                    <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
-                      <DollarSign className="w-5 h-5" style={{color: '#ff4352'}} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+              <div key={payment.id} className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+                {/* Status Bar */}
+                <div className={`h-1 bg-gradient-to-r ${getStatusGradient(payment.status)}`}></div>
+                
+                <div className="p-6">
+                  {/* Header */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center space-x-4">
+                      <div className="relative">
+                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center shadow-lg">
+                          <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        {payment.status === 'paid' && (
+                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <BadgeCheck className="w-4 h-4 text-white" />
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="flex-1">
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                             onClick={() => handleTenantClick(payment.tenant?.name || '')}>
                           {payment.tenant?.name || 'Nome não disponível'}
                         </h3>
-                        <div className="flex items-center space-x-2 ml-4">
-                          {getStatusIcon(payment.status)}
-                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
-                            {getStatusText(payment.status)}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
-                        <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endereço:</div>
-                          <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="truncate text-sm">{payment.property?.address || 'Endereço não disponível'}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vencimento:</div>
-                          <div className="flex items-center text-gray-900 dark:text-white">
-                            <Calendar className="w-4 h-4 mr-2" />
-                            <span className="truncate font-medium">{formatDate(payment.dueDate)}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valor:</div>
-                          <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="font-bold">R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                          </div>
-                        </div>
-                        <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Imóvel:</div>
-                          <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="truncate text-sm">{payment.property?.title || 'Título não disponível'}</span>
-                          </div>
+                        <div className="flex items-center mt-1 text-gray-500 dark:text-gray-400">
+                          <Home className="w-4 h-4 mr-2" />
+                          <span className="text-sm">{payment.property?.title || 'Título não disponível'}</span>
                         </div>
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                {paymentIsOverdue && (
-                  <div className="mt-2 bg-red-50 border border-red-200 rounded-lg p-2">
-                    <div className="flex items-center">
-                      <AlertTriangle className="w-4 h-4 text-red-600 mr-2" />
-                      <span className="text-xs text-red-800">
-                        Em atraso há {daysOverdue} dias
-                      </span>
+                    
+                    <div className="flex flex-col items-end">
+                      <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-lg bg-gradient-to-r ${getStatusGradient(payment.status)} text-white`}>
+                        {getStatusIcon(payment.status)}
+                        <span className="ml-2">{getStatusText(payment.status)}</span>
+                      </div>
+                      {paymentIsOverdue && (
+                        <div className="mt-2 flex items-center text-red-600 dark:text-red-400">
+                          <AlertTriangle className="w-4 h-4 mr-1" />
+                          <span className="text-xs font-medium">{daysOverdue} dias de atraso</span>
+                        </div>
+                      )}
                     </div>
                   </div>
-                )}
 
-                <div className="flex items-center justify-end mt-3">
-                  <div className="flex space-x-2">
-                    {payment.status === 'paid' && payment.receiptUrl && (
+                  {/* Details Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                      <div className="flex items-center mb-2">
+                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
+                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Endereço</span>
+                      </div>
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                        {payment.property?.address || 'Endereço não disponível'}
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
+                      <div className="flex items-center mb-2">
+                        <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
+                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Vencimento</span>
+                      </div>
+                      <p className="text-sm font-bold text-gray-900 dark:text-white">
+                        {formatDate(payment.dueDate)}
+                      </p>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-4 rounded-xl border border-green-200/50 dark:border-green-700/50">
+                      <div className="flex items-center mb-2">
+                        <CreditCard className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                        <span className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">Valor</span>
+                      </div>
+                      <p className="text-lg font-bold text-green-900 dark:text-white">
+                        R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center space-x-2">
+                      {payment.paidDate && (
+                        <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
+                          <CheckCircle className="w-4 h-4 mr-1 text-green-500" />
+                          <span>Pago em {formatDate(payment.paidDate)}</span>
+                        </div>
+                      )}
+                      {payment.paymentMethod && (
+                        <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-medium rounded-lg">
+                          {payment.paymentMethod}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center space-x-3">
+                      {payment.status === 'paid' && payment.receiptUrl && (
+                        <button 
+                          onClick={() => viewReceipt(payment)}
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                          title="Ver comprovante de pagamento"
+                        >
+                          <Receipt className="w-5 h-5 mr-2" />
+                          Ver Comprovante
+                          <ExternalLink className="w-4 h-4 ml-2" />
+                        </button>
+                      )}
+                      
+                      {payment.status === 'paid' && !payment.receiptUrl && (
+                        <div className="inline-flex items-center px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-xl text-sm font-medium">
+                          <FileText className="w-4 h-4 mr-2" />
+                          Sem comprovante
+                        </div>
+                      )}
+                      
+                      {payment.status !== 'paid' && (
+                        <button 
+                          onClick={() => {
+                            setSelectedPayment(payment)
+                            setShowModal(true)
+                          }}
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                          title="Marcar como pago"
+                        >
+                          <Zap className="w-5 h-5 mr-2" />
+                          Marcar como Pago
+                        </button>
+                      )}
+                      
                       <button 
-                        onClick={() => viewReceipt(payment)}
-                        className="inline-flex items-center px-3 py-2 bg-blue-50 text-blue-700 hover:bg-blue-100 rounded-lg transition-all duration-200 text-sm font-medium"
-                        title="Ver comprovante de pagamento"
+                        onClick={() => handleTenantClick(payment.tenant?.name || '')}
+                        className="p-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded-xl transition-all duration-200 hover:scale-105"
+                        title="Ver histórico completo"
                       >
-                        <Eye className="w-4 h-4 mr-2" />
-                        Ver Comprovante
+                        <Eye className="w-5 h-5" />
                       </button>
-                    )}
-                    {payment.status === 'paid' && !payment.receiptUrl && (
-                      <span className="inline-flex items-center px-3 py-2 bg-yellow-50 text-yellow-700 rounded-lg text-sm">
-                        <FileText className="w-4 h-4 mr-2" />
-                        Sem comprovante
-                      </span>
-                    )}
-                    {payment.status !== 'paid' && (
-                      <button 
-                        onClick={() => {
-                          setSelectedPayment(payment)
-                          setShowModal(true)
-                        }}
-                        className="inline-flex items-center px-3 py-2 bg-green-50 text-green-700 hover:bg-green-100 rounded-lg transition-all duration-200 text-sm font-medium"
-                        title="Marcar como pago"
-                      >
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        Marcar como Pago
-                      </button>
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -812,79 +931,177 @@ export default function Payments() {
           </div>
         )}
 
-        {/* Modal de Visualização de Comprovante */}
+        {/* Enhanced Receipt Modal */}
         {showReceiptModal && viewingReceipt && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                <h2 className="text-xl font-bold text-gray-900">Comprovante de Pagamento</h2>
-                <button
-                  onClick={() => {
-                    setShowReceiptModal(false)
-                    setViewingReceipt(null)
-                  }}
-                  className="text-gray-400 hover:text-gray-600"
-                >
-                  <X className="w-6 h-6" />
-                </button>
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
+                      <Receipt className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h2 className="text-2xl font-bold text-white">Comprovante de Pagamento</h2>
+                      <p className="text-blue-100">Detalhes da transação</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setShowReceiptModal(false)
+                      setViewingReceipt(null)
+                    }}
+                    className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-all duration-200"
+                  >
+                    <X className="w-5 h-5 text-white" />
+                  </button>
+                </div>
               </div>
               
-              <div className="p-6">
-                <div className="mb-4 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="font-medium mb-3">Detalhes do Pagamento</h3>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <p><strong>Inquilino:</strong> {viewingReceipt.tenant?.name || 'Nome não disponível'}</p>
-                    <p><strong>Imóvel:</strong> {viewingReceipt.property?.title || 'Título não disponível'}</p>
-                    <p><strong>Valor:</strong> R$ {viewingReceipt.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
-                    <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidDate ? formatDate(viewingReceipt.paidDate) : 'N/A'}</p>
-                    <p><strong>Vencimento:</strong> {formatDate(viewingReceipt.dueDate)}</p>
-                    <p><strong>Forma de Pagamento:</strong> {viewingReceipt.paymentMethod || 'N/A'}</p>
+              <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
+                {/* Payment Details Card */}
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 mb-6 border border-gray-200/50 dark:border-gray-600/50">
+                  <div className="flex items-center mb-4">
+                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                      <FileText className="w-4 h-4 text-white" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Detalhes do Pagamento</h3>
                   </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <Users className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Inquilino</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {viewingReceipt.tenant?.name || 'Nome não disponível'}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <Building className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Imóvel</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {viewingReceipt.property?.title || 'Título não disponível'}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <DollarSign className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Valor Pago</span>
+                      </div>
+                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                        R$ {viewingReceipt.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <CheckCircle className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Data do Pagamento</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {viewingReceipt.paidDate ? formatDate(viewingReceipt.paidDate) : 'N/A'}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <Calendar className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Vencimento</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {formatDate(viewingReceipt.dueDate)}
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-gray-500 dark:text-gray-400">
+                        <CreditCard className="w-4 h-4 mr-2" />
+                        <span className="text-sm font-medium">Forma de Pagamento</span>
+                      </div>
+                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                        {viewingReceipt.paymentMethod || 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                  
                   {viewingReceipt.notes && (
-                    <div className="mt-3">
-                      <p><strong>Observações:</strong></p>
-                      <p className="text-gray-600 italic">{viewingReceipt.notes}</p>
+                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
+                      <div className="flex items-start">
+                        <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" />
+                        <div>
+                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">Observações</h4>
+                          <p className="text-blue-700 dark:text-blue-200 italic">{viewingReceipt.notes}</p>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
 
+                {/* Receipt Display */}
                 {viewingReceipt.receiptUrl && (
-                  <div className="text-center border-2 border-dashed border-gray-300 rounded-lg p-6">
-                    <div className="flex justify-between items-center mb-4">
-                      <h3 className="font-medium">Comprovante</h3>
+                  <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-8">
+                    <div className="flex items-center justify-between mb-6">
+                      <div className="flex items-center">
+                        <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mr-3">
+                          <Paperclip className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
+                          <p className="text-sm text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
+                        </div>
+                      </div>
                       <a 
                         href={viewingReceipt.receiptUrl} 
                         download
-                        className="inline-flex items-center px-3 py-1 bg-green-600 text-white rounded text-sm hover:bg-green-700"
+                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
-                        <Download className="w-4 h-4 mr-1" />
+                        <Download className="w-4 h-4 mr-2" />
                         Download
                       </a>
                     </div>
                     
                     {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
-                      <div>
-                        <FileText size={48} className="mx-auto text-gray-400 mb-2" />
-                        <p className="text-gray-600 mb-3">Arquivo PDF</p>
+                      <div className="text-center py-12">
+                        <div className="w-24 h-24 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                          <FileText className="w-12 h-12 text-red-600 dark:text-red-400" />
+                        </div>
+                        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Documento PDF</h4>
+                        <p className="text-gray-600 dark:text-gray-400 mb-6">Clique no botão abaixo para visualizar o arquivo</p>
                         <a 
                           href={viewingReceipt.receiptUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
-                          <Eye className="w-4 h-4 mr-2" />
+                          <Eye className="w-5 h-5 mr-2" />
                           Abrir PDF
+                          <ExternalLink className="w-4 h-4 ml-2" />
                         </a>
                       </div>
                     ) : (
-                      <div>
-                        <img 
-                          src={viewingReceipt.receiptUrl} 
-                          alt="Comprovante de pagamento" 
-                          className="max-w-full max-h-96 mx-auto rounded border cursor-pointer"
-                          onClick={() => window.open(viewingReceipt.receiptUrl, '_blank')}
-                        />
-                        <p className="text-sm text-gray-500 mt-2">
+                      <div className="text-center">
+                        <div className="relative inline-block rounded-2xl overflow-hidden shadow-2xl">
+                          <img 
+                            src={viewingReceipt.receiptUrl} 
+                            alt="Comprovante de pagamento" 
+                            className="max-w-full max-h-96 cursor-pointer transition-transform duration-200 hover:scale-105"
+                            onClick={() => window.open(viewingReceipt.receiptUrl, '_blank')}
+                          />
+                          <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
+                            <div className="bg-white/90 rounded-full p-3">
+                              <ExternalLink className="w-6 h-6 text-gray-900" />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center">
+                          <ImageIcon className="w-4 h-4 mr-2" />
                           Clique na imagem para abrir em tamanho original
                         </p>
                       </div>
@@ -892,16 +1109,27 @@ export default function Payments() {
                   </div>
                 )}
 
-                <div className="flex justify-center mt-6">
+                {/* Action Buttons */}
+                <div className="flex items-center justify-center space-x-4 mt-8">
                   <button
                     onClick={() => {
                       setShowReceiptModal(false)
                       setViewingReceipt(null)
                     }}
-                    className="px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                    className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-xl transition-all duration-200 font-semibold"
                   >
                     Fechar
                   </button>
+                  {viewingReceipt.receiptUrl && (
+                    <a
+                      href={viewingReceipt.receiptUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-8 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                    >
+                      Abrir em Nova Aba
+                    </a>
+                  )}
                 </div>
               </div>
             </div>
