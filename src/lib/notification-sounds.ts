@@ -110,8 +110,14 @@ export class NotificationSounds {
     }
   }
 
+  // 🚨 Som de Alarme (Urgente)
+  playAlarmSound() {
+    // Alarme com frequências alternadas rápidas
+    this.playTone([1000, 800, 1000, 800, 1000], 0.6, 'square')
+  }
+
   // 🎯 Som por tipo de lead
-  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value') {
+  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm') {
     switch (type) {
       case 'match':
         this.playMatchSound()
@@ -136,6 +142,9 @@ export class NotificationSounds {
         break
       case 'high-value':
         this.playHighValueSound()
+        break
+      case 'alarm':
+        this.playAlarmSound()
         break
       default:
         this.playMatchSound()

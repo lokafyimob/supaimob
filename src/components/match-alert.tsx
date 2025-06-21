@@ -25,16 +25,16 @@ export function MatchAlert({ matches, onDismiss, onViewMatches }: MatchAlertProp
     if (matches.length > 0) {
       setIsVisible(true)
       
-      // 🎵 Play urgent sound when match alert appears
-      notificationSounds.playByType('urgent')
+      // 🚨 Play alarm sound when match alert appears
+      notificationSounds.playByType('alarm')
       
       // Auto-rotate through matches if there are multiple
       if (matches.length > 1) {
         const interval = setInterval(() => {
           setCurrentMatchIndex((prev) => {
             const newIndex = (prev + 1) % matches.length
-            // Play urgent sound for each new match
-            notificationSounds.playByType('urgent')
+            // Play alarm sound for each new match
+            notificationSounds.playByType('alarm')
             return newIndex
           })
         }, 4000) // Change every 4 seconds
