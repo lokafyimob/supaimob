@@ -1200,23 +1200,24 @@ export default function Payments() {
                 {/* Receipt Display */}
                 {viewingReceipt.receiptUrl ? (
                   <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-4">
-                    <div className="flex items-center justify-between mb-4">
+                    <div 
+                      className="flex items-center justify-between mb-4 cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg p-2 transition-all duration-200"
+                      onClick={() => downloadFile(viewingReceipt.receiptUrl, viewingReceipt.id, viewingReceipt.tenant?.name)}
+                      title="Clique para baixar o comprovante"
+                    >
                       <div className="flex items-center">
                         <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-2">
                           <Paperclip className="w-4 h-4 text-white" />
                         </div>
                         <div>
                           <h3 className="text-base font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
-                          <p className="text-xs text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Clique aqui para baixar o comprovante</p>
                         </div>
                       </div>
-                      <button
-                        onClick={() => downloadFile(viewingReceipt.receiptUrl, viewingReceipt.id, viewingReceipt.tenant?.name)}
-                        className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
-                      >
-                        <Download className="w-3 h-3 mr-1" />
-                        Salvar
-                      </button>
+                      <div className="flex items-center text-green-600 dark:text-green-400">
+                        <Download className="w-4 h-4 mr-1" />
+                        <span className="text-sm font-semibold">Baixar</span>
+                      </div>
                     </div>
                     
                     {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
