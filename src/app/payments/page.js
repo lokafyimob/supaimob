@@ -638,11 +638,16 @@ export default function Payments() {
                               <Eye className="w-4 h-4" />
                             </button>
                           )}
-                          {payment.status !== 'paid' && payment.status !== 'PAID' && (
+                          {(console.log('Payment status check:', payment.status, payment.status !== 'paid', payment.status !== 'PAID')) && payment.status !== 'paid' && payment.status !== 'PAID' && (
                             <button 
-                              onClick={() => {
+                              onClick={(e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                console.log('Button clicked for payment:', payment.id)
+                                console.log('Setting selectedPayment:', payment)
                                 setSelectedPayment(payment)
                                 setShowModal(true)
+                                console.log('showModal set to true')
                               }}
                               className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
                               title="Marcar como pago"
@@ -652,11 +657,16 @@ export default function Payments() {
                           )}
                         </div>
                         
-                        {payment.status !== 'paid' && payment.status !== 'PAID' && (
+                        {(console.log('Payment status check text button:', payment.status)) && payment.status !== 'paid' && payment.status !== 'PAID' && (
                           <button 
-                            onClick={() => {
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              console.log('Text button clicked for payment:', payment.id)
+                              console.log('Setting selectedPayment:', payment)
                               setSelectedPayment(payment)
                               setShowModal(true)
+                              console.log('showModal set to true')
                             }}
                             className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
                           >
@@ -686,7 +696,7 @@ export default function Payments() {
           </div>
         )}
 
-      {showModal && selectedPayment && (
+      {showModal && selectedPayment && (console.log('Rendering payment modal:', { showModal, selectedPayment: selectedPayment?.id })) && (
         <div style={{
           position: 'fixed',
           top: 0,
