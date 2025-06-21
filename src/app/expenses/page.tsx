@@ -66,6 +66,22 @@ export default function Expenses() {
     fetchExpenses()
   }, [filterYear, filterMonth])
 
+  const initializeExpensesTable = async () => {
+    try {
+      console.log('🔧 Initializing expenses table...')
+      const response = await fetch('/api/create-expenses-table', {
+        method: 'POST'
+      })
+      if (response.ok) {
+        console.log('✅ Expenses table initialized')
+        return true
+      }
+    } catch (error) {
+      console.error('Error initializing table:', error)
+    }
+    return false
+  }
+
   const fetchExpenses = async () => {
     try {
       setLoading(true)
@@ -73,6 +89,18 @@ export default function Expenses() {
       if (response.ok) {
         const data = await response.json()
         setExpenses(data)
+      } else {
+        // Se falhar, tentar inicializar a tabela
+        console.log('📊 Attempting to initialize expenses table...')
+        const initialized = await initializeExpensesTable()
+        if (initialized) {
+          // Tentar buscar novamente após inicializar
+          const retryResponse = await fetch(`/api/expenses?year=${filterYear}&month=${filterMonth}`)
+          if (retryResponse.ok) {
+            const data = await retryResponse.json()
+            setExpenses(data)
+          }
+        }
       }
     } catch (error) {
       console.error('Error fetching expenses:', error)
@@ -109,6 +137,37 @@ export default function Expenses() {
         alert(editingExpense ? 'Despesa atualizada!' : 'Despesa criada!')
       } else {
         const errorData = await response.json()
+        
+        // Se for erro de tabela não existir, tentar inicializar
+        if (errorData.error?.includes('table') || errorData.error?.includes('relation') || response.status === 500) {
+          console.log('🔧 Table may not exist, trying to initialize...')
+          const initialized = await initializeExpensesTable()
+          if (initialized) {
+            // Tentar submeter novamente
+            const retryResponse = await fetch(url, {
+              method,
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(formData)
+            })
+            
+            if (retryResponse.ok) {
+              await fetchExpenses()
+              setShowModal(false)
+              setEditingExpense(null)
+              setFormData({
+                description: '',
+                amount: '',
+                category: categories[0],
+                date: new Date().toISOString().split('T')[0],
+                type: 'operational',
+                notes: ''
+              })
+              alert(editingExpense ? 'Despesa atualizada!' : 'Despesa criada!')
+              return
+            }
+          }
+        }
+        
         alert(errorData.error || 'Erro ao salvar despesa')
       }
     } catch (error) {
