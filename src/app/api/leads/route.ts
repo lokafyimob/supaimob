@@ -53,7 +53,9 @@ export async function GET(request: NextRequest) {
       }
     })
   } catch (error) {
-    console.error('Error fetching leads:', error)
+    console.error('❌ UNEXPECTED ERROR in GET leads:', error)
+    console.error('Error stack:', error instanceof Error ? error.stack : 'No stack trace')
+    
     if (error instanceof Error && error.message === 'Unauthorized') {
       return NextResponse.json(
         { error: 'Não autorizado' },
@@ -61,7 +63,11 @@ export async function GET(request: NextRequest) {
       )
     }
     return NextResponse.json(
-      { error: 'Erro ao buscar leads', details: error instanceof Error ? error.message : 'Unknown error' },
+      { 
+        error: 'Erro ao buscar leads', 
+        details: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : 'No stack trace'
+      },
       { status: 500 }
     )
   }
