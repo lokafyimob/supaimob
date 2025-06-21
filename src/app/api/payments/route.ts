@@ -8,12 +8,19 @@ export async function GET(request: NextRequest) {
     const user = await requireAuth(request)
     console.log('👤 Usuário autenticado:', { id: user.id, email: user.email })
     
-    // Buscar pagamentos relacionados aos contratos ATIVOS do usuário
+    // Buscar pagamentos do mês atual relacionados aos contratos do usuário
+    const currentDate = new Date()
+    const currentYear = currentDate.getFullYear()
+    const currentMonth = currentDate.getMonth() + 1
+    
     const payments = await prisma.payment.findMany({
       where: {
         contract: {
-          userId: user.id,
-          status: 'ACTIVE'
+          userId: user.id
+        },
+        dueDate: {
+          gte: new Date(currentYear, currentMonth - 1, 1), // Primeiro dia do mês atual
+          lt: new Date(currentYear, currentMonth, 1) // Primeiro dia do próximo mês
         }
       },
       include: {
