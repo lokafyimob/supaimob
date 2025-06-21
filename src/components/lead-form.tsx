@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { X, Plus, Minus } from 'lucide-react'
-import { LocationSelector } from './location-selector'
+// import { LocationSelector } from './location-selector'
 
 interface LeadFormProps {
   isOpen: boolean
@@ -47,7 +47,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     maxArea: '',
     preferredCities: [''],
     preferredStates: [] as string[],
-    preferredLocation: null as any,
+    // preferredLocation: null as any,
     amenities: [] as string[],
     notes: '',
     status: 'ACTIVE',
@@ -183,10 +183,15 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     setLoading(true)
 
     try {
+      // Basic validation
+      if (!formData.name || !formData.email || !formData.phone || !formData.maxPrice) {
+        throw new Error('Campos obrigatórios não preenchidos')
+      }
+
       const submitData = {
         ...formData,
-        minPrice: formData.minPrice ? parseFloat(formData.minPrice) : null,
-        maxPrice: parseFloat(formData.maxPrice),
+        minPrice: formData.minPrice ? parseFloat(formData.minPrice.replace(/\D/g, '')) / 100 : null,
+        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')) / 100,
         minBedrooms: formData.minBedrooms ? parseInt(formData.minBedrooms) : null,
         maxBedrooms: formData.maxBedrooms ? parseInt(formData.maxBedrooms) : null,
         minBathrooms: formData.minBathrooms ? parseInt(formData.minBathrooms) : null,
@@ -194,8 +199,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         minArea: formData.minArea ? parseFloat(formData.minArea) : null,
         maxArea: formData.maxArea ? parseFloat(formData.maxArea) : null,
         preferredCities: formData.preferredCities.filter(city => city.trim() !== ''),
-        // preferredLocation: formData.preferredLocation ? JSON.stringify(formData.preferredLocation) : null,
-        // locationRadius: formData.preferredLocation?.radius || null,
+        preferredStates: formData.preferredStates,
         lastContactDate: formData.lastContactDate || null
       }
 
@@ -204,6 +208,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
       resetForm()
     } catch (error) {
       console.error('Error submitting form:', error)
+      alert(error instanceof Error ? error.message : 'Erro ao criar lead')
     } finally {
       setLoading(false)
     }

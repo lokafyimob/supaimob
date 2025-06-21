@@ -52,6 +52,8 @@ export async function POST(request: NextRequest) {
     const user = await requireAuth(request)
     const data = await request.json()
     
+    console.log('Creating lead with data:', JSON.stringify(data, null, 2))
+    
     // Get user's company
     const userData = await prisma.user.findUnique({
       where: { id: user.id },
@@ -59,9 +61,12 @@ export async function POST(request: NextRequest) {
     })
 
     if (!userData?.companyId) {
+      console.error('User company not found for user:', user.id)
       return NextResponse.json({ error: 'User company not found' }, { status: 400 })
     }
 
+    console.log('Creating lead in database...')
+    
     const lead = await prisma.lead.create({
       data: {
         name: data.name,
@@ -99,6 +104,8 @@ export async function POST(request: NextRequest) {
         }
       }
     })
+    
+    console.log('Lead created successfully:', lead.id)
 
     // Executar auto-matching
     try {
