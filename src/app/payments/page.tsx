@@ -92,6 +92,12 @@ export default function Payments() {
           ...payment,
           // Normalizar status para sempre mostrar "Pago" em português
           status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
+          // Mapear receipts para receiptUrl para compatibilidade
+          receiptUrl: payment.receiptUrl || (payment.receipts ? (
+            typeof payment.receipts === 'string' 
+              ? JSON.parse(payment.receipts)?.[0]?.url 
+              : payment.receipts?.[0]?.url
+          ) : null),
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         }))
@@ -115,6 +121,12 @@ export default function Payments() {
           ...payment,
           // Normalizar status para sempre mostrar "Pago" em português
           status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
+          // Mapear receipts para receiptUrl para compatibilidade
+          receiptUrl: payment.receiptUrl || (payment.receipts ? (
+            typeof payment.receipts === 'string' 
+              ? JSON.parse(payment.receipts)?.[0]?.url 
+              : payment.receipts?.[0]?.url
+          ) : null),
           property: payment.contract?.property || {},
           tenant: payment.contract?.tenant || {}
         })).filter((payment: Payment) => payment.tenant?.name === tenantName)
@@ -135,6 +147,18 @@ export default function Payments() {
   }
 
   const viewReceipt = (payment: Payment) => {
+    console.log('Visualizando comprovante:', {
+      paymentId: payment.id,
+      receiptUrl: payment.receiptUrl,
+      status: payment.status,
+      tenant: payment.tenant?.name
+    })
+    
+    if (!payment.receiptUrl) {
+      alert('⚠️ Nenhum comprovante foi anexado a este pagamento')
+      return
+    }
+    
     setViewingReceipt(payment)
     setShowReceiptModal(true)
   }
@@ -143,11 +167,25 @@ export default function Payments() {
     if (!selectedPayment || processingPayment) return
 
     setProcessingPayment(true)
+    
+    // Função para fechar modal e limpar dados
+    const closeModalAndReset = () => {
+      setShowModal(false)
+      setSelectedPayment(null)
+      setNotes('')
+      setPaymentMethod('dinheiro')
+      setIncludeInterest(true)
+      setUploadedFile(null)
+      setUploadedFileUrl('')
+      setProcessingPayment(false)
+    }
+
     try {
       let receiptUrl = ''
       
       if (uploadedFile) {
-        receiptUrl = uploadedFileUrl || URL.createObjectURL(uploadedFile)
+        // Criar uma URL temporária para o arquivo
+        receiptUrl = URL.createObjectURL(uploadedFile)
       }
 
       const response = await fetch('/api/payments/mark-paid', {
@@ -158,40 +196,39 @@ export default function Payments() {
           paymentMethod,
           notes,
           includeInterest,
-          receiptUrl
+          receipts: receiptUrl ? [{ url: receiptUrl, type: uploadedFile?.type || 'unknown' }] : null
         })
       })
 
       if (response.ok) {
+        // Atualizar dados
         await fetchPayments()
         
         if (showAllMonths && selectedTenant) {
           await fetchAllPaymentsByTenant(selectedTenant)
         }
         
-        setShowModal(false)
-        setSelectedPayment(null)
-        setNotes('')
-        setPaymentMethod('dinheiro')
-        setIncludeInterest(true)
-        setUploadedFile(null)
-        setUploadedFileUrl('')
+        // Fechar modal primeiro
+        closeModalAndReset()
         
+        // Mostrar feedback de sucesso
+        alert('✅ Pagamento marcado como pago com sucesso!')
+        
+        // Manter modal de histórico aberto se estava aberto
         if (selectedTenant) {
           setShowAllMonths(true)
         }
         
-        alert('Pagamento marcado como pago!')
       } else {
         const errorData = await response.json()
-        alert(errorData.error || 'Erro ao marcar pagamento como pago')
+        alert('❌ ' + (errorData.error || 'Erro ao marcar pagamento como pago'))
+        closeModalAndReset()
       }
       
     } catch (error) {
       console.error('Erro ao marcar pagamento:', error)
-      alert('Erro ao processar pagamento')
-    } finally {
-      setProcessingPayment(false)
+      alert('❌ Erro ao processar pagamento. Tente novamente.')
+      closeModalAndReset()
     }
   }
 
@@ -200,23 +237,27 @@ export default function Payments() {
     if (file) {
       const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
       if (!allowedTypes.includes(file.type)) {
-        alert('Apenas arquivos JPG, PNG ou PDF são permitidos')
+        alert('⚠️ Apenas arquivos JPG, PNG ou PDF são permitidos')
         return
       }
       
       if (file.size > 5 * 1024 * 1024) {
-        alert('Arquivo muito grande. Tamanho máximo: 5MB')
+        alert('⚠️ Arquivo muito grande. Tamanho máximo: 5MB')
         return
       }
       
       setUploadedFile(file)
       
-      if (file.type.startsWith('image/')) {
-        const url = URL.createObjectURL(file)
-        setUploadedFileUrl(url)
-      } else {
-        setUploadedFileUrl('')
-      }
+      // Criar URL de preview para todos os tipos de arquivo
+      const url = URL.createObjectURL(file)
+      setUploadedFileUrl(url)
+      
+      console.log('Arquivo carregado:', {
+        name: file.name,
+        type: file.type,
+        size: file.size,
+        url: url
+      })
     }
   }
 
@@ -1061,7 +1102,7 @@ export default function Payments() {
                 </div>
 
                 {/* Receipt Display */}
-                {viewingReceipt.receiptUrl && (
+                {viewingReceipt.receiptUrl ? (
                   <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-8">
                     <div className="flex items-center justify-between mb-6">
                       <div className="flex items-center">
@@ -1071,6 +1112,7 @@ export default function Payments() {
                         <div>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
+                          <p className="text-xs text-blue-600 font-mono mt-1 break-all">URL: {viewingReceipt.receiptUrl}</p>
                         </div>
                       </div>
                       <a 
@@ -1122,6 +1164,16 @@ export default function Payments() {
                         </p>
                       </div>
                     )}
+                  </div>
+                ) : (
+                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl border-2 border-dashed border-amber-300 dark:border-amber-600 p-8 text-center">
+                    <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
+                      <FileText className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Nenhum comprovante anexado</h3>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      Este pagamento foi marcado como pago mas não possui comprovante anexado.
+                    </p>
                   </div>
                 )}
 
