@@ -104,19 +104,18 @@ export async function POST(request: NextRequest) {
     // Executar auto-matching
     try {
       console.log('🤖 Executando auto-matching...')
-      const matchingResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auto-matching`, {
-        method: 'POST',
-        headers: {
-          'Cookie': request.headers.get('Cookie') || ''
-        }
-      })
       
-      if (matchingResponse.ok) {
-        const result = await matchingResponse.json()
-        console.log('✅ Auto-matching concluído:', result.message)
-      } else {
-        console.log('⚠️ Auto-matching falhou:', matchingResponse.status)
+      // Import the raw SQL matching service
+      const { checkForPropertyMatches } = require('@/lib/property-matching-service')
+      
+      // Execute matching for the new property
+      const matchResults = await checkForPropertyMatches(property.id)
+      console.log('✅ Property auto-matching executado:', matchResults)
+      
+      if (matchResults?.matchCount > 0) {
+        console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados para nova propriedade!`)
       }
+      
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
     }
