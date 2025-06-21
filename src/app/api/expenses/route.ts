@@ -1,23 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
+import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
+    // Verificar autenticação
+    const user = await requireAuth(request)
+    
     const { searchParams } = new URL(request.url)
     const year = searchParams.get('year')
     const month = searchParams.get('month')
 
-    let whereClause: any = {}
+    let whereClause: any = {
+      userId: user.id // Filtrar por usuário
+    }
     
     if (year && month) {
-      whereClause = {
-        year: parseInt(year),
-        month: parseInt(month)
-      }
+      whereClause.year = parseInt(year)
+      whereClause.month = parseInt(month)
     } else if (year) {
-      whereClause = {
-        year: parseInt(year)
-      }
+      whereClause.year = parseInt(year)
     }
 
     const expenses = await prisma.expense.findMany({
@@ -41,6 +43,10 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Creating new expense')
+    
+    // Verificar autenticação
+    const user = await requireAuth(request)
+    console.log('👤 User authenticated:', user.email)
     
     const body = await request.json()
     const { description, amount, category, date, type = 'operational', receipt, notes } = body
@@ -71,7 +77,9 @@ export async function POST(request: NextRequest) {
         month,
         type,
         receipt: receipt || null,
-        notes: notes || null
+        notes: notes || null,
+        userId: user.id,
+        companyId: user.companyId || null
       }
     })
 

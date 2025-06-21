@@ -5,14 +5,14 @@ export async function POST(request: NextRequest) {
   try {
     console.log('🔄 Creating expenses table...')
     
-    // Create the expenses table using raw SQL
+    // Create the expenses table using raw SQL - PostgreSQL compatible
     await prisma.$executeRaw`
       CREATE TABLE IF NOT EXISTS "expenses" (
         "id" TEXT NOT NULL PRIMARY KEY,
         "description" TEXT NOT NULL,
-        "amount" REAL NOT NULL,
+        "amount" DECIMAL(10,2) NOT NULL,
         "category" TEXT NOT NULL,
-        "date" DATETIME NOT NULL,
+        "date" TIMESTAMP NOT NULL,
         "year" INTEGER NOT NULL,
         "month" INTEGER NOT NULL,
         "type" TEXT NOT NULL DEFAULT 'operational',
@@ -20,8 +20,8 @@ export async function POST(request: NextRequest) {
         "notes" TEXT,
         "companyId" TEXT,
         "userId" TEXT,
-        "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-        "updatedAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        "createdAt" TIMESTAMP NOT NULL DEFAULT NOW(),
+        "updatedAt" TIMESTAMP NOT NULL DEFAULT NOW()
       );
     `
     
