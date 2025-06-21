@@ -4,11 +4,6 @@ import { requireAuth } from '@/lib/auth-middleware'
 export async function POST(request: NextRequest) {
   try {
     const user = await requireAuth(request)
-    const { leadId, propertyId } = await request.json()
-    
-    if (!leadId) {
-      return NextResponse.json({ error: 'Lead ID obrigatório' }, { status: 400 })
-    }
     
     const { Client } = require('pg')
     const client = new Client({
@@ -18,87 +13,64 @@ export async function POST(request: NextRequest) {
     
     await client.connect()
     
-    // Verificar se lead existe
-    const leadCheck = await client.query('SELECT id, name FROM leads WHERE id = $1', [leadId])
-    if (leadCheck.rows.length === 0) {
+    // Buscar primeiro lead do usuário
+    const leadQuery = `SELECT id, name, phone, interest FROM leads WHERE "userId" = $1 LIMIT 1`
+    const leadResult = await client.query(leadQuery, [user.id])
+    
+    if (leadResult.rows.length === 0) {
       await client.end()
-      return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 })
+      return NextResponse.json({ error: 'Nenhum lead encontrado' }, { status: 400 })
     }
     
-    // Verificar estrutura da tabela lead_notifications
-    const structureQuery = `
-      SELECT column_name, data_type, is_nullable 
-      FROM information_schema.columns 
-      WHERE table_name = 'lead_notifications' 
-      ORDER BY ordinal_position
+    // Buscar primeira propriedade do usuário
+    const propertyQuery = `SELECT id, title, "rentPrice", "salePrice" FROM properties WHERE "userId" = $1 LIMIT 1`
+    const propertyResult = await client.query(propertyQuery, [user.id])
+    
+    if (propertyResult.rows.length === 0) {
+      await client.end()
+      return NextResponse.json({ error: 'Nenhuma propriedade encontrada' }, { status: 400 })
+    }
+    
+    const lead = leadResult.rows[0]
+    const property = propertyResult.rows[0]
+    
+    // Criar notificação de TESTE
+    const notificationId = 'TEST_' + Date.now()
+    
+    const insertQuery = `
+      INSERT INTO lead_notifications (
+        id, "leadId", "propertyId", type, title, message, sent, "createdAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
+      RETURNING *
     `
-    const structureResult = await client.query(structureQuery)
     
-    console.log('📋 Estrutura da tabela lead_notifications:', structureResult.rows)
+    const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
     
-    // Buscar uma propriedade qualquer para teste
-    let testPropertyId = propertyId
-    if (!testPropertyId) {
-      const propResult = await client.query('SELECT id FROM properties WHERE "userId" = $1 LIMIT 1', [user.id])
-      if (propResult.rows.length > 0) {
-        testPropertyId = propResult.rows[0].id
-      }
-    }
+    const insertResult = await client.query(insertQuery, [
+      notificationId,
+      lead.id,
+      property.id,
+      'PROPERTY_MATCH',
+      `🚨 TESTE: Match para ${lead.name}`,
+      `Notificação de teste. Lead: ${lead.name} x Propriedade: ${property.title}. Preço: R$ ${price}`,
+      false  // NÃO ENVIADA - deve aparecer na interface
+    ])
     
-    if (!testPropertyId) {
-      await client.end()
-      return NextResponse.json({ error: 'Nenhuma propriedade encontrada para teste' }, { status: 400 })
-    }
+    await client.end()
     
-    // Tentar criar uma notificação de teste
-    const notificationId = 'test_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+    console.log('🚨 NOTIFICAÇÃO DE TESTE CRIADA:', insertResult.rows[0])
     
-    try {
-      const insertResult = await client.query(`
-        INSERT INTO lead_notifications (
-          id, "leadId", "propertyId", type, title, message, sent, "createdAt"
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-        RETURNING *
-      `, [
-        notificationId,
-        leadId,
-        testPropertyId,
-        'PROPERTY_MATCH',
-        'Teste de Notificação',
-        'Esta é uma notificação de teste para verificar se o sistema funciona',
-        false
-      ])
-      
-      console.log('✅ Notificação de teste criada:', insertResult.rows[0])
-      
-      // Verificar se foi realmente criada
-      const verifyResult = await client.query('SELECT * FROM lead_notifications WHERE id = $1', [notificationId])
-      
-      await client.end()
-      
-      return NextResponse.json({
-        success: true,
-        message: 'Notificação de teste criada com sucesso',
-        notification: insertResult.rows[0],
-        verified: verifyResult.rows.length > 0,
-        tableStructure: structureResult.rows
-      })
-      
-    } catch (insertError) {
-      console.error('❌ Erro ao inserir notificação:', insertError)
-      await client.end()
-      
-      return NextResponse.json({
-        error: 'Erro ao criar notificação de teste',
-        details: insertError instanceof Error ? insertError.message : 'Unknown error',
-        tableStructure: structureResult.rows
-      }, { status: 500 })
-    }
+    return NextResponse.json({
+      success: true,
+      message: 'Notificação de teste criada!',
+      notification: insertResult.rows[0],
+      instructions: 'Agora vá para a página de leads e veja se o alerta aparece em até 5 segundos!'
+    })
     
   } catch (error) {
-    console.error('❌ Erro geral:', error)
+    console.error('❌ Erro ao criar notificação de teste:', error)
     return NextResponse.json({
-      error: 'Erro no teste de notificação',
+      error: 'Erro ao criar notificação de teste',
       details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
