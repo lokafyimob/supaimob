@@ -87,10 +87,10 @@ export async function PUT(
     // Executar auto-matching após edição
     try {
       console.log('🤖 Propriedade editada, executando auto-matching...')
-      console.log('📋 Propriedade atualizada ID:', updatedProperty.id)
+      console.log('📋 Propriedade atualizada ID:', property.id)
       
       // Execute matching for the updated property
-      const matchResults = await checkForPropertyMatches(updatedProperty.id)
+      const matchResults = await checkForPropertyMatches(property.id)
       console.log('✅ Property auto-matching executado:', matchResults)
       
       if (matchResults?.matchCount > 0) {
