@@ -243,7 +243,7 @@ export default function Financial() {
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white text-sm">{item.property}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {item.tenant} • Taxa: {item.adminFeePercentage}% + {item.managementFeePercentage}%
+                            {item.tenant} • Taxa: {item.adminFeePercentage}%
                           </p>
                           <p className="text-xs text-blue-600 dark:text-blue-400">
                             Aluguel: {formatCurrency(item.rentAmount)} → Taxa: {formatCurrency(item.totalFee)}

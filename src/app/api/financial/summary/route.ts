@@ -40,21 +40,19 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Calcular receitas das taxas de administração - APENAS AS TAXAS, NÃO O VALOR TOTAL DO ALUGUEL
+    // Calcular receitas das taxas de administração - APENAS A TAXA CONFIGURADA NO CONTRATO
     let totalRevenue = 0
     const revenueBreakdown = paidPayments.map(payment => {
+      // Usar apenas a taxa de administração configurada (não somar com management fee)
       const adminFee = (payment.amount * payment.contract.administrationFeePercentage) / 100
-      const managementFee = (payment.amount * payment.contract.managementFeePercentage) / 100
-      const totalFee = adminFee + managementFee // APENAS AS TAXAS DE ADMINISTRAÇÃO
+      const totalFee = adminFee // APENAS A TAXA DE ADMINISTRAÇÃO
       
       totalRevenue += totalFee
       
       console.log(`📋 Pagamento ${payment.id}:`, {
         aluguel: payment.amount,
         taxaAdmin: payment.contract.administrationFeePercentage + '%',
-        taxaGestao: payment.contract.managementFeePercentage + '%', 
         valorTaxaAdmin: adminFee,
-        valorTaxaGestao: managementFee,
         totalTaxas: totalFee,
         inquilino: payment.contract.tenant.name,
         propriedade: payment.contract.property.title
@@ -66,9 +64,7 @@ export async function GET(request: NextRequest) {
         tenant: payment.contract.tenant.name,
         rentAmount: payment.amount,
         adminFeePercentage: payment.contract.administrationFeePercentage,
-        managementFeePercentage: payment.contract.managementFeePercentage,
         adminFee,
-        managementFee,
         totalFee,
         paidDate: payment.paidDate
       }
@@ -79,7 +75,7 @@ export async function GET(request: NextRequest) {
       propriedade: r.property,
       aluguel: r.rentAmount,
       taxa: r.totalFee,
-      percentual: `${r.adminFeePercentage}% + ${r.managementFeePercentage}%`
+      percentual: `${r.adminFeePercentage}%`
     })))
     
     // 2. DESPESAS DO MÊS - Gastos registrados no sistema
@@ -123,8 +119,8 @@ export async function GET(request: NextRequest) {
     let previousRevenue = 0
     previousPaidPayments.forEach(payment => {
       const adminFee = (payment.amount * payment.contract.administrationFeePercentage) / 100
-      const managementFee = (payment.amount * payment.contract.managementFeePercentage) / 100
-      previousRevenue += adminFee + managementFee
+      // Usar apenas a taxa de administração (não somar management fee)
+      previousRevenue += adminFee
     })
     
     // Despesas mês anterior
