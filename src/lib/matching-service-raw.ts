@@ -5,6 +5,7 @@
 export async function checkForMatchesRaw(leadId: string) {
   try {
     console.log(`🔍 Verificando matches para lead: ${leadId} (SQL RAW)`)
+    console.log('🔧 DATABASE_URL definida:', !!process.env.DATABASE_URL)
     
     const { Client } = require('pg')
     const client = new Client({
@@ -13,6 +14,7 @@ export async function checkForMatchesRaw(leadId: string) {
     })
     
     await client.connect()
+    console.log('✅ Conectado ao banco de dados para matching')
     
     // Get lead details
     const leadQuery = `
@@ -71,10 +73,16 @@ export async function checkForMatchesRaw(leadId: string) {
       console.log('📋 Propriedades encontradas:', userPropertiesResult.rows.map(p => ({
         id: p.id,
         title: p.title,
-        price: p.price,
-        isForRent: p.isForRent,
-        isForSale: p.isForSale
+        rentPrice: p.rentPrice,
+        salePrice: p.salePrice,
+        propertyType: p.propertyType,
+        status: p.status
       })))
+    } else {
+      // Verificar se existem propriedades do usuário (sem filtros)
+      const allUserPropsQuery = `SELECT COUNT(*) as count FROM properties WHERE "userId" = $1`
+      const allUserPropsResult = await client.query(allUserPropsQuery, [lead.userId])
+      console.log(`📊 Total de propriedades do usuário (sem filtros): ${allUserPropsResult.rows[0].count}`)
     }
     
     // Create notifications for matches
