@@ -236,7 +236,7 @@ export default function Leads() {
 
   const fetchPartnershipNotifications = async () => {
     try {
-      const response = await fetch('/api/partnerships/notifications')
+      const response = await fetch('/api/partnerships/notifications-raw')
       if (response.ok) {
         const data = await response.json()
         if (data.success && data.notifications.length > 0) {
@@ -251,7 +251,7 @@ export default function Leads() {
   const detectPartnerships = async () => {
     try {
       console.log('🤝 Detecting partnership opportunities...')
-      const response = await fetch('/api/partnerships/detect', {
+      const response = await fetch('/api/partnerships/detect-raw', {
         method: 'POST'
       })
       console.log('🤝 Partnership detection response status:', response.status)
