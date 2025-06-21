@@ -43,12 +43,8 @@ export async function checkForPropertyMatches(propertyId: string) {
         AND l.status = 'ACTIVE'
         AND l."propertyType" = $2
         AND (
-          (l.interest = 'RENT' AND $3 IS NOT NULL) OR
-          (l.interest = 'BUY' AND $4 IS NOT NULL)
-        )
-        AND (
-          (l.interest = 'RENT' AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
-          (l.interest = 'BUY' AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
+          (l.interest = 'RENT' AND $3 > 0 AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
+          (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
         )
     `
     
@@ -144,12 +140,8 @@ export async function checkForPropertyMatches(propertyId: string) {
           AND l.status = 'ACTIVE'
           AND l."propertyType" = $2
           AND (
-            (l.interest = 'RENT' AND $3 IS NOT NULL) OR
-            (l.interest = 'BUY' AND $4 IS NOT NULL)
-          )
-          AND (
-            (l.interest = 'RENT' AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
-            (l.interest = 'BUY' AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
+            (l.interest = 'RENT' AND $3 > 0 AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
+            (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
           )
         LIMIT 10
       `
