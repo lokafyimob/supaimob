@@ -229,6 +229,7 @@ export default function Payments() {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
+      case 'pago':
       case 'paid':
         return <CheckCircle className="w-5 h-5 text-green-600" />
       case 'overdue':
@@ -242,6 +243,7 @@ export default function Payments() {
 
   const getStatusText = (status: string) => {
     switch (status) {
+      case 'pago':
       case 'paid':
         return 'Pago'
       case 'overdue':
@@ -255,6 +257,7 @@ export default function Payments() {
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case 'pago':
       case 'paid':
         return 'bg-green-100 text-green-800'
       case 'overdue':
@@ -313,7 +316,9 @@ export default function Payments() {
       payment.tenant.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       payment.property.title?.toLowerCase()?.includes(searchTerm.toLowerCase())
     
-    const matchesStatus = filterStatus === 'all' || payment.status === filterStatus
+    const matchesStatus = filterStatus === 'all' || 
+                         payment.status === filterStatus || 
+                         (filterStatus === 'paid' && payment.status === 'pago')
 
     return matchesSearch && matchesStatus
   })
@@ -322,12 +327,12 @@ export default function Payments() {
     total: payments.length,
     pending: payments.filter(p => p?.status === 'pending').length,
     overdue: payments.filter(p => p?.status === 'overdue').length,
-    paid: payments.filter(p => p?.status === 'paid').length,
+    paid: payments.filter(p => p?.status === 'paid' || p?.status === 'pago').length,
     totalAmount: payments
       .filter(p => p?.status === 'pending' || p?.status === 'overdue')
       .reduce((sum, p) => sum + (p?.amount || 0), 0),
     paidAmount: payments
-      .filter(p => p?.status === 'paid')
+      .filter(p => p?.status === 'paid' || p?.status === 'pago')
       .reduce((sum, p) => sum + (p?.amount || 0), 0)
   }
 
@@ -481,10 +486,11 @@ export default function Payments() {
         <div className="space-y-6">
           {filteredPayments.map((payment) => {
             const daysOverdue = getDaysOverdue(payment.dueDate)
-            const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid'
+            const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid' && payment.status !== 'pago'
             
             const getStatusGradient = (status: string) => {
               switch (status) {
+                case 'pago':
                 case 'paid':
                   return 'from-emerald-500 to-green-600'
                 case 'overdue':
@@ -501,82 +507,82 @@ export default function Payments() {
                 {/* Status Bar */}
                 <div className={`h-1 bg-gradient-to-r ${getStatusGradient(payment.status)}`}></div>
                 
-                <div className="p-6">
-                  {/* Header */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center space-x-4">
+                <div className="p-4">
+                  {/* Header - More Compact */}
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center shadow-lg">
-                          <Users className="w-8 h-8 text-blue-600 dark:text-blue-400" />
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center shadow-md">
+                          <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                         </div>
-                        {payment.status === 'paid' && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                            <BadgeCheck className="w-4 h-4 text-white" />
+                        {(payment.status === 'paid' || payment.status === 'pago') && (
+                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
+                            <BadgeCheck className="w-3 h-3 text-white" />
                           </div>
                         )}
                       </div>
                       
                       <div className="flex-1">
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                        <h3 className="text-lg font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
                             onClick={() => handleTenantClick(payment.tenant?.name || '')}>
                           {payment.tenant?.name || 'Nome não disponível'}
                         </h3>
-                        <div className="flex items-center mt-1 text-gray-500 dark:text-gray-400">
-                          <Home className="w-4 h-4 mr-2" />
-                          <span className="text-sm">{payment.property?.title || 'Título não disponível'}</span>
+                        <div className="flex items-center text-gray-500 dark:text-gray-400">
+                          <Home className="w-3 h-3 mr-1" />
+                          <span className="text-xs">{payment.property?.title || 'Título não disponível'}</span>
                         </div>
                       </div>
                     </div>
                     
                     <div className="flex flex-col items-end">
-                      <div className={`inline-flex items-center px-4 py-2 rounded-full text-sm font-bold shadow-lg bg-gradient-to-r ${getStatusGradient(payment.status)} text-white`}>
+                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-md bg-gradient-to-r ${getStatusGradient(payment.status)} text-white`}>
                         {getStatusIcon(payment.status)}
-                        <span className="ml-2">{getStatusText(payment.status)}</span>
+                        <span className="ml-1">{getStatusText(payment.status)}</span>
                       </div>
                       {paymentIsOverdue && (
-                        <div className="mt-2 flex items-center text-red-600 dark:text-red-400">
-                          <AlertTriangle className="w-4 h-4 mr-1" />
-                          <span className="text-xs font-medium">{daysOverdue} dias de atraso</span>
+                        <div className="mt-1 flex items-center text-red-600 dark:text-red-400">
+                          <AlertTriangle className="w-3 h-3 mr-1" />
+                          <span className="text-xs font-medium">{daysOverdue} dias</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Details Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                      <div className="flex items-center mb-2">
-                        <MapPin className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
-                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Endereço</span>
+                  {/* Details Grid - More Compact */}
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                      <div className="flex items-center mb-1">
+                        <MapPin className="w-3 h-3 text-gray-500 dark:text-gray-400 mr-1" />
+                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Local</span>
                       </div>
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                      <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                         {payment.property?.address || 'Endereço não disponível'}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-4 rounded-xl">
-                      <div className="flex items-center mb-2">
-                        <Calendar className="w-4 h-4 text-gray-500 dark:text-gray-400 mr-2" />
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                      <div className="flex items-center mb-1">
+                        <Calendar className="w-3 h-3 text-gray-500 dark:text-gray-400 mr-1" />
                         <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Vencimento</span>
                       </div>
-                      <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      <p className="text-xs font-bold text-gray-900 dark:text-white">
                         {formatDate(payment.dueDate)}
                       </p>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-4 rounded-xl border border-green-200/50 dark:border-green-700/50">
-                      <div className="flex items-center mb-2">
-                        <CreditCard className="w-4 h-4 text-green-600 dark:text-green-400 mr-2" />
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-3 rounded-lg border border-green-200/50 dark:border-green-700/50">
+                      <div className="flex items-center mb-1">
+                        <CreditCard className="w-3 h-3 text-green-600 dark:text-green-400 mr-1" />
                         <span className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">Valor</span>
                       </div>
-                      <p className="text-lg font-bold text-green-900 dark:text-white">
+                      <p className="text-sm font-bold text-green-900 dark:text-white">
                         R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
 
-                  {/* Action Buttons */}
-                  <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                  {/* Action Buttons - More Compact */}
+                  <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-2">
                       {payment.paidDate && (
                         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
@@ -592,45 +598,44 @@ export default function Payments() {
                     </div>
                     
                     <div className="flex items-center space-x-3">
-                      {payment.status === 'paid' && payment.receiptUrl && (
+                      {(payment.status === 'paid' || payment.status === 'pago') && payment.receiptUrl && (
                         <button 
                           onClick={() => viewReceipt(payment)}
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-xs font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                           title="Ver comprovante de pagamento"
                         >
-                          <Receipt className="w-5 h-5 mr-2" />
+                          <Receipt className="w-4 h-4 mr-1" />
                           Ver Comprovante
-                          <ExternalLink className="w-4 h-4 ml-2" />
                         </button>
                       )}
                       
-                      {payment.status === 'paid' && !payment.receiptUrl && (
-                        <div className="inline-flex items-center px-4 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-xl text-sm font-medium">
-                          <FileText className="w-4 h-4 mr-2" />
+                      {(payment.status === 'paid' || payment.status === 'pago') && !payment.receiptUrl && (
+                        <div className="inline-flex items-center px-3 py-2 bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 rounded-lg text-xs font-medium">
+                          <FileText className="w-3 h-3 mr-1" />
                           Sem comprovante
                         </div>
                       )}
                       
-                      {payment.status !== 'paid' && (
+                      {payment.status !== 'paid' && payment.status !== 'pago' && (
                         <button 
                           onClick={() => {
                             setSelectedPayment(payment)
                             setShowModal(true)
                           }}
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-xl transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 text-white rounded-lg transition-all duration-200 text-xs font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                           title="Marcar como pago"
                         >
-                          <Zap className="w-5 h-5 mr-2" />
+                          <Zap className="w-4 h-4 mr-1" />
                           Marcar como Pago
                         </button>
                       )}
                       
                       <button 
                         onClick={() => handleTenantClick(payment.tenant?.name || '')}
-                        className="p-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded-xl transition-all duration-200 hover:scale-105"
+                        className="p-2 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-400 rounded-lg transition-all duration-200 hover:scale-105"
                         title="Ver histórico completo"
                       >
-                        <Eye className="w-5 h-5" />
+                        <Eye className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
@@ -679,7 +684,7 @@ export default function Payments() {
               <div className="p-6 space-y-4">
                 {allPayments.map((payment) => {
                   const daysOverdue = getDaysOverdue(payment.dueDate)
-                  const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid'
+                  const paymentIsOverdue = isOverdue(payment.dueDate) && payment.status !== 'paid' && payment.status !== 'pago'
                   
                   return (
                     <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
@@ -744,7 +749,7 @@ export default function Payments() {
 
                       <div className="flex items-center justify-end mt-3">
                         <div className="flex space-x-2">
-                          {payment.status === 'paid' && payment.receiptUrl && (
+                          {(payment.status === 'paid' || payment.status === 'pago') && payment.receiptUrl && (
                             <button 
                               onClick={() => viewReceipt(payment)}
                               className="inline-flex items-center px-3 py-2 bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/40 rounded-lg transition-all duration-200 text-sm font-medium"
@@ -754,13 +759,13 @@ export default function Payments() {
                               Ver Comprovante
                             </button>
                           )}
-                          {payment.status === 'paid' && !payment.receiptUrl && (
+                          {(payment.status === 'paid' || payment.status === 'pago') && !payment.receiptUrl && (
                             <span className="inline-flex items-center px-3 py-2 bg-yellow-50 dark:bg-yellow-900/20 text-yellow-700 dark:text-yellow-300 rounded-lg text-sm">
                               <FileText className="w-4 h-4 mr-2" />
                               Sem comprovante
                             </span>
                           )}
-                          {payment.status !== 'paid' && (
+                          {payment.status !== 'paid' && payment.status !== 'pago' && (
                             <button 
                               onClick={() => {
                                 setSelectedPayment(payment)
