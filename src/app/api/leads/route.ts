@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 import { checkForMatches } from '@/lib/matching-service'
+import { checkForMatchesRaw } from '@/lib/matching-service-raw'
 
 export async function GET(request: NextRequest) {
   try {
@@ -156,11 +157,8 @@ export async function POST(request: NextRequest) {
     try {
       console.log('🤖 Lead criado, executando auto-matching...')
       
-      // Import matching service directly
-      const { checkForLeadMatches } = require('@/lib/matching-service')
-      
-      // Execute matching for the created lead
-      const matchResults = await checkForLeadMatches(createdLead.id, user.id)
+      // Execute matching for the created lead using raw SQL
+      const matchResults = await checkForMatchesRaw(createdLead.id)
       console.log('✅ Auto-matching executado:', matchResults)
       
     } catch (error) {
