@@ -3,6 +3,7 @@ import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 import { checkForLeadMatches, checkForPartnershipOpportunities } from '@/lib/matching-service'
 import { findLeadsForLocationNotification } from '@/lib/location-matching-service'
+import { checkForPropertyMatches } from '@/lib/property-matching-service'
 
 export async function GET(request: NextRequest) {
   try {
@@ -104,9 +105,7 @@ export async function POST(request: NextRequest) {
     // Executar auto-matching
     try {
       console.log('🤖 Executando auto-matching...')
-      
-      // Import the raw SQL matching service
-      const { checkForPropertyMatches } = require('@/lib/property-matching-service')
+      console.log('📋 Nova propriedade ID:', property.id)
       
       // Execute matching for the new property
       const matchResults = await checkForPropertyMatches(property.id)
@@ -114,10 +113,13 @@ export async function POST(request: NextRequest) {
       
       if (matchResults?.matchCount > 0) {
         console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados para nova propriedade!`)
+      } else {
+        console.log('🔍 Nenhum match encontrado para nova propriedade')
       }
       
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
+      console.log('📝 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     }
 
     // Executar notificações por localização

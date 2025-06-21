@@ -14,6 +14,7 @@ export async function checkForPropertyMatches(propertyId: string) {
     })
     
     await client.connect()
+    console.log('✅ Conectado ao banco para property matching')
     
     // Get property details
     const propertyQuery = `
@@ -51,6 +52,13 @@ export async function checkForPropertyMatches(propertyId: string) {
         )
     `
     
+    console.log('🔍 Parâmetros da busca de leads:', {
+      userId: property.userId,
+      propertyType: property.propertyType,
+      rentPrice: property.rentPrice,
+      salePrice: property.salePrice
+    })
+    
     const userLeadsResult = await client.query(userLeadsQuery, [
       property.userId,
       property.propertyType,
@@ -59,6 +67,20 @@ export async function checkForPropertyMatches(propertyId: string) {
     ])
     
     console.log(`👥 Leads do usuário encontrados: ${userLeadsResult.rows.length}`)
+    if (userLeadsResult.rows.length > 0) {
+      console.log('📋 Leads encontrados:', userLeadsResult.rows.map(l => ({
+        id: l.id,
+        name: l.name,
+        interest: l.interest,
+        minPrice: l.minPrice,
+        maxPrice: l.maxPrice
+      })))
+    } else {
+      // Verificar se existem leads do usuário (sem filtros)
+      const allUserLeadsQuery = `SELECT COUNT(*) as count FROM leads WHERE "userId" = $1`
+      const allUserLeadsResult = await client.query(allUserLeadsQuery, [property.userId])
+      console.log(`📊 Total de leads do usuário (sem filtros): ${allUserLeadsResult.rows[0].count}`)
+    }
     
     let matchCount = 0
     

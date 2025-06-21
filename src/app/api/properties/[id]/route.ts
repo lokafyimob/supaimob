@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
+import { checkForPropertyMatches } from '@/lib/property-matching-service'
 import { checkForLeadMatches, checkForPartnershipOpportunities } from '@/lib/matching-service'
 
 export async function GET(
@@ -86,9 +87,7 @@ export async function PUT(
     // Executar auto-matching após edição
     try {
       console.log('🤖 Propriedade editada, executando auto-matching...')
-      
-      // Import the raw SQL matching service
-      const { checkForPropertyMatches } = require('@/lib/property-matching-service')
+      console.log('📋 Propriedade atualizada ID:', updatedProperty.id)
       
       // Execute matching for the updated property
       const matchResults = await checkForPropertyMatches(updatedProperty.id)
@@ -96,10 +95,13 @@ export async function PUT(
       
       if (matchResults?.matchCount > 0) {
         console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados para propriedade editada!`)
+      } else {
+        console.log('🔍 Nenhum match encontrado para propriedade editada')
       }
       
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
+      console.log('📝 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     }
 
     // Format response for SQLite compatibility
