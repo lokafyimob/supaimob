@@ -194,8 +194,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         minArea: formData.minArea ? parseFloat(formData.minArea) : null,
         maxArea: formData.maxArea ? parseFloat(formData.maxArea) : null,
         preferredCities: formData.preferredCities.filter(city => city.trim() !== ''),
-        preferredLocation: formData.preferredLocation ? JSON.stringify(formData.preferredLocation) : null,
-        locationRadius: formData.preferredLocation?.radius || null,
+        // preferredLocation: formData.preferredLocation ? JSON.stringify(formData.preferredLocation) : null,
+        // locationRadius: formData.preferredLocation?.radius || null,
         lastContactDate: formData.lastContactDate || null
       }
 
@@ -523,8 +523,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
           <div>
             <h3 className="text-lg font-medium text-gray-900 mb-4">Localização Preferida</h3>
             
-            {/* Localização no Mapa */}
-            <div className="mb-6">
+            {/* Localização no Mapa - Temporariamente desabilitada */}
+            {/* <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 Localização Específica (Opcional)
               </label>
@@ -536,7 +536,7 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
               <p className="text-xs text-gray-500 mt-1">
                 Selecione uma localização específica no mapa para receber notificações quando novos imóveis aparecerem na área
               </p>
-            </div>
+            </div> */}
             
             {/* Cidades */}
             <div className="mb-4">
