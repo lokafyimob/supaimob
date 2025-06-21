@@ -12,7 +12,8 @@ import {
   CreditCard,
   Search,
   Eye,
-  FileText
+  FileText,
+  X
 } from 'lucide-react'
 
 export default function Payments() {
@@ -29,6 +30,9 @@ export default function Payments() {
   const [uploadedFileUrl, setUploadedFileUrl] = useState('')
   const [showReceiptModal, setShowReceiptModal] = useState(false)
   const [viewingReceipt, setViewingReceipt] = useState(null)
+  const [showAllMonths, setShowAllMonths] = useState(false)
+  const [selectedTenant, setSelectedTenant] = useState(null)
+  const [allPayments, setAllPayments] = useState([])
 
   useEffect(() => {
     fetchPayments()
@@ -60,6 +64,34 @@ export default function Payments() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const fetchAllPaymentsByTenant = async (tenantName) => {
+    try {
+      const response = await fetch('/api/payments/all-months')
+      if (response.ok) {
+        const data = await response.json()
+        
+        // Mapear e filtrar por inquilino
+        const mappedPayments = data.map(payment => ({
+          ...payment,
+          property: payment.contract?.property || {},
+          tenant: payment.contract?.tenant || {}
+        })).filter(payment => payment.tenant.name === tenantName)
+        
+        setAllPayments(mappedPayments)
+      }
+    } catch (error) {
+      console.error('Erro ao carregar todos os pagamentos:', error)
+    }
+  }
+
+  const handleTenantClick = async (tenantName) => {
+    if (!tenantName) return
+    
+    setSelectedTenant(tenantName)
+    setShowAllMonths(true)
+    await fetchAllPaymentsByTenant(tenantName)
   }
 
   const handleFileUpload = (event) => {
@@ -385,8 +417,9 @@ export default function Payments() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                          {payment.property?.title || 'Título não disponível'}
+                        <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate cursor-pointer hover:text-blue-600 dark:hover:text-blue-400"
+                            onClick={() => handleTenantClick(payment.tenant?.name)}>
+                          {payment.tenant?.name || 'Nome não disponível'}
                         </h3>
                         <div className="flex items-center space-x-2 ml-4">
                           {getStatusIcon(payment.status)}
@@ -397,10 +430,9 @@ export default function Payments() {
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
                         <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Inquilino:</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endereço:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
-                            <User className="w-4 h-4 mr-2" />
-                            <span className="truncate font-medium">{payment.tenant?.name || 'Nome não disponível'}</span>
+                            <span className="truncate text-sm">{payment.property?.address || 'Endereço não disponível'}</span>
                           </div>
                         </div>
                         <div>
@@ -417,9 +449,9 @@ export default function Payments() {
                           </div>
                         </div>
                         <div>
-                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endereço:</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Imóvel:</div>
                           <div className="flex items-center text-gray-900 dark:text-white">
-                            <span className="truncate text-sm">{payment.property?.address || 'Endereço não disponível'}</span>
+                            <span className="truncate text-sm">{payment.property?.title || 'Título não disponível'}</span>
                           </div>
                         </div>
                       </div>
@@ -502,6 +534,77 @@ export default function Payments() {
                 ? 'Tente ajustar os filtros de busca.'
                 : 'Nenhum pagamento foi encontrado no sistema.'}
             </p>
+          </div>
+        )}
+
+        {/* Modal para todos os meses do inquilino */}
+        {showAllMonths && selectedTenant && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                    Histórico de Pagamentos - {selectedTenant}
+                  </h2>
+                  <button
+                    onClick={() => {
+                      setShowAllMonths(false)
+                      setSelectedTenant(null)
+                      setAllPayments([])
+                    }}
+                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-6">
+                <div className="space-y-4">
+                  {allPayments.map((payment) => (
+                    <div key={payment.id} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="font-semibold text-gray-900 dark:text-white">
+                          {payment.property?.title || 'Título não disponível'}
+                        </h3>
+                        <div className="flex items-center space-x-2">
+                          {getStatusIcon(payment.status)}
+                          <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                            {getStatusText(payment.status)}
+                          </span>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Endereço:</span>
+                          <p className="font-medium text-gray-900 dark:text-white">{payment.property?.address || 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Vencimento:</span>
+                          <p className="font-medium text-gray-900 dark:text-white">{payment.dueDate ? formatDate(payment.dueDate) : 'N/A'}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Valor:</span>
+                          <p className="font-bold text-gray-900 dark:text-white">R$ {(payment.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500 dark:text-gray-400">Data Pagamento:</span>
+                          <p className="font-medium text-gray-900 dark:text-white">
+                            {payment.paidAt ? formatDate(payment.paidAt) : 'Não pago'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {allPayments.length === 0 && (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500 dark:text-gray-400">Nenhum pagamento encontrado para este inquilino.</p>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         )}
 
