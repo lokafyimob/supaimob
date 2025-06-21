@@ -1184,7 +1184,6 @@ export default function Payments() {
                         <div>
                           <h3 className="text-lg font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
                           <p className="text-sm text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
-                          <p className="text-xs text-blue-600 font-mono mt-1 break-all">URL: {viewingReceipt.receiptUrl}</p>
                         </div>
                       </div>
                       <button
