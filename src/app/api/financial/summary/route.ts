@@ -40,14 +40,25 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    // Calcular receitas das taxas de administração
+    // Calcular receitas das taxas de administração - APENAS AS TAXAS, NÃO O VALOR TOTAL DO ALUGUEL
     let totalRevenue = 0
     const revenueBreakdown = paidPayments.map(payment => {
       const adminFee = (payment.amount * payment.contract.administrationFeePercentage) / 100
       const managementFee = (payment.amount * payment.contract.managementFeePercentage) / 100
-      const totalFee = adminFee + managementFee
+      const totalFee = adminFee + managementFee // APENAS AS TAXAS DE ADMINISTRAÇÃO
       
       totalRevenue += totalFee
+      
+      console.log(`📋 Pagamento ${payment.id}:`, {
+        aluguel: payment.amount,
+        taxaAdmin: payment.contract.administrationFeePercentage + '%',
+        taxaGestao: payment.contract.managementFeePercentage + '%', 
+        valorTaxaAdmin: adminFee,
+        valorTaxaGestao: managementFee,
+        totalTaxas: totalFee,
+        inquilino: payment.contract.tenant.name,
+        propriedade: payment.contract.property.title
+      })
       
       return {
         paymentId: payment.id,
@@ -63,7 +74,13 @@ export async function GET(request: NextRequest) {
       }
     })
     
-    console.log('💰 Total revenue from admin fees:', totalRevenue)
+    console.log('💰 RECEITA TOTAL (apenas taxas de administração):', totalRevenue)
+    console.log('🔍 Breakdown de receitas:', revenueBreakdown.map(r => ({
+      propriedade: r.property,
+      aluguel: r.rentAmount,
+      taxa: r.totalFee,
+      percentual: `${r.adminFeePercentage}% + ${r.managementFeePercentage}%`
+    })))
     
     // 2. DESPESAS DO MÊS - Gastos registrados no sistema
     const monthlyExpenses = await prisma.expense.findMany({

@@ -149,7 +149,10 @@ export default function Financial() {
             </p>
             {formatPercentage(financialData?.changes.revenue || 0)}
             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-              Taxas de {financialData?.currentMonth.paymentsCount || 0} pagamentos
+              Taxas de administração de {financialData?.currentMonth.paymentsCount || 0} pagamentos
+            </p>
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 font-medium">
+              Apenas as taxas, não o valor total dos aluguéis
             </p>
           </div>
           
@@ -223,9 +226,12 @@ export default function Financial() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {/* Revenue Breakdown */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6">
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-                Receitas do Mês ({financialData.breakdown.revenue.length})
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                Taxas de Administração ({financialData.breakdown.revenue.length})
               </h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-4">
+                Apenas as taxas cobradas sobre os aluguéis pagos
+              </p>
               <div className="space-y-3 max-h-64 overflow-y-auto">
                 {financialData.breakdown.revenue.length > 0 ? (
                   financialData.breakdown.revenue.map((item, index) => (
@@ -237,7 +243,10 @@ export default function Financial() {
                         <div>
                           <p className="font-medium text-gray-900 dark:text-white text-sm">{item.property}</p>
                           <p className="text-xs text-gray-500 dark:text-gray-400">
-                            {item.tenant} • {item.adminFeePercentage}% + {item.managementFeePercentage}%
+                            {item.tenant} • Taxa: {item.adminFeePercentage}% + {item.managementFeePercentage}%
+                          </p>
+                          <p className="text-xs text-blue-600 dark:text-blue-400">
+                            Aluguel: {formatCurrency(item.rentAmount)} → Taxa: {formatCurrency(item.totalFee)}
                           </p>
                         </div>
                       </div>
