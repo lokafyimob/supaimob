@@ -96,7 +96,10 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
     const numbers = value.replace(/\D/g, '')
     if (numbers === '') return ''
     const numberValue = parseInt(numbers)
-    return numberValue.toLocaleString('pt-BR')
+    return numberValue.toLocaleString('pt-BR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    })
   }
 
   const parseCurrency = (value: string) => {
@@ -134,8 +137,14 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         setDisplayValues({
           phone: lead.phone || '',
           document: lead.document || '',
-          minPrice: lead.minPrice ? lead.minPrice.toLocaleString('pt-BR') : '',
-          maxPrice: lead.maxPrice ? lead.maxPrice.toLocaleString('pt-BR') : ''
+          minPrice: lead.minPrice ? lead.minPrice.toLocaleString('pt-BR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }) : '',
+          maxPrice: lead.maxPrice ? lead.maxPrice.toLocaleString('pt-BR', {
+            minimumFractionDigits: 0,
+            maximumFractionDigits: 0
+          }) : ''
         })
       } else {
         resetForm()

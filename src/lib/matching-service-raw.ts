@@ -39,13 +39,24 @@ export async function checkForMatchesRaw(leadId: string) {
       JOIN users u ON p."userId" = u.id
       WHERE p."userId" = $1 
         AND p.status = 'AVAILABLE'
-        AND p.type = $2
+        AND p."propertyType" = $2
         AND (
-          (p."isForRent" = true AND $3 = 'RENT') OR
-          (p."isForSale" = true AND $3 = 'BUY')
+          (p."rentPrice" IS NOT NULL AND $3 = 'RENT') OR
+          (p."salePrice" IS NOT NULL AND $3 = 'BUY')
         )
-        AND p.price BETWEEN $4 AND $5
+        AND (
+          ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
+          ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
+        )
     `
+    
+    console.log('🔍 Parâmetros da busca:', {
+      userId: lead.userId,
+      propertyType: lead.propertyType,
+      interest: lead.interest,
+      minPrice: lead.minPrice || 0,
+      maxPrice: lead.maxPrice || 999999999
+    })
     
     const userPropertiesResult = await client.query(userPropertiesQuery, [
       lead.userId,
@@ -56,6 +67,15 @@ export async function checkForMatchesRaw(leadId: string) {
     ])
     
     console.log(`🏠 Propriedades do usuário encontradas: ${userPropertiesResult.rows.length}`)
+    if (userPropertiesResult.rows.length > 0) {
+      console.log('📋 Propriedades encontradas:', userPropertiesResult.rows.map(p => ({
+        id: p.id,
+        title: p.title,
+        price: p.price,
+        isForRent: p.isForRent,
+        isForSale: p.isForSale
+      })))
+    }
     
     // Create notifications for matches
     let matchCount = 0
@@ -78,8 +98,9 @@ export async function checkForMatchesRaw(leadId: string) {
           ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
         `
         
+        const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
         const title = `Match Encontrado: ${property.title}`
-        const message = `A propriedade "${property.title}" na ${property.city} faz match com o lead "${lead.name}"! Preço: R$ ${property.price.toLocaleString('pt-BR')}`
+        const message = `A propriedade "${property.title}" na ${property.city} faz match com o lead "${lead.name}"! Preço: R$ ${price.toLocaleString('pt-BR')}`
         
         await client.query(createNotificationQuery, [
           notificationId,
@@ -111,12 +132,15 @@ export async function checkForMatchesRaw(leadId: string) {
       WHERE p."userId" != $1 
         AND p."acceptsPartnership" = true
         AND p.status = 'AVAILABLE'
-        AND p.type = $2
+        AND p."propertyType" = $2
         AND (
-          (p."isForRent" = true AND $3 = 'RENT') OR
-          (p."isForSale" = true AND $3 = 'BUY')
+          (p."rentPrice" IS NOT NULL AND $3 = 'RENT') OR
+          (p."salePrice" IS NOT NULL AND $3 = 'BUY')
         )
-        AND p.price BETWEEN $4 AND $5
+        AND (
+          ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
+          ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
+        )
       LIMIT 10
     `
     
@@ -166,7 +190,7 @@ export async function checkForMatchesRaw(leadId: string) {
           lead.name,
           lead.phone,
           property.title,
-          property.price,
+          lead.interest === 'RENT' ? property.rentPrice : property.salePrice,
           lead.interest
         ])
         
