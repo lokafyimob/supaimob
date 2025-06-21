@@ -633,198 +633,217 @@ export default function Payments() {
         {/* Modal para todos os meses do inquilino */}
         {showAllMonths && selectedTenant && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-7xl max-h-[95vh] overflow-y-auto">
-              <div className="sticky top-0 bg-white dark:bg-gray-800 p-6 border-b border-gray-200 dark:border-gray-700 rounded-t-xl">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-                      📊 Histórico Completo de Pagamentos
-                    </h2>
-                    <p className="text-lg text-gray-600 dark:text-gray-400 mt-1">
-                      Inquilino: <span className="font-semibold text-blue-600 dark:text-blue-400">{selectedTenant}</span>
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setShowAllMonths(false)
-                      setSelectedTenant(null)
-                      setAllPayments([])
-                      cancelEditingPayment()
-                    }}
-                    className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                  >
-                    <X className="w-6 h-6" />
-                  </button>
-                </div>
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Histórico de Pagamentos - {selectedTenant}
+                </h2>
+                <button
+                  onClick={() => {
+                    setShowAllMonths(false)
+                    setSelectedTenant(null)
+                    setAllPayments([])
+                    cancelEditingPayment()
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="w-6 h-6" />
+                </button>
               </div>
 
-              <div className="p-6">
-                <div className="space-y-6">
-                  {allPayments.map((payment) => (
-                    <div key={payment.id} className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-lg p-6 border border-gray-200 dark:border-gray-600">
-                      <div className="flex items-center justify-between mb-4">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
-                            🏠 {payment.property?.title || 'Título não disponível'}
-                          </h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">
-                            {payment.property?.address || 'Endereço não disponível'}
-                          </p>
+              <div className="p-6 space-y-4">
+                {allPayments.map((payment) => (
+                  <div key={payment.id} className="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center space-x-4 flex-1">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{backgroundColor: '#fef2f2'}}>
+                          <DollarSign className="w-5 h-5" style={{color: '#ff4352'}} />
                         </div>
-                        <div className="flex items-center space-x-3">
-                          {getStatusIcon(payment.status)}
-                          <span className={`px-3 py-1 text-sm font-medium rounded-full ${getStatusColor(payment.status)}`}>
-                            {getStatusText(payment.status)}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-4">
-                        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">📅 Data de Vencimento</span>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {payment.dueDate ? formatDate(payment.dueDate) : 'Não informado'}
-                          </p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">💰 Valor do Aluguel</span>
-                          <p className="text-lg font-bold text-green-600 dark:text-green-400">
-                            R$ {(payment.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-                          </p>
-                        </div>
-                        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg">
-                          <span className="text-sm text-gray-500 dark:text-gray-400">✅ Data de Pagamento</span>
-                          <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                            {payment.paidAt ? formatDate(payment.paidAt) : 'Não pago'}
-                          </p>
-                        </div>
-                      </div>
-
-                      {/* Comprovante e Ações */}
-                      <div className="flex items-center justify-between border-t border-gray-200 dark:border-gray-600 pt-4">
-                        <div className="flex items-center space-x-4">
-                          {payment.receiptUrl && (
-                            <button
-                              onClick={() => viewReceipt(payment)}
-                              className="flex items-center space-x-2 px-4 py-2 bg-blue-100 hover:bg-blue-200 dark:bg-blue-900/20 dark:hover:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg transition-colors"
-                            >
-                              <Eye className="w-4 h-4" />
-                              <span>Ver Comprovante</span>
-                            </button>
-                          )}
-                          
-                          {payment.paymentMethod && (
-                            <span className="px-3 py-1 bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-300 text-sm rounded-full">
-                              💳 {payment.paymentMethod}
-                            </span>
-                          )}
-                        </div>
-
-                        {payment.status !== 'paid' && payment.status !== 'PAID' && (
-                          <div className="flex items-center space-x-2">
-                            {editingPaymentId === payment.id ? (
-                              <div className="flex items-center space-x-2">
-                                <button
-                                  onClick={() => handleMarkPaymentAsPaid(payment.id)}
-                                  className="flex items-center space-x-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                                >
-                                  <Save className="w-4 h-4" />
-                                  <span>Confirmar Pagamento</span>
-                                </button>
-                                <button
-                                  onClick={cancelEditingPayment}
-                                  className="px-3 py-2 bg-gray-300 hover:bg-gray-400 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg transition-colors"
-                                >
-                                  Cancelar
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                onClick={() => startEditingPayment(payment.id)}
-                                className="flex items-center space-x-2 px-4 py-2 bg-green-100 hover:bg-green-200 dark:bg-green-900/20 dark:hover:bg-green-900/30 text-green-600 dark:text-green-400 rounded-lg transition-colors"
-                              >
-                                <Edit3 className="w-4 h-4" />
-                                <span>Marcar como Pago</span>
-                              </button>
-                            )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                              {payment.property?.title || 'Título não disponível'}
+                            </h3>
+                            <div className="flex items-center space-x-2 ml-4">
+                              {getStatusIcon(payment.status)}
+                              <span className={`px-2 py-1 text-xs font-medium rounded-full ${getStatusColor(payment.status)}`}>
+                                {getStatusText(payment.status)}
+                              </span>
+                            </div>
                           </div>
+                          <div className="grid grid-cols-1 md:grid-cols-4 gap-2 text-sm">
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Endereço:</div>
+                              <div className="flex items-center text-gray-900 dark:text-white">
+                                <span className="truncate text-sm">{payment.property?.address || 'Endereço não disponível'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Vencimento:</div>
+                              <div className="flex items-center text-gray-900 dark:text-white">
+                                <Calendar className="w-4 h-4 mr-2" />
+                                <span className="truncate font-medium">{payment.dueDate ? formatDate(payment.dueDate) : 'Data não disponível'}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Valor:</div>
+                              <div className="flex items-center text-gray-900 dark:text-white">
+                                <span className="font-bold">R$ {(payment.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                              </div>
+                            </div>
+                            <div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400 mb-1">Data Pagamento:</div>
+                              <div className="flex items-center text-gray-900 dark:text-white">
+                                <span className="truncate text-sm">{payment.paidAt ? formatDate(payment.paidAt) : 'Não pago'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-end mt-3">
+                      <div className="flex space-x-2">
+                        {payment.receiptUrl && (
+                          <button 
+                            onClick={() => viewReceipt(payment)}
+                            className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                            title="Ver comprovante"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                        )}
+                        {payment.status !== 'paid' && payment.status !== 'PAID' && (
+                          editingPaymentId === payment.id ? (
+                            <>
+                              <button 
+                                onClick={() => handleMarkPaymentAsPaid(payment.id)}
+                                className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                                title="Confirmar pagamento"
+                              >
+                                <Save className="w-4 h-4" />
+                              </button>
+                              <button 
+                                onClick={cancelEditingPayment}
+                                className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                                title="Cancelar"
+                              >
+                                <X className="w-4 h-4" />
+                              </button>
+                            </>
+                          ) : (
+                            <button 
+                              onClick={() => startEditingPayment(payment.id)}
+                              className="p-2 text-green-600 hover:text-green-900 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                              title="Marcar como pago"
+                            >
+                              <CreditCard className="w-4 h-4" />
+                            </button>
+                          )
                         )}
                       </div>
+                      
+                      {payment.receiptUrl && (
+                        <button 
+                          onClick={() => viewReceipt(payment)}
+                          className="text-blue-600 hover:text-blue-800 text-sm font-medium ml-4"
+                        >
+                          Ver Comprovante
+                        </button>
+                      )}
+                      
+                      {payment.status !== 'paid' && payment.status !== 'PAID' && (
+                        editingPaymentId === payment.id ? (
+                          <button 
+                            onClick={() => handleMarkPaymentAsPaid(payment.id)}
+                            className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
+                          >
+                            Confirmar Pagamento
+                          </button>
+                        ) : (
+                          <button 
+                            onClick={() => startEditingPayment(payment.id)}
+                            className="text-green-600 hover:text-green-800 text-sm font-medium ml-4"
+                          >
+                            Marcar como Pago
+                          </button>
+                        )
+                      )}
+                    </div>
 
-                      {/* Formulário de Pagamento */}
-                      {editingPaymentId === payment.id && (
-                        <div className="mt-4 p-4 bg-white dark:bg-gray-900 rounded-lg border border-gray-200 dark:border-gray-600">
-                          <h4 className="font-semibold text-gray-900 dark:text-white mb-4">📝 Registrar Pagamento</h4>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Forma de Pagamento
-                              </label>
-                              <select
-                                value={paymentForm.paymentMethod}
-                                onChange={(e) => setPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                              >
-                                <option value="pix">PIX</option>
-                                <option value="transferencia">Transferência Bancária</option>
-                                <option value="dinheiro">Dinheiro</option>
-                                <option value="cartao">Cartão</option>
-                                <option value="cheque">Cheque</option>
-                              </select>
-                            </div>
-                            
-                            <div>
-                              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                Comprovante de Pagamento
-                              </label>
-                              <input
-                                type="file"
-                                onChange={(e) => handlePaymentFileUpload(e, payment.id)}
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
-                              />
-                            </div>
-                          </div>
-
-                          {paymentForm.receiptUrl && (
-                            <div className="mb-4">
-                              <img
-                                src={paymentForm.receiptUrl}
-                                alt="Preview do comprovante"
-                                className="max-w-xs max-h-40 object-cover rounded-lg border"
-                              />
-                            </div>
-                          )}
-
+                    {/* Formulário de Pagamento */}
+                    {editingPaymentId === payment.id && (
+                      <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-600">
+                        <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Registrar Pagamento</h4>
+                        
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                           <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Observações
+                              Forma de Pagamento
                             </label>
-                            <textarea
-                              value={paymentForm.notes}
-                              onChange={(e) => setPaymentForm(prev => ({ ...prev, notes: e.target.value }))}
-                              placeholder="Observações sobre o pagamento..."
+                            <select
+                              value={paymentForm.paymentMethod}
+                              onChange={(e) => setPaymentForm(prev => ({ ...prev, paymentMethod: e.target.value }))}
                               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
-                              rows={3}
+                            >
+                              <option value="pix">PIX</option>
+                              <option value="transferencia">Transferência Bancária</option>
+                              <option value="dinheiro">Dinheiro</option>
+                              <option value="cartao">Cartão</option>
+                              <option value="cheque">Cheque</option>
+                            </select>
+                          </div>
+                          
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Comprovante de Pagamento
+                            </label>
+                            <input
+                              type="file"
+                              onChange={(e) => handlePaymentFileUpload(e, payment.id)}
+                              accept=".jpg,.jpeg,.png,.pdf"
+                              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg"
                             />
                           </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+
+                        {paymentForm.receiptUrl && (
+                          <div className="mb-4">
+                            <img
+                              src={paymentForm.receiptUrl}
+                              alt="Preview do comprovante"
+                              className="max-w-xs max-h-40 object-cover rounded-lg border"
+                            />
+                          </div>
+                        )}
+
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Observações
+                          </label>
+                          <textarea
+                            value={paymentForm.notes}
+                            onChange={(e) => setPaymentForm(prev => ({ ...prev, notes: e.target.value }))}
+                            placeholder="Observações sobre o pagamento..."
+                            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
 
                 {allPayments.length === 0 && (
                   <div className="text-center py-12">
                     <div className="w-24 h-24 mx-auto bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mb-4">
-                      <Calendar className="w-12 h-12 text-gray-400" />
+                      <DollarSign className="w-12 h-12 text-gray-400" />
                     </div>
                     <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
-                      Nenhum Histórico Encontrado
+                      Nenhum pagamento encontrado
                     </h3>
-                    <p className="text-gray-500 dark:text-gray-400">
-                      Não há pagamentos registrados para este inquilino.
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Não há histórico de pagamentos para este inquilino.
                     </p>
                   </div>
                 )}
