@@ -20,7 +20,8 @@ import {
   MessageSquare,
   Sparkles,
   UserPlus,
-  Power
+  Power,
+  TrendingDown
 } from 'lucide-react'
 
 // OPÇÃO 1: Ícones mais modernos
@@ -31,6 +32,7 @@ const menuItems = [
   { icon: User, label: 'Inquilinos', href: '/tenants' },
   { icon: FileText, label: 'Contratos', href: '/contracts' },
   { icon: Receipt, label: 'Pagamentos', href: '/payments' },
+  { icon: TrendingDown, label: 'Despesas', href: '/expenses' },
   { icon: Calculator, label: 'Financeiro', href: '/financial' },
   { icon: Zap, label: 'Leads', href: '/leads' },
   { icon: MessageSquare, label: 'Chat OLX', href: '/olx-chat' },
