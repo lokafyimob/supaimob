@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
 
 export async function GET(request: NextRequest) {
   try {
@@ -9,7 +7,7 @@ export async function GET(request: NextRequest) {
     const year = searchParams.get('year')
     const month = searchParams.get('month')
 
-    let whereClause = {}
+    let whereClause: any = {}
     
     if (year && month) {
       whereClause = {
@@ -22,25 +20,13 @@ export async function GET(request: NextRequest) {
       }
     }
 
-    const expenses = await prisma.$queryRaw`
-      SELECT 
-        id,
-        description,
-        amount,
-        category,
-        date,
-        year,
-        month,
-        type,
-        receipt,
-        notes,
-        "createdAt",
-        "updatedAt"
-      FROM "Expense"
-      ${year ? `WHERE year = ${parseInt(year)}` : ''}
-      ${year && month ? `AND month = ${parseInt(month)}` : ''}
-      ORDER BY date DESC, "createdAt" DESC
-    `
+    const expenses = await prisma.expense.findMany({
+      where: whereClause,
+      orderBy: [
+        { date: 'desc' },
+        { createdAt: 'desc' }
+      ]
+    })
 
     return NextResponse.json(expenses)
   } catch (error) {
@@ -49,17 +35,20 @@ export async function GET(request: NextRequest) {
       { error: 'Failed to fetch expenses' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔄 Creating new expense')
+    
     const body = await request.json()
     const { description, amount, category, date, type = 'operational', receipt, notes } = body
 
+    console.log('📄 Request body:', { description, amount, category, date, type, receipt, notes })
+
     if (!description || !amount || !category || !date) {
+      console.log('❌ Missing required fields')
       return NextResponse.json(
         { error: 'Missing required fields: description, amount, category, date' },
         { status: 400 }
@@ -70,25 +59,34 @@ export async function POST(request: NextRequest) {
     const year = expenseDate.getFullYear()
     const month = expenseDate.getMonth() + 1
 
-    const expense = await prisma.$executeRaw`
-      INSERT INTO "Expense" (
-        description, amount, category, date, year, month, type, receipt, notes
-      ) VALUES (
-        ${description}, ${parseFloat(amount)}, ${category}, ${date}, ${year}, ${month}, ${type}, ${receipt || null}, ${notes || null}
-      )
-    `
+    console.log('📅 Date info:', { date, year, month })
+
+    const expense = await prisma.expense.create({
+      data: {
+        description,
+        amount: parseFloat(amount),
+        category,
+        date: expenseDate,
+        year,
+        month,
+        type,
+        receipt: receipt || null,
+        notes: notes || null
+      }
+    })
+
+    console.log('✅ Expense created:', expense.id)
 
     return NextResponse.json({
       success: true,
+      expense,
       message: 'Expense created successfully'
     })
   } catch (error) {
-    console.error('Error creating expense:', error)
+    console.error('❌ Error creating expense:', error)
     return NextResponse.json(
-      { error: 'Failed to create expense' },
+      { error: 'Failed to create expense', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }
