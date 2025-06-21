@@ -9,7 +9,7 @@ export default function Home() {
 
   return (
     <div style={{ padding: '40px', textAlign: 'center', fontFamily: 'Arial' }}>
-      <h1 style={{ fontSize: '48px', color: '#ff4352' }}>AV HOME</h1>
+      <h1 style={{ fontSize: '48px', color: '#ff4352' }}>G-PROP</h1>
       <p>Redirecionando para login...</p>
     </div>
   )

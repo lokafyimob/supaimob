@@ -110,9 +110,9 @@ export function Sidebar() {
             </div>
             <div>
               <h1 className="logo-font text-xl font-bold text-gray-900 dark:text-white tracking-tight">
-                CRM Imobiliário
+                G-PROP
               </h1>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Sistema Inteligente</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Gestão Imobiliária</p>
             </div>
           </div>
         </div>
