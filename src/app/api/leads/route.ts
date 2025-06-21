@@ -167,6 +167,16 @@ export async function POST(request: NextRequest) {
         const matchResults = await checkForMatchesRaw(createdLead.id)
         console.log('✅ Auto-matching executado com sucesso:', matchResults)
         
+        // Execute reverse partnership detection for the created lead
+        console.log('🤝 Detectando oportunidades de parceria reversa...')
+        try {
+          const { detectReversePartnerships } = require('@/lib/reverse-partnership-service')
+          const partnershipResult = await detectReversePartnerships(createdLead.id)
+          console.log('✅ Detecção de parceria reversa executada:', partnershipResult)
+        } catch (partnershipError) {
+          console.log('❌ Erro na detecção de parceria reversa:', partnershipError)
+        }
+        
         if (matchResults?.matchCount > 0) {
           console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados!`)
         } else {
