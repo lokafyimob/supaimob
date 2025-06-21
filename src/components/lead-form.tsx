@@ -95,16 +95,17 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
   const formatCurrency = (value: string) => {
     const numbers = value.replace(/\D/g, '')
     if (numbers === '') return ''
-    const numberValue = parseInt(numbers)
+    // Dividir por 100 para criar formato com 2 casas decimais
+    const numberValue = parseInt(numbers) / 100
     return numberValue.toLocaleString('pt-BR', {
-      minimumFractionDigits: 0,
-      maximumFractionDigits: 0
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
     })
   }
 
   const parseCurrency = (value: string) => {
     const numbers = value.replace(/\D/g, '')
-    return numbers === '' ? '' : parseInt(numbers).toString()
+    return numbers === '' ? '' : numbers
   }
 
   useEffect(() => {
@@ -137,13 +138,13 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
         setDisplayValues({
           phone: lead.phone || '',
           document: lead.document || '',
-          minPrice: lead.minPrice ? lead.minPrice.toLocaleString('pt-BR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+          minPrice: lead.minPrice ? (lead.minPrice * 100).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
           }) : '',
-          maxPrice: lead.maxPrice ? lead.maxPrice.toLocaleString('pt-BR', {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 0
+          maxPrice: lead.maxPrice ? (lead.maxPrice * 100).toLocaleString('pt-BR', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
           }) : ''
         })
       } else {
@@ -196,8 +197,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
 
       const submitData = {
         ...formData,
-        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) : null,
-        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')),
+        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) / 100 : null,
+        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')) / 100,
         minBedrooms: formData.minBedrooms ? parseInt(formData.minBedrooms) : null,
         maxBedrooms: formData.maxBedrooms ? parseInt(formData.maxBedrooms) : null,
         minBathrooms: formData.minBathrooms ? parseInt(formData.minBathrooms) : null,

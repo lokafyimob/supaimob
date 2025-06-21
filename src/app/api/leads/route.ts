@@ -120,11 +120,11 @@ export async function POST(request: NextRequest) {
       
       const insertQuery = `
         INSERT INTO leads (
-          id, name, email, phone, interest, "propertyType", "maxPrice", 
+          id, name, email, phone, interest, "propertyType", "minPrice", "maxPrice", 
           "preferredCities", "preferredStates", status, "companyId", "userId", 
           "needsFinancing", "createdAt", "updatedAt"
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW()
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW()
         ) RETURNING *
       `
       
@@ -134,7 +134,8 @@ export async function POST(request: NextRequest) {
         data.email,
         data.phone,
         data.interest || 'RENT',
-        data.propertyType || 'APARTMENT', 
+        data.propertyType || 'APARTMENT',
+        data.minPrice || null,
         data.maxPrice || 1000.0,
         JSON.stringify((data.preferredCities || []).filter((city: string) => city && city.trim()).map((city: string) => city.toUpperCase())),
         JSON.stringify(Array.isArray(data.preferredStates) ? data.preferredStates : []),
