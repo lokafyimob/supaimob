@@ -22,6 +22,7 @@ export function MatchAlert({ matches, onDismiss, onViewMatches }: MatchAlertProp
   const [currentMatchIndex, setCurrentMatchIndex] = useState(0)
 
   useEffect(() => {
+    console.log('🚨 MATCH ALERT RECEBEU:', matches.length, 'matches:', matches)
     if (matches.length > 0) {
       setIsVisible(true)
       

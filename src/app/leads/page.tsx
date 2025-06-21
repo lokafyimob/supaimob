@@ -981,14 +981,17 @@ export default function Leads() {
 
       {/* Match Alert */}
       <MatchAlert
-        matches={leadNotifications.map(notification => ({
-          leadId: notification.leadId,
-          leadName: notification.leadName,
-          leadPhone: notification.leadPhone,
-          propertyTitle: notification.propertyTitle,
-          propertyPrice: notification.propertyPrice,
-          matchType: notification.matchType
-        }))}
+        matches={leadNotifications.map(notification => {
+          console.log('🔧 MAPEANDO NOTIFICAÇÃO PARA MATCH ALERT:', notification)
+          return {
+            leadId: notification.leadId || notification.id,
+            leadName: notification.leadName || 'Nome não disponível',
+            leadPhone: notification.leadPhone || 'Telefone não disponível',
+            propertyTitle: notification.propertyTitle || 'Propriedade',
+            propertyPrice: notification.propertyPrice || 0,
+            matchType: notification.matchType || 'RENT'
+          }
+        })}
         onDismiss={handleDismissMatchAlert}
         onViewMatches={handleViewMatchesFromAlert}
       />
