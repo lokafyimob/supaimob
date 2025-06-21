@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { prisma } from '@/lib/db'
 import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(
@@ -10,176 +9,137 @@ export async function GET(
     const { id } = await params
     const user = await requireAuth(request)
     
-    const lead = await prisma.lead.findFirst({
-      where: { 
-        id,
-        userId: user.id 
-      }
+    console.log('🔍 Buscando matches para lead:', id)
+    
+    // Use raw SQL to avoid Prisma issues
+    const { Client } = require('pg')
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     })
+    
+    await client.connect()
+    
+    // Get lead details
+    const leadQuery = `
+      SELECT * FROM leads 
+      WHERE id = $1 AND "userId" = $2
+    `
+    const leadResult = await client.query(leadQuery, [id, user.id])
 
-    if (!lead) {
+    if (leadResult.rows.length === 0) {
+      await client.end()
       return NextResponse.json(
         { error: 'Lead não encontrado' },
         { status: 404 }
       )
     }
 
-    const preferredCities = JSON.parse(lead.preferredCities)
-    const preferredStates = JSON.parse(lead.preferredStates)
+    const lead = leadResult.rows[0]
+    const preferredCities = JSON.parse(lead.preferredCities || '[]')
+    const preferredStates = JSON.parse(lead.preferredStates || '[]')
 
-    // Build base conditions
-    const baseConditions: Record<string, any> = {
-      companyId: lead.companyId,
+    console.log('📋 Lead data:', {
+      id: lead.id,
+      name: lead.name,
+      interest: lead.interest,
       propertyType: lead.propertyType,
-      status: 'AVAILABLE'
-    }
+      minPrice: lead.minPrice,
+      maxPrice: lead.maxPrice,
+      cities: preferredCities,
+      states: preferredStates
+    })
 
-    // Build AND conditions array
-    const andConditions: Record<string, any>[] = []
+    // Build SQL query for matching properties
+    let whereConditions = [`p."companyId" = $1`, `p.status = 'AVAILABLE'`, `p."propertyType" = $2`]
+    let queryParams = [lead.companyId, lead.propertyType]
+    let paramCount = 2
 
-    // Available for condition - mais rigoroso
+    // Price conditions
     if (lead.interest === 'RENT') {
-      andConditions.push({
-        OR: [
-          { availableFor: { contains: '"RENT"' } },
-          { availableFor: { contains: 'RENT' } }
-        ]
-      })
-      andConditions.push({
-        rentPrice: {
-          gt: 0, // Must have a rent price > 0
-          gte: lead.minPrice || 0,
-          lte: lead.maxPrice
-        }
-      })
+      paramCount++
+      whereConditions.push(`p."rentPrice" IS NOT NULL AND p."rentPrice" > 0`)
+      whereConditions.push(`p."rentPrice" BETWEEN $${paramCount} AND $${paramCount + 1}`)
+      queryParams.push(lead.minPrice || 0, lead.maxPrice)
+      paramCount++
     } else if (lead.interest === 'BUY') {
-      andConditions.push({
-        OR: [
-          { availableFor: { contains: '"SALE"' } },
-          { availableFor: { contains: 'SALE' } }
-        ]
-      })
-      andConditions.push({
-        salePrice: {
-          gt: 0, // Must have a sale price > 0
-          gte: lead.minPrice || 0,
-          lte: lead.maxPrice,
-          not: null
-        }
-      })
+      paramCount++
+      whereConditions.push(`p."salePrice" IS NOT NULL AND p."salePrice" > 0`)
+      whereConditions.push(`p."salePrice" BETWEEN $${paramCount} AND $${paramCount + 1}`)
+      queryParams.push(lead.minPrice || 0, lead.maxPrice)
+      paramCount++
     }
 
     // Bedrooms
-    if (lead.minBedrooms || lead.maxBedrooms) {
-      const bedroomsCondition: Record<string, number> = {}
-      if (lead.minBedrooms) bedroomsCondition.gte = lead.minBedrooms
-      if (lead.maxBedrooms) bedroomsCondition.lte = lead.maxBedrooms
-      andConditions.push({ bedrooms: bedroomsCondition })
+    if (lead.minBedrooms) {
+      paramCount++
+      whereConditions.push(`p.bedrooms >= $${paramCount}`)
+      queryParams.push(lead.minBedrooms)
+    }
+    if (lead.maxBedrooms) {
+      paramCount++
+      whereConditions.push(`p.bedrooms <= $${paramCount}`)
+      queryParams.push(lead.maxBedrooms)
     }
 
     // Bathrooms
-    if (lead.minBathrooms || lead.maxBathrooms) {
-      const bathroomsCondition: Record<string, number> = {}
-      if (lead.minBathrooms) bathroomsCondition.gte = lead.minBathrooms
-      if (lead.maxBathrooms) bathroomsCondition.lte = lead.maxBathrooms
-      andConditions.push({ bathrooms: bathroomsCondition })
+    if (lead.minBathrooms) {
+      paramCount++
+      whereConditions.push(`p.bathrooms >= $${paramCount}`)
+      queryParams.push(lead.minBathrooms)
+    }
+    if (lead.maxBathrooms) {
+      paramCount++
+      whereConditions.push(`p.bathrooms <= $${paramCount}`)
+      queryParams.push(lead.maxBathrooms)
     }
 
     // Area
-    if (lead.minArea || lead.maxArea) {
-      const areaCondition: Record<string, number> = {}
-      if (lead.minArea) areaCondition.gte = lead.minArea
-      if (lead.maxArea) areaCondition.lte = lead.maxArea
-      andConditions.push({ area: areaCondition })
+    if (lead.minArea) {
+      paramCount++
+      whereConditions.push(`p.area >= $${paramCount}`)
+      queryParams.push(lead.minArea)
+    }
+    if (lead.maxArea) {
+      paramCount++
+      whereConditions.push(`p.area <= $${paramCount}`)
+      queryParams.push(lead.maxArea)
     }
 
-    // Cities and states
-    if (preferredCities.length > 0 || preferredStates.length > 0) {
-      const locationConditions: Record<string, any>[] = []
-      if (preferredCities.length > 0) {
-        locationConditions.push({ city: { in: preferredCities } })
-      }
-      if (preferredStates.length > 0) {
-        locationConditions.push({ state: { in: preferredStates } })
-      }
-      andConditions.push({ OR: locationConditions })
+    // Cities (if specified)
+    if (preferredCities.length > 0) {
+      paramCount++
+      const cityPlaceholders = preferredCities.map((_, index) => `$${paramCount + index}`).join(', ')
+      whereConditions.push(`p.city IN (${cityPlaceholders})`)
+      queryParams.push(...preferredCities)
+      paramCount += preferredCities.length - 1
     }
 
-    // Build final where conditions
-    const whereConditions = {
-      ...baseConditions,
-      AND: andConditions
-    }
+    const propertiesQuery = `
+      SELECT p.*, u.name as ownerName, u.email as ownerEmail, u.phone as ownerPhone
+      FROM properties p
+      JOIN users u ON p."userId" = u.id
+      WHERE ${whereConditions.join(' AND ')}
+      ORDER BY p."createdAt" DESC
+      LIMIT 50
+    `
 
-    console.log('=== MATCHING DEBUG ===')
-    console.log('Lead data:', {
-      id: id,
-      interest: lead.interest,
-      cities: preferredCities,
-      states: preferredStates,
-      minPrice: lead.minPrice,
-      maxPrice: lead.maxPrice
-    })
-    console.log('Where conditions:', JSON.stringify(whereConditions, null, 2))
+    console.log('🔍 Query SQL:', propertiesQuery)
+    console.log('📝 Parâmetros:', queryParams)
 
-    const matchingProperties = await prisma.property.findMany({
-      where: whereConditions,
-      include: {
-        owner: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    })
+    const propertiesResult = await client.query(propertiesQuery, queryParams)
+    const matchingProperties = propertiesResult.rows
 
-    console.log('Found properties before filtering:', matchingProperties.map(p => ({
-      id: p.id,
-      title: p.title,
-      city: p.city,
-      availableFor: p.availableFor,
-      rentPrice: p.rentPrice,
-      salePrice: p.salePrice
-    })))
+    console.log(`🏠 Propriedades encontradas: ${matchingProperties.length}`)
 
-    // Additional JavaScript filtering to ensure exact matches
+    // Additional filtering and scoring
     const exactMatches = matchingProperties.filter(property => {
+      // Check availableFor field
       const availableFor = JSON.parse(property.availableFor || '[]')
-      console.log(`Checking property ${property.title}:`, {
-        availableFor,
-        leadInterest: lead.interest,
-        includes: availableFor.includes(lead.interest === 'RENT' ? 'RENT' : 'SALE')
-      })
+      const neededType = lead.interest === 'RENT' ? 'RENT' : 'SALE'
       
-      // Must be available for the lead's interest
-      if (lead.interest === 'RENT' && !availableFor.includes('RENT')) {
-        console.log(`❌ Property ${property.title} not available for RENT`)
-        return false
-      }
-      if (lead.interest === 'BUY' && !availableFor.includes('SALE')) {
-        console.log(`❌ Property ${property.title} not available for SALE`)
-        return false
-      }
-      
-      // Check city (must match exactly if specified)
-      if (preferredCities.length > 0 && !preferredCities.includes(property.city)) {
-        console.log(`❌ Property ${property.title} city ${property.city} not in preferred cities:`, preferredCities)
-        return false
-      }
-      
-      // Check price range
-      const targetPrice = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
-      if (!targetPrice || targetPrice <= 0) {
-        console.log(`❌ Property ${property.title} has no valid price for ${lead.interest}`)
-        return false
-      }
-      
-      if (lead.minPrice && targetPrice < lead.minPrice) {
-        console.log(`❌ Property ${property.title} price ${targetPrice} below min ${lead.minPrice}`)
-        return false
-      }
-      
-      if (targetPrice > lead.maxPrice) {
-        console.log(`❌ Property ${property.title} price ${targetPrice} above max ${lead.maxPrice}`)
+      if (!availableFor.includes(neededType)) {
+        console.log(`❌ Property ${property.title} not available for ${neededType}`)
         return false
       }
       
@@ -187,14 +147,14 @@ export async function GET(
       return true
     })
 
-    console.log('Final exact matches:', exactMatches.length)
+    console.log(`🎯 Matches exatos: ${exactMatches.length}`)
 
-    // Calculate match score for each property
+    // Calculate match score
     const propertiesWithScore = exactMatches.map(property => {
       let score = 0
       const targetPrice = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
 
-      // Price score (closer to max budget = higher score)
+      // Price score
       if (targetPrice && lead.maxPrice) {
         const priceRatio = targetPrice / lead.maxPrice
         score += (1 - Math.abs(1 - priceRatio)) * 30
@@ -210,18 +170,25 @@ export async function GET(
 
       return {
         ...property,
-        matchScore: Math.round(score)
+        matchScore: Math.round(score),
+        owner: {
+          name: property.ownerName,
+          email: property.ownerEmail,
+          phone: property.ownerPhone
+        }
       }
     })
 
     // Sort by match score
     propertiesWithScore.sort((a, b) => b.matchScore - a.matchScore)
 
+    await client.end()
+
     return NextResponse.json(propertiesWithScore)
   } catch (error) {
-    console.error('Error finding matches:', error)
+    console.error('❌ Error finding matches:', error)
     return NextResponse.json(
-      { error: 'Erro ao buscar matches' },
+      { error: 'Erro ao buscar matches', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
