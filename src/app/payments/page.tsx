@@ -1063,17 +1063,17 @@ export default function Payments() {
         {/* Enhanced Receipt Modal */}
         {showReceiptModal && viewingReceipt && (
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-            <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-5xl max-h-[95vh] overflow-hidden">
+            <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[85vh] overflow-hidden">
               {/* Header with Gradient */}
-              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-6">
+              <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-4">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center">
-                      <Receipt className="w-6 h-6 text-white" />
+                  <div className="flex items-center space-x-3">
+                    <div className="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
+                      <Receipt className="w-4 h-4 text-white" />
                     </div>
                     <div>
-                      <h2 className="text-2xl font-bold text-white">Comprovante de Pagamento</h2>
-                      <p className="text-blue-100">Detalhes da transação</p>
+                      <h2 className="text-lg font-bold text-white">Comprovante de Pagamento</h2>
+                      <p className="text-sm text-blue-100">Detalhes da transação</p>
                     </div>
                   </div>
                   <button
@@ -1081,92 +1081,92 @@ export default function Payments() {
                       setShowReceiptModal(false)
                       setViewingReceipt(null)
                     }}
-                    className="w-10 h-10 bg-white/20 hover:bg-white/30 rounded-xl flex items-center justify-center transition-all duration-200"
+                    className="w-8 h-8 bg-white/20 hover:bg-white/30 rounded-lg flex items-center justify-center transition-all duration-200"
                   >
-                    <X className="w-5 h-5 text-white" />
+                    <X className="w-4 h-4 text-white" />
                   </button>
                 </div>
               </div>
               
-              <div className="p-6 overflow-y-auto max-h-[calc(95vh-120px)]">
+              <div className="p-4 overflow-y-auto max-h-[calc(85vh-100px)]">
                 {/* Payment Details Card */}
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-2xl p-6 mb-6 border border-gray-200/50 dark:border-gray-600/50">
-                  <div className="flex items-center mb-4">
-                    <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
-                      <FileText className="w-4 h-4 text-white" />
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-700 dark:to-gray-800 rounded-xl p-4 mb-4 border border-gray-200/50 dark:border-gray-600/50">
+                  <div className="flex items-center mb-3">
+                    <div className="w-6 h-6 bg-blue-500 rounded-lg flex items-center justify-center mr-2">
+                      <FileText className="w-3 h-3 text-white" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white">Detalhes do Pagamento</h3>
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white">Detalhes do Pagamento</h3>
                   </div>
                   
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    <div className="space-y-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <Users className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Inquilino</span>
+                        <Users className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Inquilino</span>
                       </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {viewingReceipt.tenant?.name || 'Nome não disponível'}
                       </p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <Building className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Imóvel</span>
+                        <Building className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Imóvel</span>
                       </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {viewingReceipt.property?.title || 'Título não disponível'}
                       </p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <DollarSign className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Valor Pago</span>
+                        <DollarSign className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Valor Pago</span>
                       </div>
-                      <p className="text-2xl font-bold text-green-600 dark:text-green-400">
+                      <p className="text-lg font-bold text-green-600 dark:text-green-400">
                         R$ {viewingReceipt.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <CheckCircle className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Data do Pagamento</span>
+                        <CheckCircle className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Data do Pagamento</span>
                       </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {viewingReceipt.paidDate ? formatDate(viewingReceipt.paidDate) : 'N/A'}
                       </p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <Calendar className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Vencimento</span>
+                        <Calendar className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Vencimento</span>
                       </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {formatDate(viewingReceipt.dueDate)}
                       </p>
                     </div>
                     
-                    <div className="space-y-2">
+                    <div className="space-y-1">
                       <div className="flex items-center text-gray-500 dark:text-gray-400">
-                        <CreditCard className="w-4 h-4 mr-2" />
-                        <span className="text-sm font-medium">Forma de Pagamento</span>
+                        <CreditCard className="w-3 h-3 mr-1" />
+                        <span className="text-xs font-medium">Forma de Pagamento</span>
                       </div>
-                      <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                      <p className="text-sm font-semibold text-gray-900 dark:text-white">
                         {viewingReceipt.paymentMethod || 'N/A'}
                       </p>
                     </div>
                   </div>
                   
                   {viewingReceipt.notes && (
-                    <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-xl border border-blue-200 dark:border-blue-700">
+                    <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-200 dark:border-blue-700">
                       <div className="flex items-start">
-                        <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-3" />
+                        <FileText className="w-4 h-4 text-blue-600 dark:text-blue-400 mt-0.5 mr-2" />
                         <div>
-                          <h4 className="font-semibold text-blue-900 dark:text-blue-100 mb-1">Observações</h4>
-                          <p className="text-blue-700 dark:text-blue-200 italic">{viewingReceipt.notes}</p>
+                          <h4 className="text-sm font-semibold text-blue-900 dark:text-blue-100 mb-1">Observações</h4>
+                          <p className="text-xs text-blue-700 dark:text-blue-200 italic">{viewingReceipt.notes}</p>
                         </div>
                       </div>
                     </div>
@@ -1175,73 +1175,73 @@ export default function Payments() {
 
                 {/* Receipt Display */}
                 {viewingReceipt.receiptUrl ? (
-                  <div className="bg-white dark:bg-gray-800 rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-8">
-                    <div className="flex items-center justify-between mb-6">
+                  <div className="bg-white dark:bg-gray-800 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 p-4">
+                    <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center">
-                        <div className="w-10 h-10 bg-green-500 rounded-xl flex items-center justify-center mr-3">
-                          <Paperclip className="w-5 h-5 text-white" />
+                        <div className="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center mr-2">
+                          <Paperclip className="w-4 h-4 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-lg font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
-                          <p className="text-sm text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
+                          <h3 className="text-base font-bold text-gray-900 dark:text-white">Comprovante Anexado</h3>
+                          <p className="text-xs text-gray-500 dark:text-gray-400">Documento de confirmação do pagamento</p>
                         </div>
                       </div>
                       <button
                         onClick={() => downloadFile(viewingReceipt.receiptUrl, `comprovante_${viewingReceipt.id}`)}
-                        className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                        className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
-                        <Download className="w-4 h-4 mr-2" />
+                        <Download className="w-3 h-3 mr-1" />
                         Download
                       </button>
                     </div>
                     
                     {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
-                      <div className="text-center py-12">
-                        <div className="w-24 h-24 bg-red-100 dark:bg-red-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                          <FileText className="w-12 h-12 text-red-600 dark:text-red-400" />
+                      <div className="text-center py-8">
+                        <div className="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+                          <FileText className="w-8 h-8 text-red-600 dark:text-red-400" />
                         </div>
-                        <h4 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Documento PDF</h4>
-                        <p className="text-gray-600 dark:text-gray-400 mb-6">Clique no botão abaixo para visualizar o arquivo</p>
+                        <h4 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Documento PDF</h4>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">Clique no botão abaixo para visualizar o arquivo</p>
                         <a 
                           href={viewingReceipt.receiptUrl} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
+                          className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                         >
-                          <Eye className="w-5 h-5 mr-2" />
+                          <Eye className="w-4 h-4 mr-1" />
                           Abrir PDF
-                          <ExternalLink className="w-4 h-4 ml-2" />
+                          <ExternalLink className="w-3 h-3 ml-1" />
                         </a>
                       </div>
                     ) : (
                       <div className="text-center">
-                        <div className="relative inline-block rounded-2xl overflow-hidden shadow-2xl">
+                        <div className="relative inline-block rounded-xl overflow-hidden shadow-xl">
                           <img 
                             src={viewingReceipt.receiptUrl} 
                             alt="Comprovante de pagamento" 
-                            className="max-w-full max-h-96 cursor-pointer transition-transform duration-200 hover:scale-105"
+                            className="max-w-full max-h-64 cursor-pointer transition-transform duration-200 hover:scale-105"
                             onClick={() => window.open(viewingReceipt.receiptUrl, '_blank')}
                           />
                           <div className="absolute inset-0 bg-black/0 hover:bg-black/10 transition-all duration-200 flex items-center justify-center opacity-0 hover:opacity-100">
-                            <div className="bg-white/90 rounded-full p-3">
-                              <ExternalLink className="w-6 h-6 text-gray-900" />
+                            <div className="bg-white/90 rounded-full p-2">
+                              <ExternalLink className="w-4 h-4 text-gray-900" />
                             </div>
                           </div>
                         </div>
-                        <p className="text-sm text-gray-500 dark:text-gray-400 mt-4 flex items-center justify-center">
-                          <ImageIcon className="w-4 h-4 mr-2" />
+                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-3 flex items-center justify-center">
+                          <ImageIcon className="w-3 h-3 mr-1" />
                           Clique na imagem para abrir em tamanho original
                         </p>
                       </div>
                     )}
                   </div>
                 ) : (
-                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-2xl border-2 border-dashed border-amber-300 dark:border-amber-600 p-8 text-center">
-                    <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                      <FileText className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                  <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl border-2 border-dashed border-amber-300 dark:border-amber-600 p-6 text-center">
+                    <div className="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-xl flex items-center justify-center mx-auto mb-3">
+                      <FileText className="w-6 h-6 text-amber-600 dark:text-amber-400" />
                     </div>
-                    <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">Nenhum comprovante anexado</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <h3 className="text-base font-bold text-gray-900 dark:text-white mb-2">Nenhum comprovante anexado</h3>
+                    <p className="text-xs text-gray-600 dark:text-gray-400">
                       Este pagamento foi marcado como pago mas não possui comprovante anexado.
                     </p>
                   </div>
