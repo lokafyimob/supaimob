@@ -13,17 +13,6 @@ export async function GET(request: NextRequest) {
       where: {
         userId: user.id
       },
-      include: {
-        matchedProperty: true,
-        notifications: {
-          include: {
-            property: true
-          },
-          orderBy: {
-            createdAt: 'desc'
-          }
-        }
-      },
       orderBy: {
         createdAt: 'desc'
       }
