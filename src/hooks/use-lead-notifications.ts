@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { notificationEvents, NOTIFICATION_EVENTS } from '@/lib/notification-events'
 
 interface LeadNotification {
   id: string
@@ -20,6 +21,7 @@ export function useLeadNotifications() {
   const [notifications, setNotifications] = useState<LeadNotification[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lastCount, setLastCount] = useState(0)
 
   const fetchNotifications = useCallback(async () => {
     try {
@@ -38,7 +40,19 @@ export function useLeadNotifications() {
       
       const notifications = data.notifications || []
       console.log(`🔔 ${notifications.length} notificações encontradas:`, notifications)
-      setNotifications(notifications)
+      
+      // Detectar novas notificações
+      if (notifications.length > lastCount && lastCount > 0) {
+        console.log(`🆕 ${notifications.length - lastCount} novas notificações detectadas!`)
+        // Force re-render para garantir que alertas apareçam
+        setTimeout(() => {
+          setNotifications([...notifications])
+        }, 100)
+      } else {
+        setNotifications(notifications)
+      }
+      
+      setLastCount(notifications.length)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erro desconhecido')
       console.error('❌ Erro ao buscar notificações:', err)
@@ -81,10 +95,28 @@ export function useLeadNotifications() {
     fetchNotifications()
   }, [fetchNotifications])
 
-  // Polling para verificar novas notificações a cada 30 segundos
+  // Polling para verificar novas notificações a cada 5 segundos
   useEffect(() => {
-    const interval = setInterval(fetchNotifications, 30000)
+    const interval = setInterval(fetchNotifications, 5000)
     return () => clearInterval(interval)
+  }, [fetchNotifications])
+
+  // Escutar eventos para verificação imediata
+  useEffect(() => {
+    const handleCheckNotifications = () => {
+      console.log('🚨 Evento recebido: verificando notificações imediatamente')
+      fetchNotifications()
+    }
+
+    notificationEvents.on(NOTIFICATION_EVENTS.CHECK_NOTIFICATIONS, handleCheckNotifications)
+    notificationEvents.on(NOTIFICATION_EVENTS.PROPERTY_UPDATED, handleCheckNotifications)
+    notificationEvents.on(NOTIFICATION_EVENTS.LEAD_CREATED, handleCheckNotifications)
+
+    return () => {
+      notificationEvents.off(NOTIFICATION_EVENTS.CHECK_NOTIFICATIONS, handleCheckNotifications)
+      notificationEvents.off(NOTIFICATION_EVENTS.PROPERTY_UPDATED, handleCheckNotifications)
+      notificationEvents.off(NOTIFICATION_EVENTS.LEAD_CREATED, handleCheckNotifications)
+    }
   }, [fetchNotifications])
 
   return {
