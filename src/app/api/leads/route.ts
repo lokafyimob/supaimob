@@ -157,13 +157,26 @@ export async function POST(request: NextRequest) {
     // Executar auto-matching diretamente
     try {
       console.log('🤖 Lead criado, executando auto-matching...')
+      console.log('📋 ID do lead criado:', createdLead?.id)
       
-      // Execute matching for the created lead using raw SQL
-      const matchResults = await checkForMatchesRaw(createdLead.id)
-      console.log('✅ Auto-matching executado:', matchResults)
+      if (!createdLead?.id) {
+        console.log('❌ Lead ID não encontrado, pulando auto-matching')
+      } else {
+        // Execute matching for the created lead using raw SQL
+        console.log('🔄 Iniciando checkForMatchesRaw...')
+        const matchResults = await checkForMatchesRaw(createdLead.id)
+        console.log('✅ Auto-matching executado com sucesso:', matchResults)
+        
+        if (matchResults?.matchCount > 0) {
+          console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados!`)
+        } else {
+          console.log('🔍 Nenhum match encontrado para este lead')
+        }
+      }
       
     } catch (error) {
       console.log('❌ Erro no auto-matching:', error)
+      console.log('📝 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     }
 
     return NextResponse.json(createdLead, { status: 201 })

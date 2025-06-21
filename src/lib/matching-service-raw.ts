@@ -99,29 +99,41 @@ export async function checkForMatchesRaw(leadId: string) {
       if (existingResult.rows.length === 0) {
         // Create notification
         const notificationId = 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        console.log('🔧 Criando notificação:', notificationId)
         
         const createNotificationQuery = `
           INSERT INTO lead_notifications (
-            id, "leadId", "propertyId", type, title, message, "isRead", "createdAt", "updatedAt"
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
+            id, "leadId", "propertyId", type, title, message, sent, "createdAt"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
         `
         
         const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
         const title = `Match Encontrado: ${property.title}`
         const message = `A propriedade "${property.title}" na ${property.city} faz match com o lead "${lead.name}"! Preço: R$ ${price.toLocaleString('pt-BR')}`
         
-        await client.query(createNotificationQuery, [
-          notificationId,
-          leadId,
-          property.id,
-          'PROPERTY_MATCH',
-          title,
-          message,
-          false
-        ])
-        
-        console.log(`✅ Notificação criada: ${title}`)
-        matchCount++
+        try {
+          await client.query(createNotificationQuery, [
+            notificationId,
+            leadId,
+            property.id,
+            'PROPERTY_MATCH',
+            title,
+            message,
+            false
+          ])
+          
+          console.log(`✅ Notificação criada: ${title}`)
+          matchCount++
+        } catch (notificationError) {
+          console.error('❌ Erro ao criar notificação:', notificationError)
+          console.error('📝 Parâmetros da notificação:', {
+            notificationId,
+            leadId,
+            propertyId: property.id,
+            title,
+            message
+          })
+        }
         
         // Update lead with matched property
         const updateLeadQuery = `
