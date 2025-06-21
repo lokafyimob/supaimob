@@ -12,9 +12,14 @@ export async function POST(request: NextRequest) {
     
     const { paymentId, paymentMethod, receipts, notes, includeInterest = true } = await request.json()
     
+    // Extrair URL do comprovante
+    const receiptUrl = receipts && receipts[0] ? receipts[0].url : null
+    
     console.log('Payment ID:', paymentId)
     console.log('Payment Method:', paymentMethod)
     console.log('Include Interest:', includeInterest)
+    console.log('📎 Receipt URL:', receiptUrl)
+    console.log('📎 Receipts data:', receipts)
     
     if (!paymentId || !paymentMethod) {
       return NextResponse.json(
@@ -120,7 +125,8 @@ export async function POST(request: NextRequest) {
         amount: Math.round(finalAmount * 100) / 100, // Atualizar com valor total
         penalty: Math.round(penalty * 100) / 100,
         interest: Math.round(interest * 100) / 100,
-        receipts: receipts ? JSON.stringify(receipts) : null,
+        receiptUrl: receiptUrl, // Salvar URL diretamente
+        receipts: receipts ? JSON.stringify(receipts) : null, // Manter compatibilidade
         notes: notes || `Pagamento via ${paymentMethod} - ${new Date().toLocaleString('pt-BR')}${penalty > 0 || interest > 0 ? ` - Multa: R$ ${penalty.toFixed(2)} - Juros: R$ ${interest.toFixed(2)}` : ''}${daysPastDue > 0 && !includeInterest ? ' - Pagamento sem juros por escolha' : ''}`
       },
       include: {

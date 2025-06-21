@@ -78,6 +78,36 @@ export default function Payments() {
     return normalizedStatus === 'paid' || normalizedStatus === 'pago'
   }
 
+  // Função para download seguro de arquivos
+  const downloadFile = async (url: string, filename: string) => {
+    try {
+      console.log('🔽 Iniciando download:', { url, filename })
+      
+      const response = await fetch(url)
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`)
+      }
+      
+      const blob = await response.blob()
+      const downloadUrl = window.URL.createObjectURL(blob)
+      
+      const link = document.createElement('a')
+      link.href = downloadUrl
+      link.download = filename
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      
+      // Limpar URL
+      window.URL.revokeObjectURL(downloadUrl)
+      
+      console.log('✅ Download concluído:', filename)
+    } catch (error) {
+      console.error('❌ Erro no download:', error)
+      alert('❌ Erro ao fazer download do comprovante. Tente novamente.')
+    }
+  }
+
   useEffect(() => {
     fetchPayments()
   }, [])
@@ -181,12 +211,8 @@ export default function Payments() {
     }
 
     try {
-      let receiptUrl = ''
-      
-      if (uploadedFile) {
-        // Criar uma URL temporária para o arquivo
-        receiptUrl = URL.createObjectURL(uploadedFile)
-      }
+      // Usar a URL real do servidor (já foi feito upload no handleFileUpload)
+      const receiptUrl = uploadedFileUrl // Esta é a URL real do servidor
 
       const response = await fetch('/api/payments/mark-paid', {
         method: 'POST',
@@ -232,32 +258,62 @@ export default function Payments() {
     }
   }
 
-  const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
-    if (file) {
-      const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
-      if (!allowedTypes.includes(file.type)) {
-        alert('⚠️ Apenas arquivos JPG, PNG ou PDF são permitidos')
-        return
-      }
-      
-      if (file.size > 5 * 1024 * 1024) {
-        alert('⚠️ Arquivo muito grande. Tamanho máximo: 5MB')
-        return
-      }
-      
-      setUploadedFile(file)
-      
-      // Criar URL de preview para todos os tipos de arquivo
-      const url = URL.createObjectURL(file)
-      setUploadedFileUrl(url)
-      
-      console.log('Arquivo carregado:', {
-        name: file.name,
-        type: file.type,
-        size: file.size,
-        url: url
+    if (!file) return
+
+    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
+    if (!allowedTypes.includes(file.type)) {
+      alert('⚠️ Apenas arquivos JPG, PNG ou PDF são permitidos')
+      return
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+      alert('⚠️ Arquivo muito grande. Tamanho máximo: 5MB')
+      return
+    }
+
+    // Mostrar preview temporário
+    const tempUrl = URL.createObjectURL(file)
+    setUploadedFileUrl(tempUrl)
+    setUploadedFile(file)
+
+    try {
+      // Upload para o servidor
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData
       })
+
+      if (response.ok) {
+        const result = await response.json()
+        
+        // Atualizar com URL real do servidor
+        setUploadedFileUrl(result.url)
+        
+        console.log('✅ Arquivo enviado com sucesso:', {
+          filename: result.filename,
+          url: result.url,
+          size: result.size,
+          type: result.type
+        })
+        
+        alert('✅ Comprovante carregado com sucesso!')
+      } else {
+        const error = await response.json()
+        throw new Error(error.error || 'Erro no upload')
+      }
+    } catch (error) {
+      console.error('❌ Erro no upload:', error)
+      alert('❌ Erro ao enviar comprovante: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
+      
+      // Limpar em caso de erro
+      setUploadedFile(null)
+      setUploadedFileUrl('')
+      URL.revokeObjectURL(tempUrl)
     }
   }
 
@@ -1115,14 +1171,13 @@ export default function Payments() {
                           <p className="text-xs text-blue-600 font-mono mt-1 break-all">URL: {viewingReceipt.receiptUrl}</p>
                         </div>
                       </div>
-                      <a 
-                        href={viewingReceipt.receiptUrl} 
-                        download
+                      <button
+                        onClick={() => downloadFile(viewingReceipt.receiptUrl, `comprovante_${viewingReceipt.id}`)}
                         className="inline-flex items-center px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl transform hover:scale-105"
                       >
                         <Download className="w-4 h-4 mr-2" />
                         Download
-                      </a>
+                      </button>
                     </div>
                     
                     {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
