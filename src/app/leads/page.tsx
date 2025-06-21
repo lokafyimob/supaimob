@@ -10,6 +10,7 @@ import { MatchAlert } from '@/components/match-alert'
 import { PartnershipAlert } from '@/components/partnership-alert'
 import { LocationNotifications } from '@/components/location-notifications'
 import { ToastContainer, useToast } from '@/components/toast'
+import { useLeadNotifications } from '@/hooks/use-lead-notifications'
 import {
   Plus,
   Search,
@@ -75,6 +76,7 @@ export default function Leads() {
   const [showLocationNotifications, setShowLocationNotifications] = useState(false)
   const [locationNotificationCount, setLocationNotificationCount] = useState(0)
   const { toasts, removeToast, showSuccess, showError } = useToast()
+  const { notifications: leadNotifications, markAsSent, hasNotifications } = useLeadNotifications()
   const [matchCounts, setMatchCounts] = useState<{[leadId: string]: number}>({})
   const [newMatches, setNewMatches] = useState<{
     leadId: string
@@ -388,7 +390,11 @@ export default function Leads() {
     }
   }
 
-  const handleDismissMatchAlert = () => {
+  const handleDismissMatchAlert = async () => {
+    if (leadNotifications.length > 0) {
+      const notificationIds = leadNotifications.map(n => n.id)
+      await markAsSent(notificationIds)
+    }
     setNewMatches([])
   }
 
@@ -975,7 +981,14 @@ export default function Leads() {
 
       {/* Match Alert */}
       <MatchAlert
-        matches={newMatches}
+        matches={leadNotifications.map(notification => ({
+          leadId: notification.leadId,
+          leadName: notification.leadName,
+          leadPhone: notification.leadPhone,
+          propertyTitle: notification.propertyTitle,
+          propertyPrice: notification.propertyPrice,
+          matchType: notification.matchType
+        }))}
         onDismiss={handleDismissMatchAlert}
         onViewMatches={handleViewMatchesFromAlert}
       />
