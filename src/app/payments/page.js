@@ -10,7 +10,9 @@ import {
   AlertTriangle,
   Search,
   Eye,
-  X
+  X,
+  FileText,
+  Download
 } from 'lucide-react'
 
 export default function Payments() {
@@ -488,10 +490,11 @@ export default function Payments() {
                     {payment.status === 'paid' && payment.receiptUrl && (
                       <button 
                         onClick={() => viewReceipt(payment)}
-                        className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110"
+                        className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 rounded-lg transition-all duration-200 transform hover:scale-110 relative"
                         title="Ver comprovante"
                       >
                         <Eye className="w-4 h-4" />
+                        <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
                       </button>
                     )}
                     {payment.status !== 'paid' && (
@@ -641,10 +644,11 @@ export default function Payments() {
                           {payment.receiptUrl && (
                             <button 
                               onClick={() => viewReceipt(payment)}
-                              className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 transform hover:scale-110"
+                              className="p-2 text-blue-600 hover:text-blue-900 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 transform hover:scale-110 relative"
                               title="Ver comprovante"
                             >
                               <Eye className="w-4 h-4" />
+                              <span className="absolute -top-1 -right-1 w-2 h-2 bg-green-500 rounded-full"></span>
                             </button>
                           )}
                           {payment.status !== 'paid' && payment.status !== 'PAID' && (
@@ -944,58 +948,102 @@ export default function Payments() {
               </button>
             </div>
             
-            <div style={{ marginBottom: '20px' }}>
-              <p><strong>Inquilino:</strong> {viewingReceipt.tenant?.name || 'Nome não disponível'}</p>
-              <p><strong>Imóvel:</strong> {viewingReceipt.property?.title || 'Título não disponível'}</p>
-              <p><strong>Valor:</strong> R$ {(viewingReceipt.amount || 0).toFixed(2)}</p>
-              <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidAt ? formatDate(viewingReceipt.paidAt) : 'N/A'}</p>
+            <div style={{ marginBottom: '20px', backgroundColor: '#f8f9fa', padding: '15px', borderRadius: '8px' }}>
+              <h3 style={{ marginTop: 0, marginBottom: '15px', color: '#333' }}>Detalhes do Pagamento</h3>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <p><strong>Inquilino:</strong> {viewingReceipt.tenant?.name || 'Nome não disponível'}</p>
+                <p><strong>Imóvel:</strong> {viewingReceipt.property?.title || 'Título não disponível'}</p>
+                <p><strong>Valor:</strong> R$ {(viewingReceipt.amount || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}</p>
+                <p><strong>Data do Pagamento:</strong> {viewingReceipt.paidDate ? formatDate(viewingReceipt.paidDate) : 'N/A'}</p>
+                <p><strong>Vencimento:</strong> {viewingReceipt.dueDate ? formatDate(viewingReceipt.dueDate) : 'N/A'}</p>
+                <p><strong>Forma de Pagamento:</strong> {viewingReceipt.paymentMethod || 'N/A'}</p>
+              </div>
+              {viewingReceipt.notes && (
+                <div style={{ marginTop: '10px' }}>
+                  <p><strong>Observações:</strong></p>
+                  <p style={{ fontStyle: 'italic', color: '#666' }}>{viewingReceipt.notes}</p>
+                </div>
+              )}
             </div>
 
             {viewingReceipt.receiptUrl && (
-              <div style={{ textAlign: 'center' }}>
-                {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
-                  <div>
-                    <FileText size={48} style={{ margin: '20px auto', color: '#666' }} />
-                    <p>Arquivo PDF</p>
-                    <a 
-                      href={viewingReceipt.receiptUrl} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{
-                        display: 'inline-block',
-                        padding: '10px 20px',
-                        backgroundColor: '#007bff',
-                        color: 'white',
-                        textDecoration: 'none',
-                        borderRadius: '5px',
-                        marginTop: '10px'
-                      }}
-                    >
-                      Abrir PDF
-                    </a>
-                  </div>
-                ) : (
-                  <div>
-                    <img 
-                      src={viewingReceipt.receiptUrl} 
-                      alt="Comprovante de pagamento" 
-                      style={{
-                        maxWidth: '100%',
-                        maxHeight: '500px',
-                        borderRadius: '5px',
-                        border: '1px solid #ddd'
-                      }}
-                      onError={(e) => {
-                        e.target.style.display = 'none'
-                        e.target.nextSibling.style.display = 'block'
-                      }}
-                    />
-                    <div style={{ display: 'none', textAlign: 'center', padding: '40px' }}>
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                  <h3 style={{ margin: 0, color: '#333' }}>Comprovante</h3>
+                  <a 
+                    href={viewingReceipt.receiptUrl} 
+                    download
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      padding: '8px 16px',
+                      backgroundColor: '#28a745',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '5px',
+                      fontSize: '14px'
+                    }}
+                  >
+                    <Download size={16} />
+                    Download
+                  </a>
+                </div>
+                <div style={{ textAlign: 'center', border: '2px dashed #ddd', borderRadius: '8px', padding: '20px' }}>
+                  {viewingReceipt.receiptUrl.endsWith('.pdf') ? (
+                    <div>
                       <FileText size={48} style={{ margin: '20px auto', color: '#666' }} />
-                      <p>Não foi possível carregar a imagem</p>
-                      <small style={{ color: '#666' }}>{viewingReceipt.receiptUrl}</small>
+                      <p style={{ margin: '10px 0', fontSize: '16px', fontWeight: 'bold' }}>Arquivo PDF</p>
+                      <p style={{ margin: '10px 0', color: '#666' }}>Clique no botão abaixo para visualizar</p>
+                      <a 
+                        href={viewingReceipt.receiptUrl} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          padding: '10px 20px',
+                          backgroundColor: '#007bff',
+                          color: 'white',
+                          textDecoration: 'none',
+                          borderRadius: '5px',
+                          marginTop: '10px'
+                        }}
+                      >
+                        <Eye size={16} />
+                        Abrir PDF
+                      </a>
                     </div>
-                  </div>
+                  ) : (
+                    <div>
+                      <p style={{ margin: '10px 0', fontSize: '16px', fontWeight: 'bold' }}>Imagem do Comprovante</p>
+                      <img 
+                        src={viewingReceipt.receiptUrl} 
+                        alt="Comprovante de pagamento" 
+                        style={{
+                          maxWidth: '100%',
+                          maxHeight: '500px',
+                          borderRadius: '8px',
+                          border: '1px solid #ddd',
+                          boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                          cursor: 'pointer'
+                        }}
+                        onClick={() => window.open(viewingReceipt.receiptUrl, '_blank')}
+                        onError={(e) => {
+                          e.target.style.display = 'none'
+                          e.target.nextSibling.style.display = 'block'
+                        }}
+                      />
+                      <div style={{ display: 'none', textAlign: 'center', padding: '40px' }}>
+                        <FileText size={48} style={{ margin: '20px auto', color: '#dc3545' }} />
+                        <p style={{ color: '#dc3545', fontWeight: 'bold' }}>Não foi possível carregar a imagem</p>
+                        <small style={{ color: '#666', wordBreak: 'break-all' }}>{viewingReceipt.receiptUrl}</small>
+                      </div>
+                      <p style={{ margin: '10px 0', fontSize: '12px', color: '#666' }}>
+                        Clique na imagem para abrir em tamanho original
+                      </p>
+                    </div>
                 )}
               </div>
             )}
