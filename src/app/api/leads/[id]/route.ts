@@ -54,50 +54,92 @@ export async function PUT(
     const user = await requireAuth(request)
     const data = await request.json()
     
-    const lead = await prisma.lead.update({
-      where: { 
-        id,
-        userId: user.id 
-      },
-      data: {
-        name: data.name,
-        email: data.email,
-        phone: data.phone,
-        document: data.document || null,
-        interest: data.interest,
-        propertyType: data.propertyType,
-        minPrice: data.minPrice || null,
-        maxPrice: data.maxPrice,
-        minBedrooms: data.minBedrooms || null,
-        maxBedrooms: data.maxBedrooms || null,
-        minBathrooms: data.minBathrooms || null,
-        maxBathrooms: data.maxBathrooms || null,
-        minArea: data.minArea || null,
-        maxArea: data.maxArea || null,
-        preferredCities: JSON.stringify((data.preferredCities || []).map((city: string) => city.toUpperCase())),
-        preferredStates: JSON.stringify(data.preferredStates || []),
-        amenities: data.amenities ? JSON.stringify(data.amenities) : null,
-        notes: data.notes || null,
-        status: data.status,
-        lastContactDate: data.lastContactDate ? new Date(data.lastContactDate) : null,
-        matchedPropertyId: data.matchedPropertyId || null,
-        needsFinancing: data.needsFinancing || false
-      },
-      include: {
-        matchedProperty: true,
-        notifications: {
-          include: {
-            property: true
-          }
-        }
-      }
+    console.log('Updating lead with raw SQL:', id, data)
+    
+    // Use raw SQL for update (same approach as GET)
+    const { Client } = require('pg')
+    const client = new Client({
+      connectionString: process.env.DATABASE_URL,
+      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
     })
-
-    return NextResponse.json(lead)
+    
+    await client.connect()
+    
+    // First verify the lead belongs to the user
+    const checkQuery = 'SELECT id FROM leads WHERE id = $1 AND "userId" = $2'
+    const checkResult = await client.query(checkQuery, [id, user.id])
+    
+    if (checkResult.rows.length === 0) {
+      await client.end()
+      return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 })
+    }
+    
+    // Update the lead
+    const updateQuery = `
+      UPDATE leads SET 
+        name = $1,
+        email = $2,
+        phone = $3,
+        document = $4,
+        interest = $5,
+        "propertyType" = $6,
+        "minPrice" = $7,
+        "maxPrice" = $8,
+        "minBedrooms" = $9,
+        "maxBedrooms" = $10,
+        "minBathrooms" = $11,
+        "maxBathrooms" = $12,
+        "minArea" = $13,
+        "maxArea" = $14,
+        "preferredCities" = $15,
+        "preferredStates" = $16,
+        amenities = $17,
+        notes = $18,
+        status = $19,
+        "lastContactDate" = $20,
+        "needsFinancing" = $21,
+        "updatedAt" = NOW()
+      WHERE id = $22 AND "userId" = $23
+      RETURNING *
+    `
+    
+    const values = [
+      data.name,
+      data.email,
+      data.phone,
+      data.document || null,
+      data.interest,
+      data.propertyType,
+      data.minPrice || null,
+      data.maxPrice,
+      data.minBedrooms || null,
+      data.maxBedrooms || null,
+      data.minBathrooms || null,
+      data.maxBathrooms || null,
+      data.minArea || null,
+      data.maxArea || null,
+      JSON.stringify((data.preferredCities || []).filter((city: string) => city && city.trim()).map((city: string) => city.toUpperCase())),
+      JSON.stringify(Array.isArray(data.preferredStates) ? data.preferredStates : []),
+      data.amenities ? JSON.stringify(data.amenities) : null,
+      data.notes || null,
+      data.status,
+      data.lastContactDate ? new Date(data.lastContactDate) : null,
+      data.needsFinancing || false,
+      id,
+      user.id
+    ]
+    
+    const result = await client.query(updateQuery, values)
+    await client.end()
+    
+    console.log('Lead updated successfully:', result.rows[0].id)
+    
+    return NextResponse.json(result.rows[0])
+    
   } catch (error) {
     console.error('Error updating lead:', error)
     return NextResponse.json(
-      { error: 'Erro ao atualizar lead' },
+      { error: 'Erro ao atualizar lead', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
   }
