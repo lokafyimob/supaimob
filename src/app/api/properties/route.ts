@@ -116,6 +116,26 @@ export async function POST(request: NextRequest) {
       } else {
         console.log('🔍 Nenhuma notificação criada para nova propriedade')
       }
+
+      // Execute automatic partnership creation for the created property
+      if (data.acceptsPartnership) {
+        console.log('🤝 Executando criação automática de parcerias para nova propriedade...')
+        try {
+          const { createPartnershipsForProperty } = require('@/lib/auto-partnership-service')
+          const partnershipResult = await createPartnershipsForProperty(property.id)
+          console.log('✅ Parcerias automáticas de propriedade executadas:', partnershipResult)
+          
+          if (partnershipResult?.partnershipsCreated > 0) {
+            console.log(`🎯 ${partnershipResult.partnershipsCreated} parcerias criadas para nova propriedade: ${partnershipResult.propertyTitle}`)
+          } else {
+            console.log('🔍 Nenhuma parceria criada para nova propriedade')
+          }
+        } catch (partnershipError) {
+          console.log('❌ Erro nas parcerias automáticas de propriedade:', partnershipError)
+        }
+      } else {
+        console.log('🚫 Propriedade não aceita parcerias, pulando criação automática')
+      }
       
     } catch (error) {
       console.log('❌ Erro nas notificações automáticas:', error)

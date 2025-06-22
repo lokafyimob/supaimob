@@ -182,6 +182,22 @@ export async function POST(request: NextRequest) {
         } catch (notificationError) {
           console.log('❌ Erro nas notificações automáticas de lead:', notificationError)
         }
+
+        // Execute automatic partnership creation for the created lead
+        console.log('🤝 Executando criação automática de parcerias para novo lead...')
+        try {
+          const { createPartnershipsForLead } = require('@/lib/auto-partnership-service')
+          const partnershipResult = await createPartnershipsForLead(createdLead.id)
+          console.log('✅ Parcerias automáticas executadas:', partnershipResult)
+          
+          if (partnershipResult?.partnershipsCreated > 0) {
+            console.log(`🎯 ${partnershipResult.partnershipsCreated} parcerias criadas para novo lead: ${partnershipResult.leadName}`)
+          } else {
+            console.log('🔍 Nenhuma parceria criada para novo lead')
+          }
+        } catch (partnershipError) {
+          console.log('❌ Erro nas parcerias automáticas de lead:', partnershipError)
+        }
         
         if (matchResults?.matchCount > 0) {
           console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados!`)
