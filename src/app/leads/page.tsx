@@ -132,13 +132,13 @@ export default function Leads() {
     }
   }, [leads, loading, previousMatchCounts])
 
-  // Listen for property updates to immediately check for new matches and detect partnerships
+  // Listen for property updates to immediately check for new matches
   useEffect(() => {
     const handlePropertyUpdate = () => {
       if (leads.length > 0 && !loading) {
-        console.log('Property updated, checking for new matches and detecting partnerships...')
+        console.log('Property updated, checking for new matches...')
         fetchMatchCounts(leads)
-        detectPartnerships() // Check for partnership opportunities when properties are updated
+        // Partnership detection is now handled automatically by the auto-partnership-service
       }
     }
 
@@ -248,49 +248,7 @@ export default function Leads() {
     }
   }
 
-  const detectPartnerships = async () => {
-    try {
-      console.log('🤝 ULTRAPHINK: Iniciando detecção de parcerias...')
-      
-      // Primeiro, vamos testar o debug endpoint
-      const debugResponse = await fetch('/api/debug/partnership-test')
-      if (debugResponse.ok) {
-        const debugData = await debugResponse.json()
-        console.log('🔍 DEBUG INFO:', debugData.debugInfo)
-        showSuccess('Debug Info', `Encontradas ${debugData.debugInfo.totalPartnershipProperties} propriedades com parceria e ${debugData.debugInfo.totalActiveLeads} leads ativos`)
-      }
-      
-      console.log('🤝 Detecting partnership opportunities...')
-      const response = await fetch('/api/partnerships/detect-raw', {
-        method: 'POST'
-      })
-      console.log('🤝 Partnership detection response status:', response.status)
-      
-      if (response.ok) {
-        const data = await response.json()
-        console.log('🤝 Partnership detection result:', data)
-        if (data.partnerships > 0) {
-          console.log(`✅ ${data.partnerships} partnerships found! Fetching notifications...`)
-          showSuccess('Parcerias encontradas!', `${data.partnerships} parcerias detectadas`)
-          // Refresh partnership notifications to show new ones
-          setTimeout(() => {
-            fetchPartnershipNotifications()
-          }, 1000) // Wait a bit for the notifications to be created
-        } else {
-          console.log('ℹ️ No partnerships found')
-          showError('Sem parcerias', 'Nenhuma parceria compatível encontrada')
-        }
-      } else {
-        console.error('❌ Partnership detection failed:', response.status)
-        const errorText = await response.text()
-        console.error('Error response:', errorText)
-        showError('Erro na detecção', `Status: ${response.status}`)
-      }
-    } catch (error) {
-      console.error('Error detecting partnerships:', error)
-      showError('Erro', 'Erro ao detectar parcerias')
-    }
-  }
+  // OLD detectPartnerships function removed - partnerships are now handled automatically by auto-partnership-service
 
   const handleDismissPartnershipAlert = async () => {
     // Mark current partnership notifications as viewed
@@ -324,7 +282,7 @@ export default function Leads() {
       if (response.ok) {
         showSuccess('Lead criado!', 'O lead foi cadastrado com sucesso.')
         await fetchLeads() // This will also fetch match counts
-        detectPartnerships() // Check for partnership opportunities after creating lead
+        // Partnership opportunities are now handled automatically by auto-partnership-service
         setShowForm(false)
       } else {
         const errorData = await response.json()
@@ -349,7 +307,7 @@ export default function Leads() {
       if (response.ok) {
         showSuccess('Lead atualizado!', 'As informações foram atualizadas com sucesso.')
         await fetchLeads() // This will also fetch match counts
-        detectPartnerships() // Check for partnership opportunities after updating lead
+        // Partnership opportunities are now handled automatically by auto-partnership-service
         setEditingLead(null)
         setShowForm(false)
       } else {
