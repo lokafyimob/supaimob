@@ -647,15 +647,21 @@ export default function Payments() {
             
             <div className="flex flex-wrap gap-3">
               <div className="relative">
+                <div className="absolute left-3 top-1/2 transform -translate-y-1/2 z-10">
+                  {filterStatus === 'all' && <Filter className="w-4 h-4 text-gray-500" />}
+                  {filterStatus === 'pending' && <Clock className="w-4 h-4 text-amber-500" />}
+                  {filterStatus === 'overdue' && <AlertTriangle className="w-4 h-4 text-red-500" />}
+                  {filterStatus === 'paid' && <CheckCircle className="w-4 h-4 text-green-500" />}
+                </div>
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="appearance-none px-4 py-3 pr-10 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium"
+                  className="appearance-none pl-10 pr-10 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium min-w-[160px]"
                 >
-                  <option value="all">🔍 Todos os Status</option>
-                  <option value="pending">⏱️ A Vencer</option>
-                  <option value="overdue">⚠️ Em Atraso</option>
-                  <option value="paid">✅ Pagos</option>
+                  <option value="all">Todos os Status</option>
+                  <option value="pending">A Vencer</option>
+                  <option value="overdue">Em Atraso</option>
+                  <option value="paid">Pagos</option>
                 </select>
                 <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
