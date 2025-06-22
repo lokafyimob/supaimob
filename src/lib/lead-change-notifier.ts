@@ -52,9 +52,10 @@ export async function notifyLeadChanges(leadId: string, changeType: 'created' | 
           (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" BETWEEN COALESCE($4, 0) AND $5)
         )
         AND (
-          -- Se lead precisa de financiamento, propriedade deve aceitar
-          $6 = false OR 
-          ($6 = true AND p."acceptsFinancing" = true)
+          -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
+          ($3 = 'RENT') OR
+          ($3 = 'BUY' AND $6 = false) OR 
+          ($3 = 'BUY' AND $6 = true AND p."acceptsFinancing" = true)
         )
     `
     
@@ -144,9 +145,10 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
             (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" BETWEEN COALESCE($4, 0) AND $5)
           )
           AND (
-            -- Se lead precisa de financiamento, propriedade deve aceitar
-            $6 = false OR 
-            ($6 = true AND p."acceptsFinancing" = true)
+            -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
+            ($3 = 'RENT') OR
+            ($3 = 'BUY' AND $6 = false) OR 
+            ($3 = 'BUY' AND $6 = true AND p."acceptsFinancing" = true)
           )
         LIMIT 10
       `

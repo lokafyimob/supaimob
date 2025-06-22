@@ -50,9 +50,10 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
           (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
         )
         AND (
-          -- Se lead precisa de financiamento, propriedade deve aceitar
-          l."needsFinancing" = false OR 
-          (l."needsFinancing" = true AND $5 = true)
+          -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
+          (l.interest = 'RENT') OR
+          (l.interest = 'BUY' AND l."needsFinancing" = false) OR 
+          (l.interest = 'BUY' AND l."needsFinancing" = true AND $5 = true)
         )
     `
     
@@ -143,9 +144,10 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
             (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
           )
           AND (
-            -- Se lead precisa de financiamento, propriedade deve aceitar
-            l."needsFinancing" = false OR 
-            (l."needsFinancing" = true AND $5 = true)
+            -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
+            (l.interest = 'RENT') OR
+            (l.interest = 'BUY' AND l."needsFinancing" = false) OR 
+            (l.interest = 'BUY' AND l."needsFinancing" = true AND $5 = true)
           )
         LIMIT 10
       `
