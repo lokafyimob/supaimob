@@ -102,23 +102,23 @@ export async function POST(request: NextRequest) {
     console.log('🏠 Propriedade criada:', property.id, property.title)
     console.log('🤝 Aceita parceria:', data.acceptsPartnership)
     
-    // Executar auto-matching
+    // Executar notificação automática de mudanças
     try {
-      console.log('🤖 Executando auto-matching...')
+      console.log('🔔 Executando notificação automática para nova propriedade...')
       console.log('📋 Nova propriedade ID:', property.id)
       
-      // Execute matching for the new property
-      const matchResults = await checkForPropertyMatches(property.id)
-      console.log('✅ Property auto-matching executado:', matchResults)
+      const { notifyPropertyChanges } = require('@/lib/property-change-notifier')
+      const notificationResults = await notifyPropertyChanges(property.id, 'created')
+      console.log('✅ Notificações automáticas executadas:', notificationResults)
       
-      if (matchResults?.matchCount > 0) {
-        console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados para nova propriedade!`)
+      if (notificationResults?.notificationsCreated > 0) {
+        console.log(`🎯 ${notificationResults.notificationsCreated} notificações criadas para nova propriedade: ${notificationResults.propertyTitle}`)
       } else {
-        console.log('🔍 Nenhum match encontrado para nova propriedade')
+        console.log('🔍 Nenhuma notificação criada para nova propriedade')
       }
       
     } catch (error) {
-      console.log('❌ Erro no auto-matching:', error)
+      console.log('❌ Erro nas notificações automáticas:', error)
       console.log('📝 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     }
 

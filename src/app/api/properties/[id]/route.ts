@@ -84,23 +84,23 @@ export async function PUT(
       }
     })
 
-    // Executar auto-matching após edição
+    // Executar notificação automática de mudanças
     try {
-      console.log('🤖 Propriedade editada, executando auto-matching...')
+      console.log('🔔 Propriedade editada, executando notificações automáticas...')
       console.log('📋 Propriedade atualizada ID:', property.id)
       
-      // Execute matching for the updated property
-      const matchResults = await checkForPropertyMatches(property.id)
-      console.log('✅ Property auto-matching executado:', matchResults)
+      const { notifyPropertyChanges } = require('@/lib/property-change-notifier')
+      const notificationResults = await notifyPropertyChanges(property.id, 'updated')
+      console.log('✅ Notificações automáticas executadas:', notificationResults)
       
-      if (matchResults?.matchCount > 0) {
-        console.log(`🎯 ${matchResults.matchCount} matches/parcerias criados para propriedade editada!`)
+      if (notificationResults?.notificationsCreated > 0) {
+        console.log(`🎯 ${notificationResults.notificationsCreated} notificações atualizadas para propriedade: ${notificationResults.propertyTitle}`)
       } else {
-        console.log('🔍 Nenhum match encontrado para propriedade editada')
+        console.log('🔍 Nenhuma notificação atualizada para propriedade editada')
       }
       
     } catch (error) {
-      console.log('❌ Erro no auto-matching:', error)
+      console.log('❌ Erro nas notificações automáticas:', error)
       console.log('📝 Stack trace:', error instanceof Error ? error.stack : 'N/A')
     }
 
