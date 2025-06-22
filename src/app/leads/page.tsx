@@ -525,7 +525,7 @@ export default function Leads() {
                 }}
                 className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
-                <Settings className="w-4 h-4 mr-2" />
+                <Zap className="w-4 h-4 mr-2" />
                 Corrigir Parcerias
               </button>
               <Link
