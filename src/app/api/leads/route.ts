@@ -173,44 +173,8 @@ export async function POST(request: NextRequest) {
           const { detectReversePartnerships } = require('@/lib/reverse-partnership-service')
           const partnershipResult = await detectReversePartnerships(createdLead.id)
           console.log('✅ Detecção de parceria reversa executada:', partnershipResult)
-          
-          // VERIFICAÇÃO DETALHADA - Por que não funciona?
-          console.log('🔍 DEBUGGING PARCERIAS:')
-          
-          const { Client: DebugClient } = require('pg')
-          const debugClient = new DebugClient({
-            connectionString: process.env.DATABASE_URL,
-            ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-          })
-          
-          await debugClient.connect()
-          
-          // 1. Verificar quantos usuários existem
-          const totalUsersQuery = `SELECT COUNT(*) as total FROM users`
-          const totalUsers = await debugClient.query(totalUsersQuery)
-          console.log('👥 Total de usuários no sistema:', totalUsers.rows[0].total)
-          
-          // 2. Verificar propriedades de outros usuários
-          const otherPropsQuery = `
-            SELECT COUNT(*) as total FROM properties 
-            WHERE "userId" != $1 AND "acceptsPartnership" = true AND status = 'AVAILABLE'
-          `
-          const otherProps = await debugClient.query(otherPropsQuery, [user.id])
-          console.log('🏠 Propriedades de outros usuários com parceria:', otherProps.rows[0].total)
-          
-          // 3. Verificar notificações criadas
-          const partnerNotifQuery = `
-            SELECT COUNT(*) as total FROM partnership_notifications 
-            WHERE "fromUserId" = $1 OR "toUserId" = $1
-          `
-          const partnerNotif = await debugClient.query(partnerNotifQuery, [user.id])
-          console.log('📬 Notificações de parceria do usuário:', partnerNotif.rows[0].total)
-          
-          await debugClient.end()
-          
         } catch (partnershipError) {
           console.log('❌ Erro na detecção de parceria reversa:', partnershipError)
-          console.log('📝 Stack trace completo:', partnershipError instanceof Error ? partnershipError.stack : 'N/A')
         }
         
         if (matchResults?.matchCount > 0) {

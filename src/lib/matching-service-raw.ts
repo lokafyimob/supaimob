@@ -34,6 +34,11 @@ export async function checkForMatchesRaw(leadId: string) {
     const lead = leadResult.rows[0]
     console.log(`📋 Lead: ${lead.name} - ${lead.interest} - ${lead.propertyType}`)
     
+    // Primeiro verificar se usuário tem propriedades
+    const userPropsCountQuery = `SELECT COUNT(*) as count FROM properties WHERE "userId" = $1`
+    const userPropsCount = await client.query(userPropsCountQuery, [lead.userId])
+    console.log(`📊 Total de propriedades do usuário: ${userPropsCount.rows[0].count}`)
+    
     // Find matching properties from the same user
     const userPropertiesQuery = `
       SELECT p.*, u.name as ownerName, u.email as ownerEmail, u.phone as ownerPhone
