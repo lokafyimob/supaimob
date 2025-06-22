@@ -181,3 +181,4 @@ Após deploy, acesse: `/api/init` (POST) para criar o usuário demo automaticame
 # Test Railway proxy connection Tue Jun 17 23:46:35 -03 2025
 # Test Neon connection Wed Jun 18 00:49:19 -03 2025
 # Force Prisma regeneration Wed Jun 18 01:11:16 -03 2025
+# Deploy trigger Sun Jun 22 13:05:33 -03 2025
