@@ -52,8 +52,9 @@ export async function checkForMatchesRaw(leadId: string) {
           (p."salePrice" IS NOT NULL AND $3 = 'BUY')
         )
         AND (
-          ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
-          ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
+          -- 🔥 ULTRAPHINK: Preço NUNCA pode exceder o máximo do lead
+          ($3 = 'RENT' AND p."rentPrice" >= $4 AND ($5 <= 0 OR p."rentPrice" <= $5)) OR
+          ($3 = 'BUY' AND p."salePrice" >= $4 AND ($5 <= 0 OR p."salePrice" <= $5))
         )
         AND (
           -- 🔥 LÓGICA DE FINANCIAMENTO CORRIGIDA
@@ -68,15 +69,19 @@ export async function checkForMatchesRaw(leadId: string) {
       propertyType: lead.propertyType,
       interest: lead.interest,
       minPrice: lead.minPrice || 0,
-      maxPrice: lead.maxPrice || 999999999
+      maxPrice: lead.maxPrice || 0
     })
+    
+    if (!lead.maxPrice || lead.maxPrice <= 0) {
+      console.log('⚠️ ULTRAPHINK: Lead sem preço máximo definido - limitando busca')
+    }
     
     const userPropertiesResult = await client.query(userPropertiesQuery, [
       lead.userId,
       lead.propertyType,
       lead.interest,
       lead.minPrice || 0,
-      lead.maxPrice || 999999999,
+      lead.maxPrice || 0,
       lead.needsFinancing || false
     ])
     
@@ -170,8 +175,9 @@ export async function checkForMatchesRaw(leadId: string) {
           (p."salePrice" IS NOT NULL AND $3 = 'BUY')
         )
         AND (
-          ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
-          ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
+          -- 🔥 ULTRAPHINK: Preço NUNCA pode exceder o máximo do lead (partnerships)
+          ($3 = 'RENT' AND p."rentPrice" >= $4 AND ($5 <= 0 OR p."rentPrice" <= $5)) OR
+          ($3 = 'BUY' AND p."salePrice" >= $4 AND ($5 <= 0 OR p."salePrice" <= $5))
         )
         AND (
           -- 🔥 LÓGICA DE FINANCIAMENTO CORRIGIDA

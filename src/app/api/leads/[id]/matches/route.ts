@@ -59,15 +59,29 @@ export async function GET(
     if (lead.interest === 'RENT') {
       paramCount++
       whereConditions.push(`p."rentPrice" IS NOT NULL AND p."rentPrice" > 0`)
-      whereConditions.push(`p."rentPrice" BETWEEN $${paramCount} AND $${paramCount + 1}`)
-      queryParams.push(lead.minPrice || 0, lead.maxPrice)
-      paramCount++
+      if (lead.maxPrice && lead.maxPrice > 0) {
+        whereConditions.push(`p."rentPrice" >= $${paramCount} AND p."rentPrice" <= $${paramCount + 1}`)
+        queryParams.push(lead.minPrice || 0, lead.maxPrice)
+        paramCount++
+        console.log('🔥 ULTRAPHINK: Preço aluguel deve estar entre', lead.minPrice || 0, 'e', lead.maxPrice)
+      } else {
+        whereConditions.push(`p."rentPrice" >= $${paramCount}`)
+        queryParams.push(lead.minPrice || 0)
+        console.log('⚠️ ULTRAPHINK: Lead sem preço máximo definido para aluguel')
+      }
     } else if (lead.interest === 'BUY') {
       paramCount++
       whereConditions.push(`p."salePrice" IS NOT NULL AND p."salePrice" > 0`)
-      whereConditions.push(`p."salePrice" BETWEEN $${paramCount} AND $${paramCount + 1}`)
-      queryParams.push(lead.minPrice || 0, lead.maxPrice)
-      paramCount++
+      if (lead.maxPrice && lead.maxPrice > 0) {
+        whereConditions.push(`p."salePrice" >= $${paramCount} AND p."salePrice" <= $${paramCount + 1}`)
+        queryParams.push(lead.minPrice || 0, lead.maxPrice)
+        paramCount++
+        console.log('🔥 ULTRAPHINK: Preço venda deve estar entre', lead.minPrice || 0, 'e', lead.maxPrice)
+      } else {
+        whereConditions.push(`p."salePrice" >= $${paramCount}`)
+        queryParams.push(lead.minPrice || 0)
+        console.log('⚠️ ULTRAPHINK: Lead sem preço máximo definido para compra')
+      }
     }
 
     // Bedrooms

@@ -48,8 +48,9 @@ export async function notifyLeadChanges(leadId: string, changeType: 'created' | 
         AND p.status = 'AVAILABLE'
         AND p."propertyType" = $2
         AND (
-          (p."rentPrice" IS NOT NULL AND $3 = 'RENT' AND p."rentPrice" BETWEEN COALESCE($4, 0) AND $5) OR
-          (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" BETWEEN COALESCE($4, 0) AND $5)
+          -- 🔥 ULTRAPHINK: Preço NUNCA pode exceder o máximo do lead
+          (p."rentPrice" IS NOT NULL AND $3 = 'RENT' AND p."rentPrice" >= COALESCE($4, 0) AND ($5 <= 0 OR p."rentPrice" <= $5)) OR
+          (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" >= COALESCE($4, 0) AND ($5 <= 0 OR p."salePrice" <= $5))
         )
         AND (
           -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
@@ -64,7 +65,7 @@ export async function notifyLeadChanges(leadId: string, changeType: 'created' | 
       lead.propertyType,
       lead.interest,
       lead.minPrice || 0,
-      lead.maxPrice || 999999999,
+      lead.maxPrice || 0,
       lead.needsFinancing || false
     ])
     
@@ -141,8 +142,9 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
           AND p.status = 'AVAILABLE'
           AND p."propertyType" = $2
           AND (
-            (p."rentPrice" IS NOT NULL AND $3 = 'RENT' AND p."rentPrice" BETWEEN COALESCE($4, 0) AND $5) OR
-            (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" BETWEEN COALESCE($4, 0) AND $5)
+            -- 🔥 ULTRAPHINK: Preço NUNCA pode exceder o máximo do lead (partnerships)
+            (p."rentPrice" IS NOT NULL AND $3 = 'RENT' AND p."rentPrice" >= COALESCE($4, 0) AND ($5 <= 0 OR p."rentPrice" <= $5)) OR
+            (p."salePrice" IS NOT NULL AND $3 = 'BUY' AND p."salePrice" >= COALESCE($4, 0) AND ($5 <= 0 OR p."salePrice" <= $5))
           )
           AND (
             -- 🔥 LÓGICA CORRIGIDA: Se lead precisa financiamento E interesse é COMPRA, propriedade DEVE aceitar
@@ -158,7 +160,7 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
         lead.propertyType,
         lead.interest,
         lead.minPrice || 0,
-        lead.maxPrice || 999999999,
+        lead.maxPrice || 0,
         lead.needsFinancing || false
       ])
       
