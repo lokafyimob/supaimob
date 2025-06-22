@@ -244,6 +244,35 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
       }
     }
     
+    // 3. LÓGICA ESPECIAL: Se propriedade NÃO aceita financiamento, REMOVER leads que precisam
+    if (!property.acceptsFinancing) {
+      console.log('🚫 Propriedade NÃO aceita financiamento - removendo leads incompatíveis...')
+      
+      // Remover lead_notifications de leads que precisam de financiamento
+      const removeIncompatibleLeadsQuery = `
+        DELETE FROM lead_notifications 
+        WHERE "propertyId" = $1 
+          AND "leadId" IN (
+            SELECT l.id FROM leads l 
+            WHERE l."needsFinancing" = true
+          )
+      `
+      const removedLeads = await client.query(removeIncompatibleLeadsQuery, [propertyId])
+      console.log(`🗑️ ${removedLeads.rowCount} lead_notifications removidas (leads precisam financiamento)`)
+      
+      // Remover partnership_notifications de leads que precisam de financiamento
+      const removeIncompatiblePartnershipsQuery = `
+        DELETE FROM partnership_notifications 
+        WHERE "propertyId" = $1 
+          AND "leadId" IN (
+            SELECT l.id FROM leads l 
+            WHERE l."needsFinancing" = true
+          )
+      `
+      const removedPartnerships = await client.query(removeIncompatiblePartnershipsQuery, [propertyId])
+      console.log(`🗑️ ${removedPartnerships.rowCount} partnership_notifications removidas (leads precisam financiamento)`)
+    }
+    
     await client.end()
     
     console.log(`✅ ${notificationsCreated} notificações criadas/atualizadas para a propriedade ${property.title}`)
