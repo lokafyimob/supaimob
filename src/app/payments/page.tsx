@@ -74,8 +74,8 @@ export default function Payments() {
 
   // Função helper para normalizar status - definida antes das funções de fetch
   const isPaidStatus = (status: string) => {
-    const normalizedStatus = status?.toLowerCase()
-    return normalizedStatus === 'paid' || normalizedStatus === 'pago'
+    const normalizedStatus = status?.toUpperCase()
+    return normalizedStatus === 'PAID'
   }
 
   // Função para download automático de arquivos
@@ -141,11 +141,10 @@ export default function Payments() {
       const response = await fetch('/api/payments')
       if (response.ok) {
         const data = await response.json()
+        console.log('📊 Dados recebidos da API:', data)
         
         const mappedPayments = data.map((payment: any) => ({
           ...payment,
-          // Normalizar status para sempre mostrar "Pago" em português
-          status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           // Mapear receipts para receiptUrl para compatibilidade
           receiptUrl: payment.receipts ? (() => {
             try {
@@ -164,6 +163,20 @@ export default function Payments() {
           tenant: payment.contract?.tenant || {}
         }))
         
+        console.log('📊 Pagamentos mapeados:', mappedPayments)
+        
+        // Debug das categorias
+        const pendingCount = mappedPayments.filter((p: Payment) => !isPaidStatus(p.status) && !isOverdue(p.dueDate)).length
+        const overdueCount = mappedPayments.filter((p: Payment) => !isPaidStatus(p.status) && isOverdue(p.dueDate)).length
+        const paidCount = mappedPayments.filter((p: Payment) => isPaidStatus(p.status)).length
+        
+        console.log('📊 Categorias:', {
+          'A Vencer': pendingCount,
+          'Em Atraso': overdueCount,
+          'Pagos': paidCount,
+          'Total': mappedPayments.length
+        })
+        
         setPayments(mappedPayments)
       }
     } catch (error) {
@@ -181,8 +194,6 @@ export default function Payments() {
         
         const mappedPayments = data.map((payment: any) => ({
           ...payment,
-          // Normalizar status para sempre mostrar "Pago" em português
-          status: isPaidStatus(payment.status) ? 'pago' : payment.status?.toLowerCase(),
           // Mapear receipts para receiptUrl para compatibilidade
           receiptUrl: payment.receipts ? (() => {
             try {
@@ -379,10 +390,10 @@ export default function Payments() {
     if (isPaidStatus(status)) {
       return <CheckCircle className="w-5 h-5 text-green-600" />
     }
-    switch (status?.toLowerCase()) {
-      case 'overdue':
+    switch (status?.toUpperCase()) {
+      case 'OVERDUE':
         return <AlertTriangle className="w-5 h-5 text-red-600" />
-      case 'pending':
+      case 'PENDING':
         return <Clock className="w-5 h-5 text-yellow-600" />
       default:
         return <Clock className="w-5 h-5 text-gray-600" />
@@ -393,10 +404,10 @@ export default function Payments() {
     if (isPaidStatus(status)) {
       return 'Pago'
     }
-    switch (status?.toLowerCase()) {
-      case 'overdue':
+    switch (status?.toUpperCase()) {
+      case 'OVERDUE':
         return 'Em Atraso'
-      case 'pending':
+      case 'PENDING':
         return 'Pendente'
       default:
         return status || 'Indefinido'
@@ -407,10 +418,10 @@ export default function Payments() {
     if (isPaidStatus(status)) {
       return 'bg-green-100 text-green-800'
     }
-    switch (status?.toLowerCase()) {
-      case 'overdue':
+    switch (status?.toUpperCase()) {
+      case 'OVERDUE':
         return 'bg-red-100 text-red-800'
-      case 'pending':
+      case 'PENDING':
         return 'bg-yellow-100 text-yellow-800'
       default:
         return 'bg-gray-100 text-gray-800'

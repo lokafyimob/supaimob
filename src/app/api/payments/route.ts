@@ -38,7 +38,10 @@ export async function GET(request: NextRequest) {
 
     console.log(`📊 Encontrados ${payments.length} pagamentos para o usuário ${user.email}`)
     payments.forEach(p => {
-      console.log(`- ${p.id}: ${p.contract.tenant.name} - R$ ${p.amount} - ${p.status} - Penalty: R$ ${p.penalty || 0} - Interest: R$ ${p.interest || 0}`)
+      const today = new Date()
+      const dueDate = new Date(p.dueDate)
+      const isOverdue = today > dueDate
+      console.log(`- ${p.id}: ${p.contract.tenant.name} - R$ ${p.amount} - Status: "${p.status}" - Due: ${p.dueDate} - Overdue: ${isOverdue} - Penalty: R$ ${p.penalty || 0} - Interest: R$ ${p.interest || 0}`)
     })
 
     return NextResponse.json(payments)
