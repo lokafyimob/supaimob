@@ -150,6 +150,11 @@ export async function POST(_request: NextRequest) {
             }
           }
           
+          // 🔥 ULTRAPHINK: Verificar financiamento (apenas para compra)
+          if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+            isMatch = false
+          }
+          
           if (!isMatch) continue // Pular se não é compatível
           
           // Verificar se já não foi notificado recentemente (últimas 24h)

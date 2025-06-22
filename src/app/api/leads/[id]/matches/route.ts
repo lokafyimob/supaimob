@@ -115,6 +115,13 @@ export async function GET(
       paramCount += preferredCities.length - 1
     }
 
+    // 🔥 ULTRAPHINK: Financing compatibility check
+    // If lead needs financing AND interest is BUY, property MUST accept financing
+    if (lead.needsFinancing && lead.interest === 'BUY') {
+      whereConditions.push(`p."acceptsFinancing" = true`)
+      console.log('🏦 ULTRAPHINK: Lead precisa financiamento - filtrando apenas imóveis que aceitam financiamento')
+    }
+
     const propertiesQuery = `
       SELECT p.*, u.name as ownerName, u.email as ownerEmail, u.phone as ownerPhone
       FROM properties p

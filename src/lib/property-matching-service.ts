@@ -46,6 +46,12 @@ export async function checkForPropertyMatches(propertyId: string) {
           (l.interest = 'RENT' AND $3 > 0 AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
           (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
         )
+        AND (
+          -- 🔥 ULTRAPHINK: Financing compatibility check
+          (l.interest = 'RENT') OR
+          (l.interest = 'BUY' AND l."needsFinancing" = false) OR 
+          (l.interest = 'BUY' AND l."needsFinancing" = true AND $5 = true)
+        )
     `
     
     console.log('🔍 Parâmetros da busca de leads:', {
@@ -59,7 +65,8 @@ export async function checkForPropertyMatches(propertyId: string) {
       property.userId,
       property.propertyType,
       property.rentPrice || 0,
-      property.salePrice || 0
+      property.salePrice || 0,
+      property.acceptsFinancing || false
     ])
     
     console.log(`👥 Leads do usuário encontrados: ${userLeadsResult.rows.length}`)
