@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { TenantForm } from '@/components/tenant-form'
 import { ToastContainer, useToast } from '@/components/toast'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { Plus, Search, Mail, Phone, MapPin, DollarSign, Edit, Trash2, UserCheck, AlertTriangle } from 'lucide-react'
 
 interface Tenant {
@@ -40,6 +41,8 @@ export default function Tenants() {
   const [searchTerm, setSearchTerm] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingTenant, setEditingTenant] = useState<Tenant | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [tenantToDelete, setTenantToDelete] = useState<Tenant | null>(null)
   
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
@@ -127,16 +130,21 @@ export default function Tenants() {
     }
   }
 
-  const handleDeleteTenant = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este inquilino?')) return
+  const handleDeleteTenant = async (tenant: Tenant) => {
+    setTenantToDelete(tenant)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteTenant = async () => {
+    if (!tenantToDelete) return
 
     try {
-      const response = await fetch(`/api/tenants/${id}`, {
+      const response = await fetch(`/api/tenants/${tenantToDelete.id}`, {
         method: 'DELETE',
       })
 
       if (response.ok) {
-        setTenants(prev => prev.filter(tenant => tenant.id !== id))
+        setTenants(prev => prev.filter(tenant => tenant.id !== tenantToDelete.id))
         await fetchTenants()
         showSuccess('Inquilino excluído!', 'O inquilino foi removido com sucesso.')
       } else {
@@ -147,6 +155,8 @@ export default function Tenants() {
     } catch (error) {
       console.error('Error deleting tenant:', error)
       showError('Erro ao excluir inquilino', 'Verifique sua conexão e tente novamente.')
+    } finally {
+      setTenantToDelete(null)
     }
   }
 
@@ -414,7 +424,7 @@ export default function Tenants() {
                             <Edit className="w-4 h-4" />
                           </button>
                           <button 
-                            onClick={() => handleDeleteTenant(tenant.id)}
+                            onClick={() => handleDeleteTenant(tenant)}
                             className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                             title="Deletar inquilino"
                           >
@@ -503,7 +513,7 @@ export default function Tenants() {
                     <Edit className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => handleDeleteTenant(tenant.id)}
+                    onClick={() => handleDeleteTenant(tenant)}
                     className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                     title="Deletar inquilino"
                   >
@@ -541,6 +551,21 @@ export default function Tenants() {
 
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setTenantToDelete(null)
+          }}
+          onConfirm={confirmDeleteTenant}
+          title="Excluir Inquilino"
+          message="Tem certeza que deseja excluir este inquilino? Esta ação não pode ser desfeita."
+          itemName={tenantToDelete?.name}
+          confirmText="Sim, excluir"
+          cancelText="Cancelar"
+        />
       </div>
     </DashboardLayout>
   )

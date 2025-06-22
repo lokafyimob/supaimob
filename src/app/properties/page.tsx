@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import { PropertyForm } from '@/components/property-form'
 import { ToastContainer, useToast } from '@/components/toast'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { Plus, Search, MapPin, Bed, Bath, Square, Edit, Trash2 } from 'lucide-react'
 
 interface Property {
@@ -39,6 +40,8 @@ export default function Properties() {
   const [showForm, setShowForm] = useState(false)
   const [editingProperty, setEditingProperty] = useState<Property | null>(null)
   const [deletingPropertyId, setDeletingPropertyId] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [propertyToDelete, setPropertyToDelete] = useState<Property | null>(null)
   
   const { toasts, removeToast, showSuccess, showError } = useToast()
 
@@ -125,12 +128,17 @@ export default function Properties() {
     }
   }
 
-  const handleDirectDeleteProperty = async (propertyId: string) => {
-    if (!confirm('Tem certeza que deseja deletar este imóvel?')) return
+  const handleDirectDeleteProperty = async (property: Property) => {
+    setPropertyToDelete(property)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteProperty = async () => {
+    if (!propertyToDelete) return
 
     try {
-      setDeletingPropertyId(propertyId)
-      const response = await fetch(`/api/properties/${propertyId}`, {
+      setDeletingPropertyId(propertyToDelete.id)
+      const response = await fetch(`/api/properties/${propertyToDelete.id}`, {
         method: 'DELETE'
       })
 
@@ -149,6 +157,7 @@ export default function Properties() {
       showError('Erro ao excluir imóvel', 'Verifique sua conexão e tente novamente.')
     } finally {
       setDeletingPropertyId(null)
+      setPropertyToDelete(null)
     }
   }
 
@@ -421,7 +430,7 @@ export default function Properties() {
                           <Edit className="w-4 h-4" />
                         </button>
                         <button 
-                          onClick={() => handleDirectDeleteProperty(property.id)}
+                          onClick={() => handleDirectDeleteProperty(property)}
                           disabled={deletingPropertyId === property.id}
                           className={`p-2 text-red-600 hover:text-red-900 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors ${
                             deletingPropertyId === property.id ? 'opacity-50 cursor-not-allowed' : ''
@@ -526,7 +535,7 @@ export default function Properties() {
                     <Edit className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => handleDirectDeleteProperty(property.id)}
+                    onClick={() => handleDirectDeleteProperty(property)}
                     disabled={deletingPropertyId === property.id}
                     className={`p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
                       deletingPropertyId === property.id ? 'opacity-50 cursor-not-allowed' : ''
@@ -574,6 +583,21 @@ export default function Properties() {
 
         {/* Toast Notifications */}
         <ToastContainer toasts={toasts} onRemove={removeToast} />
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setPropertyToDelete(null)
+          }}
+          onConfirm={confirmDeleteProperty}
+          title="Excluir Imóvel"
+          message="Tem certeza que deseja excluir este imóvel? Esta ação não pode ser desfeita."
+          itemName={propertyToDelete?.title}
+          confirmText="Sim, excluir"
+          cancelText="Cancelar"
+        />
       </div>
     </DashboardLayout>
   )
