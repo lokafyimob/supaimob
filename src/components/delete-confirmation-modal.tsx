@@ -34,44 +34,44 @@ export function DeleteConfirmationModal({
       />
       
       {/* Modal */}
-      <div className="relative bg-white dark:bg-gray-800 rounded-2xl shadow-2xl p-6 w-full max-w-md mx-4 transform transition-all duration-300 scale-100">
+      <div className="relative bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-5 w-full max-w-sm mx-4 transform transition-all duration-300 scale-100">
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+          className="absolute top-3 right-3 p-1 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
         >
-          <X className="w-5 h-5" />
+          <X className="w-4 h-4" />
         </button>
 
         {/* Icon */}
-        <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-red-100 dark:bg-red-900/20 rounded-full">
-          <AlertTriangle className="w-8 h-8 text-red-600 dark:text-red-400" />
+        <div className="flex items-center justify-center w-12 h-12 mx-auto mb-3 bg-red-100 dark:bg-red-900/20 rounded-full">
+          <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
         </div>
 
         {/* Title */}
-        <h3 className="text-xl font-bold text-gray-900 dark:text-white text-center mb-2">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white text-center mb-2">
           {title}
         </h3>
 
         {/* Message */}
-        <p className="text-gray-600 dark:text-gray-400 text-center mb-2">
+        <p className="text-sm text-gray-600 dark:text-gray-400 text-center mb-3">
           {message}
         </p>
 
         {/* Item name highlight */}
         {itemName && (
-          <p className="text-center mb-6">
-            <span className="px-3 py-1 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-lg font-medium text-sm">
+          <p className="text-center mb-4">
+            <span className="px-2 py-1 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-300 rounded-md font-medium text-sm">
               {itemName}
             </span>
           </p>
         )}
 
         {/* Buttons */}
-        <div className="flex space-x-3 mt-6">
+        <div className="flex space-x-3 mt-4">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            className="flex-1 px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg font-medium hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm"
           >
             {cancelText}
           </button>
@@ -80,7 +80,7 @@ export function DeleteConfirmationModal({
               onConfirm()
               onClose()
             }}
-            className="flex-1 px-4 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition-colors shadow-lg hover:shadow-xl transform hover:scale-105 text-sm"
           >
             {confirmText}
           </button>
