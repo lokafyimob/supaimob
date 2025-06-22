@@ -250,6 +250,16 @@ export default function Leads() {
 
   const detectPartnerships = async () => {
     try {
+      console.log('🤝 ULTRAPHINK: Iniciando detecção de parcerias...')
+      
+      // Primeiro, vamos testar o debug endpoint
+      const debugResponse = await fetch('/api/debug/partnership-test')
+      if (debugResponse.ok) {
+        const debugData = await debugResponse.json()
+        console.log('🔍 DEBUG INFO:', debugData.debugInfo)
+        showSuccess('Debug Info', `Encontradas ${debugData.debugInfo.totalPartnershipProperties} propriedades com parceria e ${debugData.debugInfo.totalActiveLeads} leads ativos`)
+      }
+      
       console.log('🤝 Detecting partnership opportunities...')
       const response = await fetch('/api/partnerships/detect-raw', {
         method: 'POST'
@@ -261,20 +271,24 @@ export default function Leads() {
         console.log('🤝 Partnership detection result:', data)
         if (data.partnerships > 0) {
           console.log(`✅ ${data.partnerships} partnerships found! Fetching notifications...`)
+          showSuccess('Parcerias encontradas!', `${data.partnerships} parcerias detectadas`)
           // Refresh partnership notifications to show new ones
           setTimeout(() => {
             fetchPartnershipNotifications()
           }, 1000) // Wait a bit for the notifications to be created
         } else {
           console.log('ℹ️ No partnerships found')
+          showError('Sem parcerias', 'Nenhuma parceria compatível encontrada')
         }
       } else {
         console.error('❌ Partnership detection failed:', response.status)
         const errorText = await response.text()
         console.error('Error response:', errorText)
+        showError('Erro na detecção', `Status: ${response.status}`)
       }
     } catch (error) {
       console.error('Error detecting partnerships:', error)
+      showError('Erro', 'Erro ao detectar parcerias')
     }
   }
 
@@ -486,6 +500,13 @@ export default function Leads() {
                     {locationNotificationCount}
                   </span>
                 )}
+              </button>
+              <button
+                onClick={detectPartnerships}
+                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+              >
+                <Users className="w-4 h-4 mr-2" />
+                Testar Parcerias
               </button>
               <Link
                 href="/leads/map"
