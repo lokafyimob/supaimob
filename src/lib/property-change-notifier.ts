@@ -49,16 +49,25 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
           (l.interest = 'RENT' AND $3 > 0 AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
           (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
         )
+        AND (
+          -- Se lead precisa de financiamento, propriedade deve aceitar
+          l."needsFinancing" = false OR 
+          (l."needsFinancing" = true AND $5 = true)
+        )
     `
     
     const userLeadsResult = await client.query(userLeadsQuery, [
       property.userId,
       property.propertyType,
       property.rentPrice || 0,
-      property.salePrice || 0
+      property.salePrice || 0,
+      property.acceptsFinancing || false
     ])
     
     console.log(`👤 Leads do mesmo usuário que fazem match: ${userLeadsResult.rows.length}`)
+    console.log(`🏦 Propriedade aceita financiamento: ${property.acceptsFinancing}`)
+    console.log(`📊 Status da propriedade: ${property.status}`)
+    console.log(`🤝 Aceita parceria: ${property.acceptsPartnership}`)
     
     // Criar/atualizar lead_notifications
     for (const lead of userLeadsResult.rows) {
@@ -71,7 +80,17 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
       
       const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
       const title = `${changeType === 'created' ? 'Novo Match' : 'Match Atualizado'}: ${property.title}`
-      const message = `Propriedade "${property.title}" em ${property.city} ${changeType === 'created' ? 'foi adicionada e' : 'foi atualizada e'} faz match com o lead "${lead.name}"! Preço: R$ ${price?.toLocaleString('pt-BR') || 'N/A'}`
+      
+      // Informações detalhadas sobre financiamento e status
+      const financingInfo = lead.needsFinancing ? 
+        (property.acceptsFinancing ? '✅ Aceita financiamento' : '❌ Não aceita financiamento') : 
+        ''
+      const statusInfo = `Status: ${property.status}`
+      
+      const message = `Propriedade "${property.title}" em ${property.city} ${changeType === 'created' ? 'foi adicionada e' : 'foi atualizada e'} faz match com o lead "${lead.name}"! 
+💰 Preço: R$ ${price?.toLocaleString('pt-BR') || 'N/A'}
+📊 ${statusInfo}
+${financingInfo ? `🏦 ${financingInfo}` : ''}`
       
       if (existingResult.rows.length === 0) {
         // Criar nova notificação
@@ -110,8 +129,8 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
       }
     }
     
-    // B) Leads de outros usuários (partnership_notifications) - SE a propriedade aceita parceria
-    if (property.acceptsPartnership) {
+    // B) Leads de outros usuários (partnership_notifications) - SE a propriedade aceita parceria E está disponível
+    if (property.acceptsPartnership && property.status === 'AVAILABLE') {
       const partnershipLeadsQuery = `
         SELECT l.*, u.name as userName, u.email as userEmail, u.phone as userPhone
         FROM leads l
@@ -123,6 +142,11 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
             (l.interest = 'RENT' AND $3 > 0 AND $3 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice") OR
             (l.interest = 'BUY' AND $4 > 0 AND $4 BETWEEN COALESCE(l."minPrice", 0) AND l."maxPrice")
           )
+          AND (
+            -- Se lead precisa de financiamento, propriedade deve aceitar
+            l."needsFinancing" = false OR 
+            (l."needsFinancing" = true AND $5 = true)
+          )
         LIMIT 10
       `
       
@@ -130,7 +154,8 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
         property.userId,
         property.propertyType,
         property.rentPrice || 0,
-        property.salePrice || 0
+        property.salePrice || 0,
+        property.acceptsFinancing || false
       ])
       
       console.log(`🤝 Leads de outros usuários para parceria: ${partnershipResult.rows.length}`)
