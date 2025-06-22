@@ -84,7 +84,17 @@ export default function LeadsMapPage() {
     mapInstance.current = new window.google.maps.Map(mapRef.current, {
       center,
       zoom: 5,
-      mapTypeControl: false,
+      mapTypeControl: true,
+      mapTypeControlOptions: {
+        style: window.google.maps.MapTypeControlStyle.DROPDOWN_MENU,
+        position: window.google.maps.ControlPosition.TOP_RIGHT,
+        mapTypeIds: [
+          window.google.maps.MapTypeId.ROADMAP,
+          window.google.maps.MapTypeId.SATELLITE,
+          window.google.maps.MapTypeId.HYBRID,
+          window.google.maps.MapTypeId.TERRAIN
+        ]
+      },
       streetViewControl: false,
       fullscreenControl: true,
     })
