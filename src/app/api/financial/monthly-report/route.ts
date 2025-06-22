@@ -1,94 +1,138 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import { prisma } from '@/lib/db'
+import { requireAuth } from '@/lib/auth-middleware'
 
 export async function GET(request: NextRequest) {
   try {
+    const user = await requireAuth(request)
     const { searchParams } = new URL(request.url)
     const year = parseInt(searchParams.get('year') || new Date().getFullYear().toString())
     const month = parseInt(searchParams.get('month') || (new Date().getMonth() + 1).toString())
 
-    // Get current month's paid payments (revenue)
-    const currentMonthRevenue = await prisma.$queryRaw`
-      SELECT 
-        COALESCE(SUM(amount), 0) as total_rent,
-        COUNT(*) as payment_count
-      FROM "Payment"
-      WHERE status = 'paid'
-        AND EXTRACT(YEAR FROM "paidAt") = ${year}
-        AND EXTRACT(MONTH FROM "paidAt") = ${month}
-    `
+    console.log(`🔍 Generating report for ${month}/${year} for user ${user.email}`)
 
-    // Get current month's expenses
-    const currentMonthExpenses = await prisma.$queryRaw`
-      SELECT 
-        COALESCE(SUM(amount), 0) as total_expenses,
-        COUNT(*) as expense_count,
-        category,
-        SUM(amount) as category_total
-      FROM "Expense"
-      WHERE year = ${year} AND month = ${month}
-      GROUP BY category
-      ORDER BY category_total DESC
-    `
+    // Get paid payments for the month (using paidDate instead of paidAt)
+    const paidPayments = await prisma.payment.findMany({
+      where: {
+        contract: {
+          userId: user.id
+        },
+        status: 'PAID',
+        paidDate: {
+          gte: new Date(year, month - 1, 1),
+          lt: new Date(year, month, 1)
+        }
+      },
+      include: {
+        contract: {
+          include: {
+            property: true,
+            tenant: true
+          }
+        }
+      }
+    })
 
-    const totalExpenses = await prisma.$queryRaw`
-      SELECT COALESCE(SUM(amount), 0) as total
-      FROM "Expense"
-      WHERE year = ${year} AND month = ${month}
-    `
+    console.log(`📊 Found ${paidPayments.length} paid payments`)
 
-    // Calculate admin fee (assuming 10% of rent)
-    const revenue = currentMonthRevenue[0] || { total_rent: 0, payment_count: 0 }
-    const adminFeeRate = 0.10 // 10%
-    const adminFee = parseFloat(revenue.total_rent) * adminFeeRate
-    const netRevenue = parseFloat(revenue.total_rent) - adminFee
-    const expenses = parseFloat(totalExpenses[0]?.total || 0)
-    const profit = netRevenue - expenses
+    // Calculate revenue from admin fees (10% of rent amount)
+    const adminFeeRate = 0.10
+    let totalRent = 0
+    let totalAdminFee = 0
+    
+    const revenueBreakdown = paidPayments.map(payment => {
+      const rentAmount = payment.amount
+      const adminFee = rentAmount * adminFeeRate
+      totalRent += rentAmount
+      totalAdminFee += adminFee
+      
+      return {
+        paymentId: payment.id,
+        property: payment.contract.property.title,
+        tenant: payment.contract.tenant.name,
+        rentAmount: rentAmount,
+        adminFeePercentage: adminFeeRate * 100,
+        managementFeePercentage: 0,
+        adminFee: adminFee,
+        managementFee: 0,
+        totalFee: adminFee,
+        paidDate: payment.paidDate?.toISOString() || payment.updatedAt.toISOString()
+      }
+    })
 
-    // Update or create monthly revenue record
-    await prisma.$executeRaw`
-      INSERT INTO "MonthlyRevenue" (year, month, "totalRent", "adminFee", "netRevenue", "paymentCount", "updatedAt")
-      VALUES (${year}, ${month}, ${revenue.total_rent}, ${adminFee}, ${netRevenue}, ${revenue.payment_count}, CURRENT_TIMESTAMP)
-      ON CONFLICT (year, month) 
-      DO UPDATE SET 
-        "totalRent" = ${revenue.total_rent},
-        "adminFee" = ${adminFee},
-        "netRevenue" = ${netRevenue},
-        "paymentCount" = ${revenue.payment_count},
-        "updatedAt" = CURRENT_TIMESTAMP
-    `
+    // Get expenses for the month
+    const expenses = await prisma.expense.findMany({
+      where: {
+        year: year,
+        month: month,
+        ...(user.companyId && { companyId: user.companyId })
+      }
+    })
+
+    console.log(`💰 Found ${expenses.length} expenses`)
+
+    const totalExpenses = expenses.reduce((sum, expense) => sum + expense.amount, 0)
+    
+    // Group expenses by category
+    const expensesByCategory = expenses.reduce((acc: any[], expense) => {
+      const existing = acc.find(item => item.category === expense.category)
+      if (existing) {
+        existing.category_total = (parseFloat(existing.category_total) + expense.amount).toString()
+      } else {
+        acc.push({
+          category: expense.category,
+          category_total: expense.amount.toString()
+        })
+      }
+      return acc
+    }, [])
+
+    const expenseBreakdown = expenses.map(expense => ({
+      id: expense.id,
+      description: expense.description,
+      amount: expense.amount,
+      category: expense.category,
+      date: expense.date.toISOString()
+    }))
+
+    // Calculate profit
+    const netRevenue = totalAdminFee // Our revenue is the admin fee, not the full rent
+    const profit = netRevenue - totalExpenses
+    const profitMargin = netRevenue > 0 ? (profit / netRevenue * 100) : 0
+
+    console.log(`📈 Report summary: Revenue=${netRevenue}, Expenses=${totalExpenses}, Profit=${profit}`)
 
     return NextResponse.json({
       year,
       month,
       revenue: {
-        totalRent: parseFloat(revenue.total_rent),
-        adminFee: adminFee,
+        totalRent: totalRent,
+        adminFee: totalAdminFee,
         netRevenue: netRevenue,
-        paymentCount: parseInt(revenue.payment_count)
+        paymentCount: paidPayments.length
       },
       expenses: {
-        total: expenses,
-        count: currentMonthExpenses.length,
-        byCategory: currentMonthExpenses
+        total: totalExpenses,
+        count: expenses.length,
+        byCategory: expensesByCategory
       },
       profit: profit,
       summary: {
         totalRevenue: netRevenue,
-        totalExpenses: expenses,
+        totalExpenses: totalExpenses,
         netProfit: profit,
-        profitMargin: netRevenue > 0 ? (profit / netRevenue * 100) : 0
+        profitMargin: profitMargin
+      },
+      breakdown: {
+        revenue: revenueBreakdown,
+        expenses: expenseBreakdown
       }
     })
   } catch (error) {
     console.error('Error generating monthly report:', error)
     return NextResponse.json(
-      { error: 'Failed to generate monthly report' },
+      { error: 'Failed to generate monthly report', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     )
-  } finally {
-    await prisma.$disconnect()
   }
 }

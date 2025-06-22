@@ -119,10 +119,16 @@ export default function Financial() {
       const response = await fetch(`/api/financial/monthly-report?year=${selectedYear}&month=${selectedMonth}`)
       
       if (!response.ok) {
-        throw new Error('Erro ao gerar relatório')
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Erro ao gerar relatório')
       }
       
       const reportData = await response.json()
+      
+      // Check if there's any data for the selected period
+      if (reportData.revenue.paymentCount === 0 && reportData.expenses.count === 0) {
+        alert(`ℹ️ Nenhum dado encontrado para ${getMonthName(selectedMonth)} ${selectedYear}.\n\nO relatório será gerado mesmo assim, mas estará vazio. Você pode gerar relatórios para qualquer período, mesmo antes do mês estar concluído.`)
+      }
       
       // Create report content
       const reportContent = `
@@ -143,9 +149,10 @@ DETALHAMENTO DAS RECEITAS
 =====================================
 
 Valor Total dos Aluguéis: ${formatCurrency(reportData.revenue.totalRent)}
-Taxa de Administração: ${formatCurrency(reportData.revenue.adminFee)}
+Taxa de Administração (10%): ${formatCurrency(reportData.revenue.adminFee)}
 Receita Líquida: ${formatCurrency(reportData.revenue.netRevenue)}
 Número de Pagamentos: ${reportData.revenue.paymentCount}
+${reportData.revenue.paymentCount === 0 ? '\n⚠️  Nenhum pagamento foi registrado como pago neste período.' : ''}
 
 =====================================
 DETALHAMENTO DAS DESPESAS
@@ -155,9 +162,12 @@ Total de Despesas: ${formatCurrency(reportData.expenses.total)}
 Número de Despesas: ${reportData.expenses.count}
 
 Despesas por Categoria:
-${reportData.expenses.byCategory.map((cat: any) => 
-  `• ${cat.category}: ${formatCurrency(parseFloat(cat.category_total))}`
-).join('\n')}
+${reportData.expenses.byCategory.length > 0 
+  ? reportData.expenses.byCategory.map((cat: any) => 
+      `• ${cat.category}: ${formatCurrency(parseFloat(cat.category_total))}`
+    ).join('\n')
+  : '• Nenhuma despesa registrada neste período'
+}
 
 =====================================
 ANÁLISE
@@ -460,6 +470,7 @@ Sistema: CRM Imobiliário - SupaiMob
                       </h4>
                       <p className="text-xs text-blue-700 dark:text-blue-300">
                         O relatório incluirá receitas, despesas, lucro líquido e análise detalhada do período selecionado.
+                        Funciona para qualquer mês/ano, mesmo se o período ainda não estiver concluído.
                         O arquivo será baixado automaticamente em formato de texto.
                       </p>
                     </div>
