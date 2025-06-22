@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
     
     await client.connect()
     
-    console.log('🔧 ULTRAPHINK: Corrigindo propriedades para aceitar parcerias...')
+    console.log('🔧 ULTRAPHINK: Corrigindo propriedades para aceitar parcerias... v2')
     
     // 1. Verificar propriedades atuais
     const checkQuery = `

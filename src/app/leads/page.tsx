@@ -489,45 +489,6 @@ export default function Leads() {
               </p>
             </div>
             <div className="mt-4 sm:mt-0 flex space-x-3">
-              <button
-                onClick={() => setShowLocationNotifications(true)}
-                className="relative inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <MapPin className="w-4 h-4 mr-2" />
-                Notificações
-                {locationNotificationCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                    {locationNotificationCount}
-                  </span>
-                )}
-              </button>
-              <button
-                onClick={detectPartnerships}
-                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                Testar Parcerias
-              </button>
-              <button
-                onClick={async () => {
-                  try {
-                    const response = await fetch('/api/debug/fix-partnerships', { method: 'POST' })
-                    if (response.ok) {
-                      const data = await response.json()
-                      showSuccess('Propriedades corrigidas!', `${data.correctedProperties} propriedades atualizadas`)
-                      console.log('🔧 Propriedades corrigidas:', data.properties)
-                    } else {
-                      showError('Erro', 'Não foi possível corrigir as propriedades')
-                    }
-                  } catch (error) {
-                    showError('Erro', 'Erro ao corrigir propriedades')
-                  }
-                }}
-                className="inline-flex items-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                <Zap className="w-4 h-4 mr-2" />
-                Corrigir Parcerias
-              </button>
               <Link
                 href="/leads/map"
                 className="inline-flex items-center px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
