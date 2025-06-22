@@ -167,14 +167,20 @@ export async function POST(request: NextRequest) {
         const matchResults = await checkForMatchesRaw(createdLead.id)
         console.log('✅ Auto-matching executado com sucesso:', matchResults)
         
-        // Execute reverse partnership detection for the created lead
-        console.log('🤝 Detectando oportunidades de parceria reversa...')
+        // Execute automatic notification system for the created lead
+        console.log('🔔 Executando sistema de notificação automática para novo lead...')
         try {
-          const { detectReversePartnerships } = require('@/lib/reverse-partnership-service')
-          const partnershipResult = await detectReversePartnerships(createdLead.id)
-          console.log('✅ Detecção de parceria reversa executada:', partnershipResult)
-        } catch (partnershipError) {
-          console.log('❌ Erro na detecção de parceria reversa:', partnershipError)
+          const { notifyLeadChanges } = require('@/lib/lead-change-notifier')
+          const notificationResult = await notifyLeadChanges(createdLead.id, 'created')
+          console.log('✅ Notificações automáticas de lead executadas:', notificationResult)
+          
+          if (notificationResult?.notificationsCreated > 0) {
+            console.log(`🎯 ${notificationResult.notificationsCreated} notificações criadas para novo lead: ${notificationResult.leadName}`)
+          } else {
+            console.log('🔍 Nenhuma notificação criada para novo lead')
+          }
+        } catch (notificationError) {
+          console.log('❌ Erro nas notificações automáticas de lead:', notificationError)
         }
         
         if (matchResults?.matchCount > 0) {

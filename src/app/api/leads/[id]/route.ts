@@ -134,6 +134,26 @@ export async function PUT(
     
     console.log('Lead updated successfully:', result.rows[0].id)
     
+    // Execute automatic notification system for the updated lead
+    try {
+      console.log('🔔 Lead editado, executando notificações automáticas...')
+      console.log('📋 Lead atualizado ID:', result.rows[0].id)
+      
+      const { notifyLeadChanges } = require('@/lib/lead-change-notifier')
+      const notificationResult = await notifyLeadChanges(result.rows[0].id, 'updated')
+      console.log('✅ Notificações automáticas de lead executadas:', notificationResult)
+      
+      if (notificationResult?.notificationsCreated > 0) {
+        console.log(`🎯 ${notificationResult.notificationsCreated} notificações atualizadas para lead: ${notificationResult.leadName}`)
+      } else {
+        console.log('🔍 Nenhuma notificação atualizada para lead editado')
+      }
+      
+    } catch (notificationError) {
+      console.log('❌ Erro nas notificações automáticas de lead:', notificationError)
+      console.log('📝 Stack trace:', notificationError instanceof Error ? notificationError.stack : 'N/A')
+    }
+    
     return NextResponse.json(result.rows[0])
     
   } catch (error) {
