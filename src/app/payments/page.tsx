@@ -166,11 +166,19 @@ export default function Payments() {
         console.log('📊 Pagamentos mapeados:', mappedPayments)
         
         // Debug das categorias
+        console.log('📊 Analisando categorização individual:')
+        mappedPayments.forEach((p: Payment, index: number) => {
+          const paid = isPaidStatus(p.status)
+          const overdue = isOverdue(p.dueDate)
+          const category = paid ? 'PAGO' : (overdue ? 'EM_ATRASO' : 'A_VENCER')
+          console.log(`${index + 1}. ${p.tenant?.name} - Status: "${p.status}" - Due: ${p.dueDate} - Paid: ${paid} - Overdue: ${overdue} - Category: ${category}`)
+        })
+        
         const pendingCount = mappedPayments.filter((p: Payment) => !isPaidStatus(p.status) && !isOverdue(p.dueDate)).length
         const overdueCount = mappedPayments.filter((p: Payment) => !isPaidStatus(p.status) && isOverdue(p.dueDate)).length
         const paidCount = mappedPayments.filter((p: Payment) => isPaidStatus(p.status)).length
         
-        console.log('📊 Categorias:', {
+        console.log('📊 Resumo das Categorias:', {
           'A Vencer': pendingCount,
           'Em Atraso': overdueCount,
           'Pagos': paidCount,
@@ -432,9 +440,16 @@ export default function Payments() {
     if (!dueDate) return false
     try {
       const today = new Date()
+      today.setHours(0, 0, 0, 0) // Zerar as horas para comparar apenas a data
+      
       const due = new Date(dueDate)
-      return today > due
+      due.setHours(0, 0, 0, 0) // Zerar as horas para comparar apenas a data
+      
+      const result = today > due
+      console.log(`🗓️ isOverdue check: ${dueDate} -> due: ${due.toISOString().split('T')[0]}, today: ${today.toISOString().split('T')[0]}, overdue: ${result}`)
+      return result
     } catch (error) {
+      console.error('Erro ao verificar vencimento:', error, dueDate)
       return false
     }
   }
