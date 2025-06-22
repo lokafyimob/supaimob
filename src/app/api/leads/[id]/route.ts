@@ -184,43 +184,61 @@ export async function DELETE(
     
     await client.connect()
     
-    // First verify the lead belongs to the user
-    const checkQuery = 'SELECT id FROM leads WHERE id = $1 AND "userId" = $2'
-    const checkResult = await client.query(checkQuery, [id, user.id])
-    
-    if (checkResult.rows.length === 0) {
+    try {
+      // Start transaction
+      await client.query('BEGIN')
+      
+      // First verify the lead belongs to the user
+      const checkQuery = 'SELECT id FROM leads WHERE id = $1 AND "userId" = $2'
+      const checkResult = await client.query(checkQuery, [id, user.id])
+      
+      if (checkResult.rows.length === 0) {
+        await client.query('ROLLBACK')
+        await client.end()
+        return NextResponse.json({ error: 'Lead não encontrado ou não autorizado' }, { status: 404 })
+      }
+      
+      // Delete in the correct order to avoid foreign key violations
+      
+      // 1. Delete partnership notifications
+      const deletePartnershipNotifQuery = 'DELETE FROM partnership_notifications WHERE "leadId" = $1'
+      const partnershipResult = await client.query(deletePartnershipNotifQuery, [id])
+      console.log(`🗑️ ${partnershipResult.rowCount} partnership_notifications deletadas`)
+      
+      // 2. Delete lead notifications
+      const deleteLeadNotifQuery = 'DELETE FROM lead_notifications WHERE "leadId" = $1'
+      const notifResult = await client.query(deleteLeadNotifQuery, [id])
+      console.log(`🗑️ ${notifResult.rowCount} lead_notifications deletadas`)
+      
+      // 3. Delete the lead itself
+      const deleteLeadQuery = 'DELETE FROM leads WHERE id = $1 AND "userId" = $2'
+      const leadResult = await client.query(deleteLeadQuery, [id, user.id])
+      console.log(`🗑️ ${leadResult.rowCount} lead deletado`)
+      
+      // Commit the transaction
+      await client.query('COMMIT')
       await client.end()
-      return NextResponse.json({ error: 'Lead não encontrado ou não autorizado' }, { status: 404 })
-    }
-    
-    // Delete in the correct order to avoid foreign key violations
-    
-    // 1. Delete partnership notifications
-    const deletePartnershipNotifQuery = 'DELETE FROM partnership_notifications WHERE "leadId" = $1'
-    const partnershipResult = await client.query(deletePartnershipNotifQuery, [id])
-    console.log(`🗑️ ${partnershipResult.rowCount} partnership_notifications deletadas`)
-    
-    // 2. Delete lead notifications
-    const deleteLeadNotifQuery = 'DELETE FROM lead_notifications WHERE "leadId" = $1'
-    const notifResult = await client.query(deleteLeadNotifQuery, [id])
-    console.log(`🗑️ ${notifResult.rowCount} lead_notifications deletadas`)
-    
-    // 3. Delete the lead itself
-    const deleteLeadQuery = 'DELETE FROM leads WHERE id = $1 AND "userId" = $2'
-    const leadResult = await client.query(deleteLeadQuery, [id, user.id])
-    console.log(`🗑️ ${leadResult.rowCount} lead deletado`)
-    
-    await client.end()
-    
-    if (leadResult.rowCount === 0) {
-      return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 })
-    }
+      
+      if (leadResult.rowCount === 0) {
+        return NextResponse.json({ error: 'Lead não encontrado' }, { status: 404 })
+      }
 
-    return NextResponse.json({ 
-      message: 'Lead deletado com sucesso',
-      deletedNotifications: notifResult.rowCount,
-      deletedPartnerships: partnershipResult.rowCount
-    })
+      return NextResponse.json({ 
+        message: 'Lead deletado com sucesso',
+        deletedNotifications: notifResult.rowCount,
+        deletedPartnerships: partnershipResult.rowCount
+      })
+      
+    } catch (dbError) {
+      // Rollback transaction on error
+      try {
+        await client.query('ROLLBACK')
+      } catch (rollbackError) {
+        console.error('Error during rollback:', rollbackError)
+      }
+      await client.end()
+      throw dbError
+    }
     
   } catch (error) {
     console.error('❌ Error deleting lead:', error)
