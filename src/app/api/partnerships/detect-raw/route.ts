@@ -81,10 +81,12 @@ export async function POST(request: NextRequest) {
         // Verificar preço
         if (lead.interest === 'RENT' && property.rentPrice) {
           if (lead.minPrice && property.rentPrice < lead.minPrice) isMatch = false
-          if (property.rentPrice > lead.maxPrice) isMatch = false
+          // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente - PARCERIAS
+          if (lead.maxPrice && lead.maxPrice > 0 && property.rentPrice > lead.maxPrice) isMatch = false
         } else if (lead.interest === 'BUY' && property.salePrice) {
           if (lead.minPrice && property.salePrice < lead.minPrice) isMatch = false
-          if (property.salePrice > lead.maxPrice) isMatch = false
+          // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente - PARCERIAS
+          if (lead.maxPrice && lead.maxPrice > 0 && property.salePrice > lead.maxPrice) isMatch = false
         }
         
         // Verificar quartos
@@ -106,6 +108,12 @@ export async function POST(request: NextRequest) {
               isMatch = false
             }
           }
+        }
+        
+        // 🔥 ULTRAPHINK: Verificar financiamento (apenas para compra) - PARCERIAS
+        if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+          isMatch = false
+          console.log(`❌ Lead ${lead.name} precisa financiamento mas propriedade ${property.title} não aceita - parceria rejeitada`)
         }
         
         if (!isMatch) continue
