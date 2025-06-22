@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     
     // 1. Buscar TODOS os leads ativos
     const leadsQuery = `
-      SELECT l.*, u.name as userName, u.email as userEmail, u.phone as userPhone
+      SELECT l.*, u.name as "userName", u.email as "userEmail", u.phone as "userPhone"
       FROM leads l
       JOIN users u ON l."userId" = u.id  
       WHERE l.status = 'ACTIVE'
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     
     // 2. Buscar TODAS as propriedades que aceitam parceria
     const propertiesQuery = `
-      SELECT p.*, u.name as ownerName, u.email as ownerEmail, u.phone as ownerPhone
+      SELECT p.*, u.name as "ownerName", u.email as "ownerEmail", u.phone as "ownerPhone"
       FROM properties p
       JOIN users u ON p."userId" = u.id
       WHERE p."acceptsPartnership" = true 
@@ -80,9 +80,9 @@ export async function POST(request: NextRequest) {
                 property.userId,       // toUserId (quem tem o imóvel)  
                 lead.id,              // leadId
                 property.id,          // propertyId
-                lead.userName,        // fromUserName
-                lead.userPhone,       // fromUserPhone
-                lead.userEmail,       // fromUserEmail
+                lead.userName || 'Usuario',        // fromUserName
+                lead.userPhone || null,       // fromUserPhone
+                lead.userEmail || 'email@teste.com',       // fromUserEmail
                 lead.name,            // leadName (nome do cliente)
                 lead.phone,           // leadPhone (telefone do cliente)
                 property.title,       // propertyTitle
