@@ -55,6 +55,12 @@ export async function checkForMatchesRaw(leadId: string) {
           ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
           ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
         )
+        AND (
+          -- 🔥 LÓGICA DE FINANCIAMENTO CORRIGIDA
+          ($3 = 'RENT') OR
+          ($3 = 'BUY' AND $6 = false) OR 
+          ($3 = 'BUY' AND $6 = true AND p."acceptsFinancing" = true)
+        )
     `
     
     console.log('🔍 Parâmetros da busca:', {
@@ -70,7 +76,8 @@ export async function checkForMatchesRaw(leadId: string) {
       lead.propertyType,
       lead.interest,
       lead.minPrice || 0,
-      lead.maxPrice || 999999999
+      lead.maxPrice || 999999999,
+      lead.needsFinancing || false
     ])
     
     console.log(`🏠 Propriedades do usuário encontradas: ${userPropertiesResult.rows.length}`)
@@ -166,6 +173,12 @@ export async function checkForMatchesRaw(leadId: string) {
           ($3 = 'RENT' AND p."rentPrice" BETWEEN $4 AND $5) OR
           ($3 = 'BUY' AND p."salePrice" BETWEEN $4 AND $5)
         )
+        AND (
+          -- 🔥 LÓGICA DE FINANCIAMENTO CORRIGIDA
+          ($3 = 'RENT') OR
+          ($3 = 'BUY' AND $6 = false) OR 
+          ($3 = 'BUY' AND $6 = true AND p."acceptsFinancing" = true)
+        )
       LIMIT 10
     `
     
@@ -174,7 +187,8 @@ export async function checkForMatchesRaw(leadId: string) {
       lead.propertyType,
       lead.interest,
       lead.minPrice || 0,
-      lead.maxPrice || 999999999
+      lead.maxPrice || 999999999,
+      lead.needsFinancing || false
     ])
     
     console.log(`🤝 Propriedades para parceria encontradas: ${partnershipResult.rows.length}`)

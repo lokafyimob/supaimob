@@ -70,6 +70,24 @@ export async function notifyPropertyChanges(propertyId: string, changeType: 'cre
     console.log(`📊 Status da propriedade: ${property.status}`)
     console.log(`🤝 Aceita parceria: ${property.acceptsPartnership}`)
     
+    // 🔍 DEBUG DETALHADO: Verificar cada lead
+    if (userLeadsResult.rows.length > 0) {
+      console.log('🔍 DEBUGGING LEADS ENCONTRADOS:')
+      for (const lead of userLeadsResult.rows) {
+        console.log(`  - Lead: ${lead.name}`)
+        console.log(`    Interest: ${lead.interest}`)
+        console.log(`    Needs Financing: ${lead.needsFinancing}`)
+        console.log(`    Min/Max Price: ${lead.minPrice} - ${lead.maxPrice}`)
+        console.log(`    Property Price: ${lead.interest === 'RENT' ? property.rentPrice : property.salePrice}`)
+        console.log(`    Should Match: ${
+          (lead.interest === 'RENT') || 
+          (lead.interest === 'BUY' && !lead.needsFinancing) || 
+          (lead.interest === 'BUY' && lead.needsFinancing && property.acceptsFinancing)
+        }`)
+        console.log('    ---')
+      }
+    }
+    
     // Criar/atualizar lead_notifications
     for (const lead of userLeadsResult.rows) {
       // Verificar se já existe notificação
