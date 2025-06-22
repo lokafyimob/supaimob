@@ -130,72 +130,229 @@ export default function Financial() {
         alert(`ℹ️ Nenhum dado encontrado para ${getMonthName(selectedMonth)} ${selectedYear}.\n\nO relatório será gerado mesmo assim, mas estará vazio. Você pode gerar relatórios para qualquer período, mesmo antes do mês estar concluído.`)
       }
       
-      // Create report content
-      const reportContent = `
-RELATÓRIO FINANCEIRO MENSAL
-${getMonthName(selectedMonth)} ${selectedYear}
+      // Create HTML content for PDF generation
+      const reportHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Relatório Financeiro - ${getMonthName(selectedMonth)} ${selectedYear}</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      line-height: 1.6;
+      margin: 40px;
+      color: #333;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 3px solid #4f46e5;
+      padding-bottom: 20px;
+      margin-bottom: 30px;
+    }
+    .header h1 {
+      color: #4f46e5;
+      margin: 0;
+      font-size: 24px;
+    }
+    .header h2 {
+      color: #6b7280;
+      margin: 5px 0 0 0;
+      font-size: 18px;
+      font-weight: normal;
+    }
+    .section {
+      margin: 30px 0;
+      padding: 20px;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      background-color: #f9fafb;
+    }
+    .section h3 {
+      color: #374151;
+      margin-top: 0;
+      margin-bottom: 15px;
+      font-size: 18px;
+      border-bottom: 2px solid #d1d5db;
+      padding-bottom: 5px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin: 20px 0;
+    }
+    .summary-item {
+      background: white;
+      padding: 15px;
+      border-radius: 6px;
+      border-left: 4px solid #4f46e5;
+    }
+    .summary-item.positive {
+      border-left-color: #10b981;
+    }
+    .summary-item.negative {
+      border-left-color: #ef4444;
+    }
+    .summary-item strong {
+      display: block;
+      font-size: 14px;
+      color: #6b7280;
+      margin-bottom: 5px;
+    }
+    .summary-item span {
+      font-size: 20px;
+      font-weight: bold;
+      color: #111827;
+    }
+    .details {
+      margin: 15px 0;
+    }
+    .details p {
+      margin: 8px 0;
+      padding: 8px 12px;
+      background: white;
+      border-radius: 4px;
+    }
+    .warning {
+      background-color: #fef3c7;
+      border: 1px solid #f59e0b;
+      color: #92400e;
+      padding: 10px;
+      border-radius: 6px;
+      margin: 10px 0;
+    }
+    .expenses-list {
+      list-style: none;
+      padding: 0;
+    }
+    .expenses-list li {
+      background: white;
+      margin: 8px 0;
+      padding: 10px;
+      border-radius: 4px;
+      border-left: 3px solid #6b7280;
+    }
+    .analysis {
+      text-align: center;
+      font-size: 18px;
+      font-weight: bold;
+      padding: 20px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .analysis.positive {
+      background-color: #d1fae5;
+      color: #065f46;
+      border: 2px solid #10b981;
+    }
+    .analysis.negative {
+      background-color: #fee2e2;
+      color: #991b1b;
+      border: 2px solid #ef4444;
+    }
+    .footer {
+      margin-top: 40px;
+      padding-top: 20px;
+      border-top: 1px solid #d1d5db;
+      text-align: center;
+      color: #6b7280;
+      font-size: 12px;
+    }
+    @media print {
+      body { margin: 20px; }
+      .section { break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>RELATÓRIO FINANCEIRO MENSAL</h1>
+    <h2>${getMonthName(selectedMonth)} ${selectedYear}</h2>
+  </div>
 
-=====================================
-RESUMO EXECUTIVO
-=====================================
+  <div class="section">
+    <h3>📊 RESUMO EXECUTIVO</h3>
+    <div class="summary-grid">
+      <div class="summary-item positive">
+        <strong>Total de Receitas</strong>
+        <span>${formatCurrency(reportData.revenue.netRevenue)}</span>
+      </div>
+      <div class="summary-item negative">
+        <strong>Total de Despesas</strong>
+        <span>${formatCurrency(reportData.expenses.total)}</span>
+      </div>
+      <div class="summary-item ${reportData.profit >= 0 ? 'positive' : 'negative'}">
+        <strong>Lucro Líquido</strong>
+        <span>${formatCurrency(reportData.profit)}</span>
+      </div>
+      <div class="summary-item">
+        <strong>Margem de Lucro</strong>
+        <span>${reportData.summary.profitMargin.toFixed(1)}%</span>
+      </div>
+    </div>
+  </div>
 
-• Total de Receitas: ${formatCurrency(reportData.revenue.netRevenue)}
-• Total de Despesas: ${formatCurrency(reportData.expenses.total)}
-• Lucro Líquido: ${formatCurrency(reportData.profit)}
-• Margem de Lucro: ${reportData.summary.profitMargin.toFixed(1)}%
+  <div class="section">
+    <h3>💰 DETALHAMENTO DAS RECEITAS</h3>
+    <div class="details">
+      <p><strong>Valor Total dos Aluguéis:</strong> ${formatCurrency(reportData.revenue.totalRent)}</p>
+      <p><strong>Taxa de Administração (10%):</strong> ${formatCurrency(reportData.revenue.adminFee)}</p>
+      <p><strong>Receita Líquida:</strong> ${formatCurrency(reportData.revenue.netRevenue)}</p>
+      <p><strong>Número de Pagamentos:</strong> ${reportData.revenue.paymentCount}</p>
+      ${reportData.revenue.paymentCount === 0 ? '<div class="warning">⚠️ Nenhum pagamento foi registrado como pago neste período.</div>' : ''}
+    </div>
+  </div>
 
-=====================================
-DETALHAMENTO DAS RECEITAS
-=====================================
+  <div class="section">
+    <h3>💸 DETALHAMENTO DAS DESPESAS</h3>
+    <div class="details">
+      <p><strong>Total de Despesas:</strong> ${formatCurrency(reportData.expenses.total)}</p>
+      <p><strong>Número de Despesas:</strong> ${reportData.expenses.count}</p>
+    </div>
+    
+    <h4>Despesas por Categoria:</h4>
+    <ul class="expenses-list">
+      ${reportData.expenses.byCategory.length > 0 
+        ? reportData.expenses.byCategory.map((cat: any) => 
+            `<li><strong>${cat.category}:</strong> ${formatCurrency(parseFloat(cat.category_total))}</li>`
+          ).join('')
+        : '<li>Nenhuma despesa registrada neste período</li>'
+      }
+    </ul>
+  </div>
 
-Valor Total dos Aluguéis: ${formatCurrency(reportData.revenue.totalRent)}
-Taxa de Administração (10%): ${formatCurrency(reportData.revenue.adminFee)}
-Receita Líquida: ${formatCurrency(reportData.revenue.netRevenue)}
-Número de Pagamentos: ${reportData.revenue.paymentCount}
-${reportData.revenue.paymentCount === 0 ? '\n⚠️  Nenhum pagamento foi registrado como pago neste período.' : ''}
+  <div class="analysis ${reportData.profit >= 0 ? 'positive' : 'negative'}">
+    ${reportData.profit > 0 
+      ? `✅ MÊS POSITIVO com lucro de ${formatCurrency(reportData.profit)}`
+      : `❌ MÊS NEGATIVO com prejuízo de ${formatCurrency(Math.abs(reportData.profit))}`
+    }
+    <br>
+    Margem de lucro: ${reportData.summary.profitMargin.toFixed(1)}%
+  </div>
 
-=====================================
-DETALHAMENTO DAS DESPESAS
-=====================================
+  <div class="footer">
+    <p>Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}</p>
+    <p>Sistema: CRM Imobiliário - SupaiMob</p>
+  </div>
+</body>
+</html>
+      `
 
-Total de Despesas: ${formatCurrency(reportData.expenses.total)}
-Número de Despesas: ${reportData.expenses.count}
-
-Despesas por Categoria:
-${reportData.expenses.byCategory.length > 0 
-  ? reportData.expenses.byCategory.map((cat: any) => 
-      `• ${cat.category}: ${formatCurrency(parseFloat(cat.category_total))}`
-    ).join('\n')
-  : '• Nenhuma despesa registrada neste período'
-}
-
-=====================================
-ANÁLISE
-=====================================
-
-${reportData.profit > 0 
-  ? `✅ Mês POSITIVO com lucro de ${formatCurrency(reportData.profit)}`
-  : `❌ Mês NEGATIVO com prejuízo de ${formatCurrency(Math.abs(reportData.profit))}`
-}
-
-Margem de lucro: ${reportData.summary.profitMargin.toFixed(1)}%
-
-=====================================
-
-Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
-Sistema: CRM Imobiliário - SupaiMob
-      `.trim()
-
-      // Download report
-      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `relatorio-financeiro-${getMonthName(selectedMonth).toLowerCase()}-${selectedYear}.txt`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      // Create a new window and print to PDF
+      const printWindow = window.open('', '_blank')
+      if (printWindow) {
+        printWindow.document.write(reportHTML)
+        printWindow.document.close()
+        
+        // Wait for content to load then trigger print
+        printWindow.onload = () => {
+          setTimeout(() => {
+            printWindow.print()
+            printWindow.close()
+          }, 500)
+        }
+      }
       
       setShowReportsModal(false)
       
@@ -471,7 +628,7 @@ Sistema: CRM Imobiliário - SupaiMob
                       <p className="text-xs text-blue-700 dark:text-blue-300">
                         O relatório incluirá receitas, despesas, lucro líquido e análise detalhada do período selecionado.
                         Funciona para qualquer mês/ano, mesmo se o período ainda não estiver concluído.
-                        O arquivo será baixado automaticamente em formato de texto.
+                        Será gerado um relatório profissional em PDF para download.
                       </p>
                     </div>
                   </div>
