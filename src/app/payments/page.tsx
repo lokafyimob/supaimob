@@ -464,20 +464,42 @@ export default function Payments() {
       payment.tenant.name?.toLowerCase()?.includes(searchTerm.toLowerCase()) ||
       payment.property.title?.toLowerCase()?.includes(searchTerm.toLowerCase())
     
-    const matchesStatus = filterStatus === 'all' || 
-                         payment.status?.toLowerCase() === filterStatus || 
-                         (filterStatus === 'paid' && isPaidStatus(payment.status))
+    let matchesStatus = false
+    
+    if (filterStatus === 'all') {
+      matchesStatus = true
+    } else if (filterStatus === 'pending') {
+      // A Vencer: não pagos e não em atraso
+      matchesStatus = !isPaidStatus(payment.status) && 
+                     (payment.status?.toLowerCase() === 'pending' || 
+                      (!isOverdue(payment.dueDate) && payment.status?.toLowerCase() !== 'overdue'))
+    } else if (filterStatus === 'overdue') {
+      // Em Atraso: não pagos e atrasados
+      matchesStatus = !isPaidStatus(payment.status) && 
+                     (payment.status?.toLowerCase() === 'overdue' || isOverdue(payment.dueDate))
+    } else if (filterStatus === 'paid') {
+      matchesStatus = isPaidStatus(payment.status)
+    }
 
     return matchesSearch && matchesStatus
   })
 
   const stats = {
     total: payments.length,
-    pending: payments.filter(p => p?.status?.toLowerCase() === 'pending').length,
-    overdue: payments.filter(p => p?.status?.toLowerCase() === 'overdue').length,
+    // A Vencer: todos os pagamentos pendentes (não pagos e não em atraso)
+    pending: payments.filter(p => 
+      !isPaidStatus(p?.status) && 
+      (p?.status?.toLowerCase() === 'pending' || 
+       (!isOverdue(p?.dueDate) && p?.status?.toLowerCase() !== 'overdue'))
+    ).length,
+    // Em Atraso: todos os pagamentos atrasados (não pagos e data vencida)
+    overdue: payments.filter(p => 
+      !isPaidStatus(p?.status) && 
+      (p?.status?.toLowerCase() === 'overdue' || isOverdue(p?.dueDate))
+    ).length,
     paid: payments.filter(p => isPaidStatus(p?.status)).length,
     totalAmount: payments
-      .filter(p => p?.status?.toLowerCase() === 'pending' || p?.status?.toLowerCase() === 'overdue')
+      .filter(p => !isPaidStatus(p?.status))
       .reduce((sum, p) => sum + (p?.amount || 0), 0),
     paidAmount: payments
       .filter(p => isPaidStatus(p?.status))
@@ -528,7 +550,7 @@ export default function Payments() {
           <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-amber-200/50 dark:border-amber-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">Pendentes</p>
+                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">A Vencer</p>
                 <p className="text-3xl font-bold text-amber-900 dark:text-white mt-2">{stats.pending}</p>
                 <div className="flex items-center mt-2">
                   <Timer className="w-4 h-4 text-amber-500 mr-1" />
@@ -608,7 +630,7 @@ export default function Payments() {
                   className="appearance-none px-4 py-3 pr-10 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium"
                 >
                   <option value="all">🔍 Todos os Status</option>
-                  <option value="pending">⏱️ Pendentes</option>
+                  <option value="pending">⏱️ A Vencer</option>
                   <option value="overdue">⚠️ Em Atraso</option>
                   <option value="paid">✅ Pagos</option>
                 </select>
