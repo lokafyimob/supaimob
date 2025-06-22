@@ -123,10 +123,12 @@ export async function POST(_request: NextRequest) {
           // Verificar preço
           if (lead.interest === 'RENT' && property.rentPrice) {
             if (lead.minPrice && property.rentPrice < lead.minPrice) isMatch = false
-            if (property.rentPrice > lead.maxPrice) isMatch = false
+            // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente
+            if (lead.maxPrice && lead.maxPrice > 0 && property.rentPrice > lead.maxPrice) isMatch = false
           } else if (lead.interest === 'BUY' && property.salePrice) {
             if (lead.minPrice && property.salePrice < lead.minPrice) isMatch = false
-            if (property.salePrice > lead.maxPrice) isMatch = false
+            // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente
+            if (lead.maxPrice && lead.maxPrice > 0 && property.salePrice > lead.maxPrice) isMatch = false
           }
           
           // Verificar quartos

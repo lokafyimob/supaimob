@@ -151,7 +151,8 @@ async function checkDetailedMatch(property: any, lead: any): Promise<boolean> {
     const targetPrice = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
     if (targetPrice) {
       if (lead.minPrice && targetPrice < lead.minPrice) return false
-      if (targetPrice > lead.maxPrice) return false
+      // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente
+      if (lead.maxPrice && lead.maxPrice > 0 && targetPrice > lead.maxPrice) return false
     }
     
     // Verificar quartos

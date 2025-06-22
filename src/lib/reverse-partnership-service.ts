@@ -72,7 +72,8 @@ export async function detectReversePartnerships(leadId: string) {
       if (!propertyPrice || propertyPrice <= 0) continue
       
       if (lead.minPrice && propertyPrice < lead.minPrice) isMatch = false
-      if (propertyPrice > lead.maxPrice) isMatch = false
+      // 🔥 ULTRAPHINK: Verificar preço máximo rigorosamente
+      if (lead.maxPrice && lead.maxPrice > 0 && propertyPrice > lead.maxPrice) isMatch = false
       
       // Verificar quartos
       if (lead.minBedrooms && property.bedrooms < lead.minBedrooms) isMatch = false
@@ -96,6 +97,12 @@ export async function detectReversePartnerships(leadId: string) {
             isMatch = false
           }
         }
+      }
+      
+      // 🔥 ULTRAPHINK: Verificar financiamento (apenas para compra)
+      if (lead.interest === 'BUY' && lead.needsFinancing && !property.acceptsFinancing) {
+        isMatch = false
+        console.log(`❌ Lead ${lead.name} precisa financiamento mas propriedade ${property.title} não aceita`)
       }
       
       if (!isMatch) continue
