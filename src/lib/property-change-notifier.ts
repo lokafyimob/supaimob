@@ -162,15 +162,16 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
       
       // Criar/atualizar partnership_notifications
       for (const lead of partnershipResult.rows) {
-        // Verificar se já existe parceria nas últimas 24h
+        // Verificar se já existe parceria (sem limite de tempo para ULTRAPHINK)
         const existingPartnershipQuery = `
           SELECT id, "createdAt" FROM partnership_notifications 
           WHERE "fromUserId" = $1 AND "toUserId" = $2 AND "leadId" = $3 AND "propertyId" = $4
-          AND "createdAt" > NOW() - INTERVAL '24 hours'
         `
         const existingPartnership = await client.query(existingPartnershipQuery, [
           lead.userId, property.userId, lead.id, propertyId
         ])
+        
+        const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
         
         if (existingPartnership.rows.length === 0) {
           // Criar nova parceria
@@ -184,8 +185,6 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
               viewed, "createdAt"
             ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
           `
-          
-          const price = lead.interest === 'RENT' ? property.rentPrice : property.salePrice
           
           await client.query(createPartnershipQuery, [
             partnershipId,
@@ -205,6 +204,41 @@ ${financingInfo ? `🏦 ${financingInfo}` : ''}`
           ])
           
           console.log(`🤝 Nova partnership_notification criada: ${lead.name} x ${property.title}`)
+          notificationsCreated++
+          
+        } else {
+          // 🔥 ULTRAPHINK: ATUALIZAR TODOS OS CAMPOS da parceria existente
+          const updatePartnershipQuery = `
+            UPDATE partnership_notifications 
+            SET 
+              "fromUserName" = $1,
+              "fromUserPhone" = $2, 
+              "fromUserEmail" = $3,
+              "leadName" = $4,
+              "leadPhone" = $5,
+              "propertyTitle" = $6,
+              "propertyPrice" = $7,
+              "matchType" = $8,
+              viewed = false
+            WHERE "fromUserId" = $9 AND "toUserId" = $10 AND "leadId" = $11 AND "propertyId" = $12
+          `
+          
+          await client.query(updatePartnershipQuery, [
+            lead.userName,
+            lead.userPhone,
+            lead.userEmail,
+            lead.name,
+            lead.phone,
+            property.title,
+            price,
+            lead.interest,
+            lead.userId,
+            property.userId,
+            lead.id,
+            propertyId
+          ])
+          
+          console.log(`🔄 ULTRAPHINK: Partnership_notification ATUALIZADA: ${lead.name} x ${property.title}`)
           notificationsCreated++
         }
       }
