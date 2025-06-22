@@ -469,14 +469,11 @@ export default function Payments() {
     if (filterStatus === 'all') {
       matchesStatus = true
     } else if (filterStatus === 'pending') {
-      // A Vencer: não pagos e não em atraso
-      matchesStatus = !isPaidStatus(payment.status) && 
-                     (payment.status?.toLowerCase() === 'pending' || 
-                      (!isOverdue(payment.dueDate) && payment.status?.toLowerCase() !== 'overdue'))
+      // A Vencer: não pago e não vencido
+      matchesStatus = !isPaidStatus(payment.status) && !isOverdue(payment.dueDate)
     } else if (filterStatus === 'overdue') {
-      // Em Atraso: não pagos e atrasados
-      matchesStatus = !isPaidStatus(payment.status) && 
-                     (payment.status?.toLowerCase() === 'overdue' || isOverdue(payment.dueDate))
+      // Em Atraso: não pago e vencido
+      matchesStatus = !isPaidStatus(payment.status) && isOverdue(payment.dueDate)
     } else if (filterStatus === 'paid') {
       matchesStatus = isPaidStatus(payment.status)
     }
@@ -484,26 +481,26 @@ export default function Payments() {
     return matchesSearch && matchesStatus
   })
 
+  // Calcular estatísticas com lógica mais clara
+  const pendingPayments = payments.filter(p => {
+    if (!p || isPaidStatus(p.status)) return false
+    return !isOverdue(p.dueDate) // A vencer = não pago e não vencido
+  })
+  
+  const overduePayments = payments.filter(p => {
+    if (!p || isPaidStatus(p.status)) return false
+    return isOverdue(p.dueDate) // Em atraso = não pago e vencido
+  })
+  
+  const paidPayments = payments.filter(p => p && isPaidStatus(p.status))
+
   const stats = {
     total: payments.length,
-    // A Vencer: todos os pagamentos pendentes (não pagos e não em atraso)
-    pending: payments.filter(p => 
-      !isPaidStatus(p?.status) && 
-      (p?.status?.toLowerCase() === 'pending' || 
-       (!isOverdue(p?.dueDate) && p?.status?.toLowerCase() !== 'overdue'))
-    ).length,
-    // Em Atraso: todos os pagamentos atrasados (não pagos e data vencida)
-    overdue: payments.filter(p => 
-      !isPaidStatus(p?.status) && 
-      (p?.status?.toLowerCase() === 'overdue' || isOverdue(p?.dueDate))
-    ).length,
-    paid: payments.filter(p => isPaidStatus(p?.status)).length,
-    totalAmount: payments
-      .filter(p => !isPaidStatus(p?.status))
-      .reduce((sum, p) => sum + (p?.amount || 0), 0),
-    paidAmount: payments
-      .filter(p => isPaidStatus(p?.status))
-      .reduce((sum, p) => sum + (p?.amount || 0), 0)
+    pending: pendingPayments.length,
+    overdue: overduePayments.length,
+    paid: paidPayments.length,
+    totalAmount: [...pendingPayments, ...overduePayments].reduce((sum, p) => sum + (p?.amount || 0), 0),
+    paidAmount: paidPayments.reduce((sum, p) => sum + (p?.amount || 0), 0)
   }
 
   if (loading) {
