@@ -69,10 +69,10 @@ export async function POST(request: NextRequest) {
               // CRIAR NOTIFICAÇÃO DE PARCERIA
               const insertQuery = `
                 INSERT INTO partnership_notifications (
-                  "fromUserId", "toUserId", "leadId", "propertyId",
+                  id, "fromUserId", "toUserId", "leadId", "propertyId",
                   "fromUserName", "fromUserPhone", "fromUserEmail",
                   "leadName", "leadPhone", "propertyTitle", "propertyPrice", "matchType"
-                ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+                ) VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
               `
               
               await client.query(insertQuery, [
