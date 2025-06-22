@@ -169,9 +169,23 @@ export async function GET(
       if (preferredStates.includes(property.state)) score += 10
 
       return {
-        ...property,
+        id: property.id,
+        title: property.title,
+        description: property.description,
+        address: property.address,
+        city: property.city,
+        state: property.state,
+        bedrooms: property.bedrooms,
+        bathrooms: property.bathrooms,
+        area: property.area,
+        rentPrice: property.rentPrice,
+        salePrice: property.salePrice,
+        propertyType: property.propertyType,
+        images: property.images ? JSON.parse(property.images) : [],
+        amenities: property.amenities ? JSON.parse(property.amenities) : [],
         matchScore: Math.round(score),
         owner: {
+          id: property.userId,
           name: property.ownerName,
           email: property.ownerEmail,
           phone: property.ownerPhone
