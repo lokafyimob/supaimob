@@ -541,7 +541,7 @@ export default function Payments() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
+      <div className="space-y-4">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -552,97 +552,75 @@ export default function Payments() {
           </div>
         </div>
 
-        {/* Enhanced Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-blue-200/50 dark:border-blue-700/50">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/30 dark:to-blue-800/30 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-blue-200/50 dark:border-blue-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-blue-700 dark:text-blue-300 uppercase tracking-wide">Total de Pagamentos</p>
-                <p className="text-3xl font-bold text-blue-900 dark:text-white mt-2">{stats.total}</p>
-                <div className="flex items-center mt-2">
-                  <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
-                  <span className="text-xs text-green-600 font-medium">+12% este mês</span>
-                </div>
+                <p className="text-xs font-medium text-blue-700 dark:text-blue-300 uppercase tracking-wide">Total</p>
+                <p className="text-2xl font-bold text-blue-900 dark:text-white mt-1">{stats.total}</p>
               </div>
-              <div className="bg-blue-500 p-4 rounded-2xl shadow-lg">
-                <Receipt className="w-8 h-8 text-white" />
+              <div className="bg-blue-500 p-3 rounded-xl shadow-md">
+                <Receipt className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-amber-200/50 dark:border-amber-700/50">
+          <div className="bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-900/30 dark:to-amber-800/30 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-amber-200/50 dark:border-amber-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 uppercase tracking-wide">A Vencer</p>
-                <p className="text-3xl font-bold text-amber-900 dark:text-white mt-2">{stats.pending}</p>
-                <div className="flex items-center mt-2">
-                  <Timer className="w-4 h-4 text-amber-500 mr-1" />
-                  <span className="text-xs text-amber-600 font-medium">Aguardando</span>
-                </div>
+                <p className="text-xs font-medium text-amber-700 dark:text-amber-300 uppercase tracking-wide">A Vencer</p>
+                <p className="text-2xl font-bold text-amber-900 dark:text-white mt-1">{stats.pending}</p>
               </div>
-              <div className="bg-amber-500 p-4 rounded-2xl shadow-lg">
-                <Clock className="w-8 h-8 text-white" />
+              <div className="bg-amber-500 p-3 rounded-xl shadow-md">
+                <Clock className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-red-200/50 dark:border-red-700/50">
+          <div className="bg-gradient-to-br from-red-50 to-red-100 dark:from-red-900/30 dark:to-red-800/30 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-red-200/50 dark:border-red-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-red-700 dark:text-red-300 uppercase tracking-wide">Em Atraso</p>
-                <p className="text-3xl font-bold text-red-900 dark:text-white mt-2">{stats.overdue}</p>
-                <div className="flex items-center mt-2">
-                  <AlertTriangle className="w-4 h-4 text-red-500 mr-1" />
-                  <span className="text-xs text-red-600 font-medium">Ação necessária</span>
-                </div>
+                <p className="text-xs font-medium text-red-700 dark:text-red-300 uppercase tracking-wide">Em Atraso</p>
+                <p className="text-2xl font-bold text-red-900 dark:text-white mt-1">{stats.overdue}</p>
               </div>
-              <div className="bg-red-500 p-4 rounded-2xl shadow-lg">
-                <AlertTriangle className="w-8 h-8 text-white" />
+              <div className="bg-red-500 p-3 rounded-xl shadow-md">
+                <AlertTriangle className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
           
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 p-6 border border-emerald-200/50 dark:border-emerald-700/50">
+          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-900/30 dark:to-emerald-800/30 rounded-xl shadow-sm hover:shadow-lg transition-all duration-300 p-4 border border-emerald-200/50 dark:border-emerald-700/50">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">Valor em Aberto</p>
-                <p className="text-2xl font-bold text-emerald-900 dark:text-white mt-2">
-                  R$ {stats.totalAmount.toLocaleString('pt-BR')}
+                <p className="text-xs font-medium text-emerald-700 dark:text-emerald-300 uppercase tracking-wide">Valor</p>
+                <p className="text-xl font-bold text-emerald-900 dark:text-white mt-1">
+                  R$ {stats.totalAmount.toLocaleString('pt-BR', { maximumFractionDigits: 0 })}
                 </p>
-                <div className="flex items-center mt-2">
-                  <Wallet className="w-4 h-4 text-emerald-500 mr-1" />
-                  <span className="text-xs text-emerald-600 font-medium">A receber</span>
-                </div>
               </div>
-              <div className="bg-emerald-500 p-4 rounded-2xl shadow-lg">
-                <DollarSign className="w-8 h-8 text-white" />
+              <div className="bg-emerald-500 p-3 rounded-xl shadow-md">
+                <DollarSign className="w-6 h-6 text-white" />
               </div>
             </div>
           </div>
         </div>
 
-        {/* Enhanced Filters */}
-        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg border border-gray-200/50 dark:border-gray-700/50 p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center space-x-2">
-              <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-              <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Filtros</h3>
-            </div>
-            <div className="flex items-center space-x-2 text-sm text-gray-500 dark:text-gray-400">
-              <span>{filteredPayments.length} de {payments.length} resultados</span>
-            </div>
-          </div>
-          
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 lg:space-x-6">
+        {/* Compact Filters */}
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200/50 dark:border-gray-700/50 p-4">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-3 lg:space-y-0 lg:space-x-4">
             <div className="flex-1 relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <input
                 type="text"
-                placeholder="Buscar por inquilino, imóvel ou endereço..."
+                placeholder="Buscar por inquilino ou imóvel..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50"
+                className="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50"
               />
+            </div>
+            
+            <div className="text-xs text-gray-500 dark:text-gray-400 lg:min-w-max">
+              {filteredPayments.length} de {payments.length} resultados
             </div>
             
             <div className="flex flex-wrap gap-3">
@@ -656,14 +634,14 @@ export default function Payments() {
                 <select
                   value={filterStatus}
                   onChange={(e) => setFilterStatus(e.target.value)}
-                  className="appearance-none pl-10 pr-10 py-3 border-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium min-w-[160px]"
+                  className="appearance-none pl-10 pr-8 py-2.5 border border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all duration-200 bg-gray-50 dark:bg-gray-700/50 font-medium text-sm min-w-[140px]"
                 >
-                  <option value="all">Todos os Status</option>
+                  <option value="all">Todos</option>
                   <option value="pending">A Vencer</option>
                   <option value="overdue">Em Atraso</option>
                   <option value="paid">Pagos</option>
                 </select>
-                <ChevronRight className="absolute right-3 top-1/2 transform -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
+                <ChevronRight className="absolute right-2 top-1/2 transform -translate-y-1/2 rotate-90 w-4 h-4 text-gray-400 pointer-events-none" />
               </div>
               
               {(searchTerm || filterStatus !== 'all') && (
@@ -672,17 +650,17 @@ export default function Payments() {
                     setSearchTerm('')
                     setFilterStatus('all')
                   }}
-                  className="px-4 py-3 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-xl transition-all duration-200 font-medium"
+                  className="px-3 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-700 dark:text-gray-300 rounded-lg transition-all duration-200 text-sm font-medium"
                 >
-                  Limpar
+                  ×
                 </button>
               )}
             </div>
           </div>
         </div>
 
-        {/* Enhanced Payments List */}
-        <div className="space-y-6">
+        {/* Compact Payments List */}
+        <div className="space-y-4">
           {filteredPayments.map((payment) => {
             const daysOverdue = getDaysOverdue(payment.dueDate)
             const paymentIsOverdue = isOverdue(payment.dueDate) && !isPaidStatus(payment.status)
@@ -702,27 +680,27 @@ export default function Payments() {
             }
             
             return (
-              <div key={payment.id} className="group bg-white dark:bg-gray-800 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
+              <div key={payment.id} className="bg-white dark:bg-gray-800 rounded-lg shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200/50 dark:border-gray-700/50 overflow-hidden">
                 {/* Status Bar */}
                 <div className={`h-1 bg-gradient-to-r ${getStatusGradient(payment.status)}`}></div>
                 
-                <div className="p-4">
-                  {/* Header - More Compact */}
-                  <div className="flex items-center justify-between mb-3">
+                <div className="p-3">
+                  {/* Header - Compact */}
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center space-x-3">
                       <div className="relative">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center shadow-md">
-                          <Users className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                        <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-100 to-blue-200 dark:from-blue-900/50 dark:to-blue-800/50 flex items-center justify-center">
+                          <Users className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                         </div>
                         {isPaidStatus(payment.status) && (
-                          <div className="absolute -top-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center shadow-lg">
-                            <BadgeCheck className="w-3 h-3 text-white" />
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                            <BadgeCheck className="w-2 h-2 text-white" />
                           </div>
                         )}
                       </div>
                       
                       <div className="flex-1">
-                        <h3 className="text-lg font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
+                        <h3 className="text-base font-bold text-gray-900 dark:text-white cursor-pointer hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
                             onClick={() => handleTenantClick(payment.tenant?.name || '')}>
                           {payment.tenant?.name || 'Nome não disponível'}
                         </h3>
@@ -734,54 +712,54 @@ export default function Payments() {
                     </div>
                     
                     <div className="flex flex-col items-end">
-                      <div className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold shadow-md bg-gradient-to-r ${getStatusGradient(payment.status)} text-white`}>
+                      <div className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium shadow-sm bg-gradient-to-r ${getStatusGradient(payment.status)} text-white`}>
                         {getStatusIcon(payment.status)}
                         <span className="ml-1">{getStatusText(payment.status)}</span>
                       </div>
                       {paymentIsOverdue && (
                         <div className="mt-1 flex items-center text-red-600 dark:text-red-400">
                           <AlertTriangle className="w-3 h-3 mr-1" />
-                          <span className="text-xs font-medium">{daysOverdue} dias</span>
+                          <span className="text-xs font-medium">{daysOverdue}d</span>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Details Grid - More Compact */}
-                  <div className="grid grid-cols-3 gap-3 mb-3">
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                  {/* Details Grid - Compact */}
+                  <div className="grid grid-cols-3 gap-2 mb-2">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
                       <div className="flex items-center mb-1">
                         <MapPin className="w-3 h-3 text-gray-500 dark:text-gray-400 mr-1" />
-                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Local</span>
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Local</span>
                       </div>
                       <p className="text-xs font-medium text-gray-900 dark:text-white truncate">
                         {payment.property?.address || 'Endereço não disponível'}
                       </p>
                     </div>
                     
-                    <div className="bg-gray-50 dark:bg-gray-700/50 p-3 rounded-lg">
+                    <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
                       <div className="flex items-center mb-1">
                         <Calendar className="w-3 h-3 text-gray-500 dark:text-gray-400 mr-1" />
-                        <span className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wide">Vencimento</span>
+                        <span className="text-xs font-medium text-gray-500 dark:text-gray-400">Vencimento</span>
                       </div>
                       <p className="text-xs font-bold text-gray-900 dark:text-white">
                         {formatDate(payment.dueDate)}
                       </p>
                     </div>
                     
-                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 dark:from-green-900/30 dark:to-emerald-900/30 p-3 rounded-lg border border-green-200/50 dark:border-green-700/50">
+                    <div className="bg-green-50 dark:bg-green-900/30 p-2 rounded border border-green-200/50 dark:border-green-700/50">
                       <div className="flex items-center mb-1">
                         <CreditCard className="w-3 h-3 text-green-600 dark:text-green-400 mr-1" />
-                        <span className="text-xs font-semibold text-green-700 dark:text-green-300 uppercase tracking-wide">Valor</span>
+                        <span className="text-xs font-medium text-green-700 dark:text-green-300">Valor</span>
                       </div>
                       <p className="text-sm font-bold text-green-900 dark:text-white">
-                        R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        R$ {payment.amount.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                       </p>
                     </div>
                   </div>
 
-                  {/* Action Buttons - More Compact */}
-                  <div className="flex items-center justify-between pt-3 border-t border-gray-200 dark:border-gray-700">
+                  {/* Action Buttons - Compact */}
+                  <div className="flex items-center justify-between pt-2 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center space-x-2">
                       {payment.paidDate && (
                         <div className="flex items-center text-xs text-gray-500 dark:text-gray-400">
