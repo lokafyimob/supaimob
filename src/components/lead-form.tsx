@@ -105,7 +105,10 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
 
   const parseCurrency = (value: string) => {
     const numbers = value.replace(/\D/g, '')
-    return numbers === '' ? '' : numbers
+    if (numbers === '') return ''
+    // Converter para valor real (dividindo por 100 para considerar os centavos)
+    const numberValue = parseInt(numbers) / 100
+    return numberValue.toString()
   }
 
   useEffect(() => {
@@ -197,8 +200,8 @@ export function LeadForm({ isOpen, onClose, onSubmit, lead }: LeadFormProps) {
 
       const submitData = {
         ...formData,
-        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice.replace(/\D/g, '')) : null,
-        maxPrice: parseFloat(formData.maxPrice.replace(/\D/g, '')),
+        minPrice: formData.minPrice && formData.minPrice.trim() ? parseFloat(formData.minPrice) : null,
+        maxPrice: parseFloat(formData.maxPrice),
         minBedrooms: formData.minBedrooms ? parseInt(formData.minBedrooms) : null,
         maxBedrooms: formData.maxBedrooms ? parseInt(formData.maxBedrooms) : null,
         minBathrooms: formData.minBathrooms ? parseInt(formData.minBathrooms) : null,
