@@ -122,8 +122,8 @@ export async function detectReversePartnerships(leadId: string) {
             id, "fromUserId", "toUserId", "leadId", "propertyId",
             "fromUserName", "fromUserPhone", "fromUserEmail",
             "leadName", "leadPhone", "propertyTitle", "propertyPrice", "matchType",
-            viewed, "createdAt", "updatedAt"
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
+            viewed, "createdAt"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW())
         `
         
         await client.query(insertQuery, [

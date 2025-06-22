@@ -199,8 +199,8 @@ export async function checkForMatchesRaw(leadId: string) {
             id, "fromUserId", "toUserId", "leadId", "propertyId", 
             "fromUserName", "fromUserPhone", "fromUserEmail",
             "leadName", "leadPhone", "propertyTitle", "propertyPrice", "matchType",
-            "createdAt", "updatedAt"
-          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW(), NOW())
+            "createdAt"
+          ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, NOW())
         `
         
         await client.query(createPartnershipQuery, [

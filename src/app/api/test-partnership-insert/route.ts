@@ -47,8 +47,8 @@ export async function GET(request: NextRequest) {
       INSERT INTO partnership_notifications (
         id, "fromUserId", "toUserId", "leadId", "propertyId",
         "fromUserName", "leadName", "propertyTitle", "propertyPrice", "matchType",
-        viewed, "createdAt", "updatedAt"
-      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW(), NOW())
+        viewed, "createdAt"
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, NOW())
       RETURNING *
     `
     
