@@ -12,8 +12,9 @@ interface Lead {
   interest: string
   propertyType: string
   maxPrice: number
-  preferredLocation?: string
-  locationRadius?: number
+  minPrice?: number
+  preferredCities: string
+  preferredStates: string
   status: string
   createdAt: string
 }
@@ -61,7 +62,11 @@ export default function LeadsMapPage() {
       const response = await fetch('/api/leads')
       if (response.ok) {
         const data = await response.json()
-        setLeads(data.leads)
+        // A API retorna um array direto, não um objeto com leads
+        setLeads(Array.isArray(data) ? data : data.leads || [])
+        console.log('📋 Leads carregados:', data.length || 0)
+      } else {
+        console.error('Erro na API:', response.status, response.statusText)
       }
     } catch (error) {
       console.error('Error fetching leads:', error)
@@ -90,29 +95,45 @@ export default function LeadsMapPage() {
     updateMapMarkers(filteredLeads)
   }
 
-  const updateMapMarkers = (leadsToShow: Lead[]) => {
+  const updateMapMarkers = async (leadsToShow: Lead[]) => {
     // Clear existing markers
     markersRef.current.forEach(marker => marker.setMap(null))
     markersRef.current = []
 
-    // Add new markers for leads with location
-    leadsToShow.forEach(lead => {
-      if (lead.preferredLocation) {
-        try {
-          const location: LocationData = JSON.parse(lead.preferredLocation)
+    const geocoder = new window.google.maps.Geocoder()
+
+    // Add new markers for leads with preferred cities
+    for (const lead of leadsToShow) {
+      try {
+        const cities = JSON.parse(lead.preferredCities || '[]')
+        if (cities.length > 0) {
+          const city = cities[0] // Use first preferred city
+          
+          // Geocode the city
+          const results = await new Promise<any>((resolve, reject) => {
+            geocoder.geocode({ address: `${city}, Brazil` }, (results, status) => {
+              if (status === 'OK' && results && results[0]) {
+                resolve(results[0])
+              } else {
+                reject(new Error(`Geocoding failed: ${status}`))
+              }
+            })
+          })
+
+          const location = results.geometry.location
           
           // Create marker
           const marker = new window.google.maps.Marker({
-            position: { lat: location.lat, lng: location.lng },
+            position: location,
             map: mapInstance.current,
-            title: lead.name,
+            title: `${lead.name} - ${city}`,
             icon: {
               url: getMarkerIcon(lead.interest, lead.status),
               scaledSize: new window.google.maps.Size(32, 32),
             }
           })
 
-          // Create circle for radius
+          // Create circle for radius (10km default)
           const circle = new window.google.maps.Circle({
             strokeColor: getCircleColor(lead.interest),
             strokeOpacity: 0.8,
@@ -120,23 +141,23 @@ export default function LeadsMapPage() {
             fillColor: getCircleColor(lead.interest),
             fillOpacity: 0.15,
             map: mapInstance.current,
-            center: { lat: location.lat, lng: location.lng },
-            radius: (lead.locationRadius || 5) * 1000, // Convert to meters
+            center: location,
+            radius: 10000, // 10km radius
           })
 
           // Add click listener
           marker.addListener('click', () => {
             setSelectedLead(lead)
-            infoWindowRef.current.setContent(createInfoWindowContent(lead, location))
+            infoWindowRef.current.setContent(createInfoWindowContent(lead, city))
             infoWindowRef.current.open(mapInstance.current, marker)
           })
 
           markersRef.current.push(marker, circle)
-        } catch (error) {
-          console.error('Error parsing location for lead:', lead.id, error)
         }
+      } catch (error) {
+        console.error('Error creating marker for lead:', lead.id, error)
       }
-    })
+    }
   }
 
   const getMarkerIcon = (interest: string, status: string) => {
@@ -152,17 +173,20 @@ export default function LeadsMapPage() {
     return interest === 'RENT' ? '#3b82f6' : '#ef4444'
   }
 
-  const createInfoWindowContent = (lead: Lead, location: LocationData) => {
+  const createInfoWindowContent = (lead: Lead, city: string) => {
+    const priceRange = lead.minPrice 
+      ? `R$ ${lead.minPrice.toLocaleString('pt-BR')} - R$ ${lead.maxPrice?.toLocaleString('pt-BR') || 'N/A'}`
+      : `Até R$ ${lead.maxPrice?.toLocaleString('pt-BR') || 'N/A'}`
+      
     return `
       <div class="p-3 max-w-xs">
         <h3 class="font-bold text-lg mb-2">${lead.name}</h3>
         <div class="space-y-1 text-sm">
           <p><strong>Interesse:</strong> ${lead.interest === 'RENT' ? 'Aluguel' : 'Compra'}</p>
           <p><strong>Tipo:</strong> ${getPropertyTypeLabel(lead.propertyType)}</p>
-          <p><strong>Orçamento:</strong> R$ ${lead.maxPrice?.toLocaleString('pt-BR') || 'N/A'}</p>
+          <p><strong>Orçamento:</strong> ${priceRange}</p>
           <p><strong>Status:</strong> ${getStatusLabel(lead.status)}</p>
-          <p><strong>Localização:</strong> ${location.address}</p>
-          <p><strong>Raio:</strong> ${lead.locationRadius || 5}km</p>
+          <p><strong>Cidade:</strong> ${city}</p>
           <p><strong>Telefone:</strong> ${lead.phone}</p>
         </div>
         <button 
@@ -227,7 +251,14 @@ export default function LeadsMapPage() {
   }
 
   const getTotalWithLocation = () => {
-    return filteredLeads.filter(lead => lead.preferredLocation).length
+    return filteredLeads.filter(lead => {
+      try {
+        const cities = JSON.parse(lead.preferredCities || '[]')
+        return cities.length > 0
+      } catch {
+        return false
+      }
+    }).length
   }
 
   // Global function for info window button
