@@ -5,6 +5,7 @@ import { DashboardLayout } from '@/components/dashboard-layout'
 import { ContractForm } from '@/components/contract-form'
 import { AIContractForm } from '@/components/ai-contract-form'
 import { ContractMaintenances } from '@/components/contract-maintenances'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { 
   FileText, 
   Plus, 
@@ -66,6 +67,8 @@ export default function Contracts() {
   const [showContractDetails, setShowContractDetails] = useState(false)
   const [viewingContract, setViewingContract] = useState<Contract | null>(null)
   const [deletingContractId, setDeletingContractId] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [contractToDelete, setContractToDelete] = useState<Contract | null>(null)
   const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
 
   useEffect(() => {
@@ -148,12 +151,17 @@ export default function Contracts() {
     }
   }
 
-  const handleDeleteContract = async (id: string) => {
-    if (!confirm('Tem certeza que deseja deletar este contrato?')) return
+  const handleDeleteContract = async (contract: Contract) => {
+    setContractToDelete(contract)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteContract = async () => {
+    if (!contractToDelete) return
 
     try {
-      setDeletingContractId(id)
-      const response = await fetch(`/api/contracts/${id}`, {
+      setDeletingContractId(contractToDelete.id)
+      const response = await fetch(`/api/contracts/${contractToDelete.id}`, {
         method: 'DELETE',
       })
 
@@ -169,6 +177,7 @@ export default function Contracts() {
       showNotification('error', 'Erro ao excluir contrato')
     } finally {
       setDeletingContractId(null)
+      setContractToDelete(null)
     }
   }
 
@@ -604,7 +613,7 @@ Sistema: CRM Imobiliário
                       <Edit className="w-4 h-4" />
                     </button>
                     <button 
-                      onClick={() => handleDeleteContract(contract.id)}
+                      onClick={() => handleDeleteContract(contract)}
                       disabled={deletingContractId === contract.id}
                       className={`p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 ${
                         deletingContractId === contract.id ? 'opacity-50 cursor-not-allowed animate-pulse' : ''
@@ -825,6 +834,21 @@ Sistema: CRM Imobiliário
             animation: animate-in 0.3s ease-out;
           }
         `}</style>
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setContractToDelete(null)
+          }}
+          onConfirm={confirmDeleteContract}
+          title="Excluir Contrato"
+          message="Tem certeza que deseja excluir este contrato? Esta ação não pode ser desfeita."
+          itemName={contractToDelete ? `${contractToDelete.property?.title} - ${contractToDelete.tenant?.name}` : undefined}
+          confirmText="Sim, excluir"
+          cancelText="Cancelar"
+        />
       </div>
     </DashboardLayout>
   )

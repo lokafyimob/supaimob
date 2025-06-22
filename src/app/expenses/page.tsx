@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { DashboardLayout } from '@/components/dashboard-layout'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { 
   Plus,
   Search,
@@ -48,6 +49,8 @@ export default function Expenses() {
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [editingExpense, setEditingExpense] = useState<Expense | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [expenseToDelete, setExpenseToDelete] = useState<Expense | null>(null)
   const [searchTerm, setSearchTerm] = useState('')
   const [filterCategory, setFilterCategory] = useState('all')
   const [filterMonth, setFilterMonth] = useState(new Date().getMonth() + 1)
@@ -189,11 +192,16 @@ export default function Expenses() {
     setShowModal(true)
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Tem certeza que deseja excluir esta despesa?')) return
+  const handleDelete = async (expense: Expense) => {
+    setExpenseToDelete(expense)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteExpense = async () => {
+    if (!expenseToDelete) return
 
     try {
-      const response = await fetch(`/api/expenses/${id}`, {
+      const response = await fetch(`/api/expenses/${expenseToDelete.id}`, {
         method: 'DELETE'
       })
 
@@ -206,6 +214,8 @@ export default function Expenses() {
     } catch (error) {
       console.error('Error deleting expense:', error)
       alert('Erro ao excluir despesa')
+    } finally {
+      setExpenseToDelete(null)
     }
   }
 
@@ -426,7 +436,7 @@ export default function Expenses() {
                     <Edit className="w-4 h-4" />
                   </button>
                   <button 
-                    onClick={() => handleDelete(expense.id)}
+                    onClick={() => handleDelete(expense)}
                     className="p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110"
                     title="Excluir despesa"
                   >
@@ -593,6 +603,21 @@ export default function Expenses() {
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <DeleteConfirmationModal
+          isOpen={showDeleteModal}
+          onClose={() => {
+            setShowDeleteModal(false)
+            setExpenseToDelete(null)
+          }}
+          onConfirm={confirmDeleteExpense}
+          title="Excluir Despesa"
+          message="Tem certeza que deseja excluir esta despesa? Esta ação não pode ser desfeita."
+          itemName={expenseToDelete?.description}
+          confirmText="Sim, excluir"
+          cancelText="Cancelar"
+        />
       </div>
     </DashboardLayout>
   )
