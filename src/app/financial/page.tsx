@@ -8,7 +8,10 @@ import {
   DollarSign,
   Receipt,
   Calculator,
-  RefreshCw
+  RefreshCw,
+  X,
+  Download,
+  FileText
 } from 'lucide-react'
 
 interface FinancialSummary {
@@ -59,6 +62,10 @@ interface FinancialSummary {
 export default function Financial() {
   const [financialData, setFinancialData] = useState<FinancialSummary | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showReportsModal, setShowReportsModal] = useState(false)
+  const [generatingReport, setGeneratingReport] = useState(false)
+  const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1)
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
   const fetchFinancialSummary = async () => {
     try {
@@ -104,6 +111,90 @@ export default function Financial() {
       'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'
     ]
     return months[month - 1]
+  }
+
+  const generateMonthlyReport = async () => {
+    try {
+      setGeneratingReport(true)
+      const response = await fetch(`/api/financial/monthly-report?year=${selectedYear}&month=${selectedMonth}`)
+      
+      if (!response.ok) {
+        throw new Error('Erro ao gerar relatório')
+      }
+      
+      const reportData = await response.json()
+      
+      // Create report content
+      const reportContent = `
+RELATÓRIO FINANCEIRO MENSAL
+${getMonthName(selectedMonth)} ${selectedYear}
+
+=====================================
+RESUMO EXECUTIVO
+=====================================
+
+• Total de Receitas: ${formatCurrency(reportData.revenue.netRevenue)}
+• Total de Despesas: ${formatCurrency(reportData.expenses.total)}
+• Lucro Líquido: ${formatCurrency(reportData.profit)}
+• Margem de Lucro: ${reportData.summary.profitMargin.toFixed(1)}%
+
+=====================================
+DETALHAMENTO DAS RECEITAS
+=====================================
+
+Valor Total dos Aluguéis: ${formatCurrency(reportData.revenue.totalRent)}
+Taxa de Administração: ${formatCurrency(reportData.revenue.adminFee)}
+Receita Líquida: ${formatCurrency(reportData.revenue.netRevenue)}
+Número de Pagamentos: ${reportData.revenue.paymentCount}
+
+=====================================
+DETALHAMENTO DAS DESPESAS
+=====================================
+
+Total de Despesas: ${formatCurrency(reportData.expenses.total)}
+Número de Despesas: ${reportData.expenses.count}
+
+Despesas por Categoria:
+${reportData.expenses.byCategory.map((cat: any) => 
+  `• ${cat.category}: ${formatCurrency(parseFloat(cat.category_total))}`
+).join('\n')}
+
+=====================================
+ANÁLISE
+=====================================
+
+${reportData.profit > 0 
+  ? `✅ Mês POSITIVO com lucro de ${formatCurrency(reportData.profit)}`
+  : `❌ Mês NEGATIVO com prejuízo de ${formatCurrency(Math.abs(reportData.profit))}`
+}
+
+Margem de lucro: ${reportData.summary.profitMargin.toFixed(1)}%
+
+=====================================
+
+Relatório gerado em: ${new Date().toLocaleDateString('pt-BR')} às ${new Date().toLocaleTimeString('pt-BR')}
+Sistema: CRM Imobiliário - SupaiMob
+      `.trim()
+
+      // Download report
+      const blob = new Blob([reportContent], { type: 'text/plain;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `relatorio-financeiro-${getMonthName(selectedMonth).toLowerCase()}-${selectedYear}.txt`
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      
+      setShowReportsModal(false)
+      
+    } catch (error) {
+      console.error('Erro ao gerar relatório:', error)
+      alert('Erro ao gerar relatório. Tente novamente.')
+    } finally {
+      setGeneratingReport(false)
+    }
   }
 
   if (loading) {
@@ -214,7 +305,10 @@ export default function Financial() {
               <DollarSign className="w-6 h-6 text-blue-600 dark:text-blue-400 mb-2" />
               <span className="text-sm font-medium text-gray-900 dark:text-white">Contratos</span>
             </a>
-            <button className="flex flex-col items-center p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+            <button 
+              onClick={() => setShowReportsModal(true)}
+              className="flex flex-col items-center p-4 border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+            >
               <Calculator className="w-6 h-6 text-purple-600 dark:text-purple-400 mb-2" />
               <span className="text-sm font-medium text-gray-900 dark:text-white">Relatórios</span>
             </button>
@@ -301,6 +395,102 @@ export default function Financial() {
                     Nenhuma despesa registrada neste mês
                   </p>
                 )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Reports Modal */}
+        {showReportsModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md">
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Gerar Relatório Financeiro
+                </h2>
+                <button
+                  onClick={() => setShowReportsModal(false)}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <X className="w-6 h-6" />
+                </button>
+              </div>
+
+              <div className="p-6 space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Mês do Relatório
+                  </label>
+                  <select
+                    value={selectedMonth}
+                    onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {Array.from({ length: 12 }, (_, i) => i + 1).map((month) => (
+                      <option key={month} value={month}>
+                        {getMonthName(month)}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Ano do Relatório
+                  </label>
+                  <select
+                    value={selectedYear}
+                    onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                  >
+                    {Array.from({ length: 5 }, (_, i) => new Date().getFullYear() - i).map((year) => (
+                      <option key={year} value={year}>
+                        {year}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bg-blue-50 dark:bg-blue-900/20 rounded-lg p-4">
+                  <div className="flex items-start">
+                    <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400 mt-0.5 mr-2" />
+                    <div>
+                      <h4 className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-1">
+                        Sobre o Relatório
+                      </h4>
+                      <p className="text-xs text-blue-700 dark:text-blue-300">
+                        O relatório incluirá receitas, despesas, lucro líquido e análise detalhada do período selecionado.
+                        O arquivo será baixado automaticamente em formato de texto.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200 dark:border-gray-700">
+                <button
+                  onClick={() => setShowReportsModal(false)}
+                  className="px-4 py-2 text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={generateMonthlyReport}
+                  disabled={generatingReport}
+                  className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                >
+                  {generatingReport ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                      Gerando...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-4 h-4 mr-2" />
+                      Gerar e Baixar
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
