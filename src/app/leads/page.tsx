@@ -10,6 +10,7 @@ import { MatchAlert } from '@/components/match-alert'
 import { PartnershipAlert } from '@/components/partnership-alert'
 import { LocationNotifications } from '@/components/location-notifications'
 import { ToastContainer, useToast } from '@/components/toast'
+import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
 import { useLeadNotifications } from '@/hooks/use-lead-notifications'
 import {
   Plus,
@@ -73,6 +74,8 @@ export default function Leads() {
   const [showAIListingsModal, setShowAIListingsModal] = useState(false)
   const [selectedLeadForListings, setSelectedLeadForListings] = useState<Lead | null>(null)
   const [deletingLeadId, setDeletingLeadId] = useState<string | null>(null)
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null)
   const [showLocationNotifications, setShowLocationNotifications] = useState(false)
   const [locationNotificationCount, setLocationNotificationCount] = useState(0)
   const { toasts, removeToast, showSuccess, showError } = useToast()
@@ -320,12 +323,17 @@ export default function Leads() {
     }
   }
 
-  const handleDeleteLead = async (leadId: string) => {
-    if (!confirm('Tem certeza que deseja deletar este lead?')) return
+  const handleDeleteLead = async (lead: Lead) => {
+    setLeadToDelete(lead)
+    setShowDeleteModal(true)
+  }
+
+  const confirmDeleteLead = async () => {
+    if (!leadToDelete) return
 
     try {
-      setDeletingLeadId(leadId)
-      const response = await fetch(`/api/leads/${leadId}`, {
+      setDeletingLeadId(leadToDelete.id)
+      const response = await fetch(`/api/leads/${leadToDelete.id}`, {
         method: 'DELETE'
       })
 
@@ -341,6 +349,7 @@ export default function Leads() {
       showError('Erro ao excluir lead', 'Verifique sua conexão e tente novamente.')
     } finally {
       setDeletingLeadId(null)
+      setLeadToDelete(null)
     }
   }
 
@@ -742,7 +751,7 @@ export default function Leads() {
                               <Edit className="w-4 h-4" />
                             </button>
                             <button
-                              onClick={() => handleDeleteLead(lead.id)}
+                              onClick={() => handleDeleteLead(lead)}
                               disabled={deletingLeadId === lead.id}
                               className={`p-2 text-red-600 hover:text-red-900 hover:bg-red-50 rounded-lg transition-all duration-200 transform hover:scale-110 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/20 ${
                                 deletingLeadId === lead.id ? 'opacity-50 cursor-not-allowed animate-pulse' : ''
@@ -876,7 +885,7 @@ export default function Leads() {
                       <Edit className="w-4 h-4" />
                     </button>
                     <button
-                      onClick={() => handleDeleteLead(lead.id)}
+                      onClick={() => handleDeleteLead(lead)}
                       disabled={deletingLeadId === lead.id}
                       className={`p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors ${
                         deletingLeadId === lead.id ? 'opacity-50 cursor-not-allowed' : ''
@@ -976,6 +985,21 @@ export default function Leads() {
           </div>
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <DeleteConfirmationModal
+        isOpen={showDeleteModal}
+        onClose={() => {
+          setShowDeleteModal(false)
+          setLeadToDelete(null)
+        }}
+        onConfirm={confirmDeleteLead}
+        title="Excluir Lead"
+        message="Tem certeza que deseja excluir este lead? Esta ação não pode ser desfeita."
+        itemName={leadToDelete?.name}
+        confirmText="Sim, excluir"
+        cancelText="Cancelar"
+      />
     </DashboardLayout>
   )
 }
