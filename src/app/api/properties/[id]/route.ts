@@ -30,6 +30,13 @@ export async function GET(
       )
     }
 
+    console.log('🏦 Propriedade do banco de dados:', {
+      id: property.id,
+      acceptsFinancing: property.acceptsFinancing,
+      acceptsPartnership: property.acceptsPartnership,
+      status: property.status
+    })
+
     // Format response for SQLite compatibility
     const formattedProperty = {
       ...property,
@@ -37,6 +44,13 @@ export async function GET(
       amenities: property.amenities ? JSON.parse(property.amenities) : [],
       availableFor: property.availableFor ? JSON.parse(property.availableFor) : ['RENT']
     }
+
+    console.log('🏦 Propriedade formatada enviada:', {
+      id: formattedProperty.id,
+      acceptsFinancing: formattedProperty.acceptsFinancing,
+      acceptsPartnership: formattedProperty.acceptsPartnership,
+      status: formattedProperty.status
+    })
 
     return NextResponse.json(formattedProperty)
   } catch (error) {

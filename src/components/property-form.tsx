@@ -78,6 +78,12 @@ export function PropertyForm({ isOpen, onClose, onSubmit, property }: PropertyFo
             if (availableFor.length === 0) availableFor.push('RENT') // Default
           }
 
+          console.log('🏦 Dados da propriedade para edição:', {
+            acceptsFinancing: property.acceptsFinancing,
+            acceptsPartnership: property.acceptsPartnership,
+            status: property.status
+          })
+          
           setFormData({
             title: property.title || '',
             description: property.description || '',
