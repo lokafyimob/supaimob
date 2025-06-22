@@ -71,6 +71,13 @@ export default function Payments() {
   const [selectedTenant, setSelectedTenant] = useState<string | null>(null)
   const [allPayments, setAllPayments] = useState<Payment[]>([])
   const [processingPayment, setProcessingPayment] = useState(false)
+  const [notification, setNotification] = useState<{type: 'success' | 'error', message: string} | null>(null)
+
+  // Função para mostrar notificações
+  const showNotification = (type: 'success' | 'error', message: string) => {
+    setNotification({ type, message })
+    setTimeout(() => setNotification(null), 4000) // Remove após 4 segundos
+  }
 
   // Função helper para normalizar status - definida antes das funções de fetch
   const isPaidStatus = (status: string) => {
@@ -128,7 +135,7 @@ export default function Payments() {
       console.log('✅ Download concluído:', filename)
     } catch (error) {
       console.error('❌ Erro no download:', error)
-      alert('❌ Erro ao fazer download do comprovante. Tente novamente.')
+      showNotification('error', 'Erro ao fazer download do comprovante. Tente novamente.')
     }
   }
 
@@ -244,7 +251,7 @@ export default function Payments() {
     })
     
     if (!payment.receiptUrl) {
-      alert('⚠️ Nenhum comprovante foi anexado a este pagamento')
+      showNotification('error', 'Nenhum comprovante foi anexado a este pagamento')
       return
     }
     
@@ -297,7 +304,7 @@ export default function Payments() {
         closeModalAndReset()
         
         // Mostrar feedback de sucesso
-        alert('✅ Pagamento marcado como pago com sucesso!')
+        showNotification('success', 'Pagamento marcado como pago com sucesso!')
         
         // Manter modal de histórico aberto se estava aberto
         if (selectedTenant) {
@@ -306,13 +313,13 @@ export default function Payments() {
         
       } else {
         const errorData = await response.json()
-        alert('❌ ' + (errorData.error || 'Erro ao marcar pagamento como pago'))
+        showNotification('error', errorData.error || 'Erro ao marcar pagamento como pago')
         closeModalAndReset()
       }
       
     } catch (error) {
       console.error('Erro ao marcar pagamento:', error)
-      alert('❌ Erro ao processar pagamento. Tente novamente.')
+      showNotification('error', 'Erro ao processar pagamento. Tente novamente.')
       closeModalAndReset()
     }
   }
@@ -323,12 +330,12 @@ export default function Payments() {
 
     const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf']
     if (!allowedTypes.includes(file.type)) {
-      alert('⚠️ Apenas arquivos JPG, PNG ou PDF são permitidos')
+      showNotification('error', 'Apenas arquivos JPG, PNG ou PDF são permitidos')
       return
     }
     
     if (file.size > 5 * 1024 * 1024) {
-      alert('⚠️ Arquivo muito grande. Tamanho máximo: 5MB')
+      showNotification('error', 'Arquivo muito grande. Tamanho máximo: 5MB')
       return
     }
 
@@ -360,14 +367,14 @@ export default function Payments() {
           type: result.type
         })
         
-        alert('✅ Comprovante carregado com sucesso!')
+        showNotification('success', 'Comprovante carregado com sucesso!')
       } else {
         const error = await response.json()
         throw new Error(error.error || 'Erro no upload')
       }
     } catch (error) {
       console.error('❌ Erro no upload:', error)
-      alert('❌ Erro ao enviar comprovante: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
+      showNotification('error', 'Erro ao enviar comprovante: ' + (error instanceof Error ? error.message : 'Erro desconhecido'))
       
       // Limpar em caso de erro
       setUploadedFile(null)
@@ -1305,6 +1312,64 @@ export default function Payments() {
             </div>
           </div>
         )}
+
+        {/* Notification Toast */}
+        {notification && (
+          <div 
+            className={`fixed top-4 right-4 z-50 px-6 py-4 rounded-lg shadow-lg transform transition-all duration-300 ease-out animate-in slide-in-from-right max-w-md ${
+              notification.type === 'success' 
+                ? 'bg-green-600 text-white' 
+                : 'bg-red-600 text-white'
+            }`}
+          >
+            <div className="flex items-center">
+              {notification.type === 'success' ? (
+                <CheckCircle className="w-5 h-5 mr-2" />
+              ) : (
+                <AlertTriangle className="w-5 h-5 mr-2" />
+              )}
+              <span className="font-medium">{notification.message}</span>
+              <button
+                onClick={() => setNotification(null)}
+                className="ml-4 text-white hover:text-gray-200"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="mt-2 h-1 bg-white/20 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-white/60 rounded-full transition-all duration-4000 ease-linear"
+                style={{ 
+                  width: '100%',
+                  animation: 'shrink 4s linear forwards'
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        <style jsx>{`
+          @keyframes shrink {
+            from { width: 100%; }
+            to { width: 0%; }
+          }
+          @keyframes animate-in {
+            from {
+              opacity: 0;
+              transform: translateX(100%);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+          .animate-in {
+            animation: animate-in 0.3s ease-out;
+          }
+          .slide-in-from-right {
+            animation: animate-in 0.3s ease-out;
+          }
+        `}</style>
       </div>
     </DashboardLayout>
   )
