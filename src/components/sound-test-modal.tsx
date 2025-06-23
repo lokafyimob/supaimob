@@ -15,6 +15,14 @@ export function SoundTestModal({ isOpen, onClose }: SoundTestModalProps) {
   if (!isOpen) return null
 
   const availableSounds = notificationSounds.getAvailableSounds()
+  
+  // Group sounds by category
+  const soundsByCategory = availableSounds.reduce((acc, sound) => {
+    const category = sound.category || 'Outros'
+    if (!acc[category]) acc[category] = []
+    acc[category].push(sound)
+    return acc
+  }, {} as Record<string, typeof availableSounds>)
 
   const playSound = (soundType: string) => {
     setPlayingSound(soundType)
@@ -60,53 +68,63 @@ export function SoundTestModal({ isOpen, onClose }: SoundTestModalProps) {
 
         <div className="p-6">
           <p className="text-gray-600 dark:text-gray-400 mb-6">
-            Clique nos botões abaixo para testar os diferentes sons de notificação do sistema.
+            Agora você tem acesso a {availableSounds.length} sons diferentes organizados por categorias! Clique nos botões para testar.
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {availableSounds.map((sound) => (
-              <div
-                key={sound.type}
-                className={`bg-gray-50 dark:bg-gray-700 rounded-lg p-4 border-2 transition-all duration-200 ${
-                  playingSound === sound.type 
-                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
-                    : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
-                }`}
-              >
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="font-semibold text-gray-900 dark:text-white">
-                    {sound.name}
-                  </h3>
-                  <div className={`text-xs font-medium px-2 py-1 rounded-full ${getVolumeColor(sound.volume)} bg-gray-100 dark:bg-gray-600`}>
-                    {getVolumeLabel(sound.volume)}
-                  </div>
+          <div className="space-y-6 max-h-96 overflow-y-auto">
+            {Object.entries(soundsByCategory).map(([category, sounds]) => (
+              <div key={category} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                <h3 className="font-bold text-gray-900 dark:text-white mb-3 text-sm uppercase tracking-wider border-b border-gray-300 dark:border-gray-600 pb-2">
+                  {category} ({sounds.length})
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {sounds.map((sound) => (
+                    <div
+                      key={sound.type}
+                      className={`bg-white dark:bg-gray-800 rounded-lg p-3 border-2 transition-all duration-200 ${
+                        playingSound === sound.type 
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20' 
+                          : 'border-transparent hover:border-gray-300 dark:hover:border-gray-600'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h4 className="font-semibold text-gray-900 dark:text-white text-sm">
+                          {sound.name}
+                        </h4>
+                        <div className={`text-xs font-medium px-2 py-1 rounded-full ${getVolumeColor(sound.volume)} bg-gray-100 dark:bg-gray-600`}>
+                          {getVolumeLabel(sound.volume)}
+                        </div>
+                      </div>
+                      
+                      <p className="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                        {sound.description}
+                      </p>
+                      
+                      <button
+                        onClick={() => playSound(sound.type)}
+                        disabled={playingSound === sound.type}
+                        className={`w-full flex items-center justify-center px-3 py-2 rounded-lg transition-all duration-200 text-xs ${
+                          playingSound === sound.type
+                            ? 'bg-blue-600 text-white'
+                            : 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-white hover:bg-gray-200 dark:hover:bg-gray-600 border border-gray-300 dark:border-gray-500'
+                        }`}
+                      >
+                        {playingSound === sound.type ? (
+                          <>
+                            <div className="animate-pulse mr-2">🔊</div>
+                            Tocando...
+                          </>
+                        ) : (
+                          <>
+                            <Play className="w-3 h-3 mr-2" />
+                            Testar
+                          </>
+                        )}
+                      </button>
+                    </div>
+                  ))}
                 </div>
-                
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
-                  {sound.description}
-                </p>
-                
-                <button
-                  onClick={() => playSound(sound.type)}
-                  disabled={playingSound === sound.type}
-                  className={`w-full flex items-center justify-center px-4 py-2 rounded-lg transition-all duration-200 ${
-                    playingSound === sound.type
-                      ? 'bg-blue-600 text-white'
-                      : 'bg-white dark:bg-gray-600 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-gray-500 border border-gray-300 dark:border-gray-500'
-                  }`}
-                >
-                  {playingSound === sound.type ? (
-                    <>
-                      <div className="animate-pulse mr-2">🔊</div>
-                      Tocando...
-                    </>
-                  ) : (
-                    <>
-                      <Play className="w-4 h-4 mr-2" />
-                      Testar Som
-                    </>
-                  )}
-                </button>
               </div>
             ))}
           </div>

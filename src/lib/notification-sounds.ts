@@ -122,8 +122,146 @@ export class NotificationSounds {
     this.playTone([880, 740, 659, 587], 0.4, 'sine') // Lá, Fá#, Mi, Ré - progressão descendente
   }
 
-  // 🎯 Som por tipo de lead
-  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm' | 'red') {
+  // 🎨 SONS POR COR/TEMA
+  playGreenSound() {
+    this.playTone([523, 659, 784], 0.3, 'sine') // Dó, Mi, Sol - acorde maior fresco
+  }
+
+  playBlueSound() {
+    this.playTone([440, 554, 659], 0.25, 'sine') // Lá, Dó#, Mi - calmo e profissional
+  }
+
+  playYellowSound() {
+    this.playTone([587, 740, 880, 1047], 0.35, 'sine') // Ré, Fá#, Lá, Dó - alegre e otimista
+  }
+
+  playPurpleSound() {
+    this.playTone([349, 523, 698, 1047], 0.4, 'sine') // Fá, Dó, Fá, Dó - elegante e sofisticado
+  }
+
+  playOrangeSound() {
+    this.playTone([659, 831, 1047, 1319], 0.45, 'triangle') // Mi, Sol#, Dó, Mi - energético
+  }
+
+  // 🎼 SONS MUSICAIS
+  playChordMajorSound() {
+    this.playTone([523, 659, 784, 1047], 0.4, 'sine') // Dó maior - alegre
+  }
+
+  playChordMinorSound() {
+    this.playTone([523, 622, 784, 1047], 0.35, 'sine') // Dó menor - dramático
+  }
+
+  playBellSound() {
+    this.playTone([1047, 1175, 1397, 1047], 0.3, 'triangle') // Som de sino
+  }
+
+  playFanfareSound() {
+    this.playTone([523, 659, 784, 1047, 1319], 0.5, 'sawtooth') // Fanfarra de sucesso
+  }
+
+  playMelodySound() {
+    this.playTone([523, 587, 659, 698, 784, 880, 988, 1047], 0.35, 'sine') // Escala ascendente
+  }
+
+  // 🌟 SONS POR INTENSIDADE
+  playGentleSound() {
+    this.playTone([440, 523, 659], 0.15, 'sine') // Muito suave
+  }
+
+  playSoftSound() {
+    this.playTone([523, 659, 784], 0.2, 'sine') // Suave
+  }
+
+  playMediumSound() {
+    this.playTone([659, 784, 988], 0.4, 'sine') // Médio
+  }
+
+  playStrongSound() {
+    this.playTone([784, 988, 1175], 0.6, 'triangle') // Forte
+  }
+
+  playIntenseSound() {
+    this.playTone([880, 1047, 1319, 1568], 0.8, 'sawtooth') // Muito intenso
+  }
+
+  // 🎯 SONS POR FUNÇÃO
+  playAnnouncementSound() {
+    this.playTone([784, 1047, 784, 1047], 0.5, 'square') // Para anúncios
+  }
+
+  playSuccessSound() {
+    this.playTone([523, 659, 784, 1047, 1319], 0.4, 'sine') // Para sucessos
+  }
+
+  playWarningSound() {
+    this.playTone([740, 659, 740, 659], 0.5, 'triangle') // Para avisos
+  }
+
+  playErrorSound() {
+    this.playTone([392, 330, 277], 0.6, 'sawtooth') // Para erros
+  }
+
+  playInfoSound() {
+    this.playTone([659, 784, 880], 0.3, 'sine') // Para informações
+  }
+
+  // 🌍 SONS POR ESTILO
+  playCorporateSound() {
+    this.playTone([440, 554, 659, 831], 0.35, 'sine') // Corporativo profissional
+  }
+
+  playGamingSound() {
+    this.playTone([659, 831, 1047, 831, 659], 0.4, 'square') // Estilo games
+  }
+
+  playModernSound() {
+    this.playTone([880, 1175, 1568, 2093], 0.3, 'triangle') // Moderno e tech
+  }
+
+  playFunSound() {
+    this.playTone([523, 698, 880, 1175, 1568, 1175, 880, 698], 0.4, 'sine') // Divertido
+  }
+
+  playZenSound() {
+    this.playTone([220, 277, 330, 370], 0.2, 'sine') // Relaxante e zen
+  }
+
+  // ⏰ SONS POR CONTEXTO
+  playMorningSound() {
+    this.playTone([523, 659, 784, 1047], 0.35, 'sine') // Som matinal
+  }
+
+  playAfternoonSound() {
+    this.playTone([659, 784, 988, 1175], 0.4, 'sine') // Som diurno
+  }
+
+  playEveningSound() {
+    this.playTone([440, 523, 659, 784], 0.3, 'sine') // Som vespertino
+  }
+
+  playMidnightSound() {
+    this.playTone([330, 415, 523], 0.2, 'sine') // Som noturno
+  }
+
+  playReminderSound() {
+    this.playTone([784, 988, 784], 0.35, 'triangle') // Som de lembrete
+  }
+
+  // 🎯 Som por tipo - ARSENAL COMPLETO
+  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm' | 'red' |
+    // Cores
+    'green' | 'blue' | 'yellow' | 'purple' | 'orange' |
+    // Musicais  
+    'chord-major' | 'chord-minor' | 'bell' | 'fanfare' | 'melody' |
+    // Intensidade
+    'gentle' | 'soft' | 'medium' | 'strong' | 'intense' |
+    // Função
+    'announcement' | 'success' | 'warning' | 'error' | 'info' |
+    // Estilo
+    'corporate' | 'gaming' | 'modern' | 'fun' | 'zen' |
+    // Contexto
+    'morning' | 'afternoon' | 'evening' | 'midnight' | 'reminder') {
     switch (type) {
       case 'match':
         this.playMatchSound()
@@ -155,6 +293,102 @@ export class NotificationSounds {
       case 'red':
         this.playRedSound()
         break
+      // Cores
+      case 'green':
+        this.playGreenSound()
+        break
+      case 'blue':
+        this.playBlueSound()
+        break
+      case 'yellow':
+        this.playYellowSound()
+        break
+      case 'purple':
+        this.playPurpleSound()
+        break
+      case 'orange':
+        this.playOrangeSound()
+        break
+      // Musicais
+      case 'chord-major':
+        this.playChordMajorSound()
+        break
+      case 'chord-minor':
+        this.playChordMinorSound()
+        break
+      case 'bell':
+        this.playBellSound()
+        break
+      case 'fanfare':
+        this.playFanfareSound()
+        break
+      case 'melody':
+        this.playMelodySound()
+        break
+      // Intensidade
+      case 'gentle':
+        this.playGentleSound()
+        break
+      case 'soft':
+        this.playSoftSound()
+        break
+      case 'medium':
+        this.playMediumSound()
+        break
+      case 'strong':
+        this.playStrongSound()
+        break
+      case 'intense':
+        this.playIntenseSound()
+        break
+      // Função
+      case 'announcement':
+        this.playAnnouncementSound()
+        break
+      case 'success':
+        this.playSuccessSound()
+        break
+      case 'warning':
+        this.playWarningSound()
+        break
+      case 'error':
+        this.playErrorSound()
+        break
+      case 'info':
+        this.playInfoSound()
+        break
+      // Estilo
+      case 'corporate':
+        this.playCorporateSound()
+        break
+      case 'gaming':
+        this.playGamingSound()
+        break
+      case 'modern':
+        this.playModernSound()
+        break
+      case 'fun':
+        this.playFunSound()
+        break
+      case 'zen':
+        this.playZenSound()
+        break
+      // Contexto
+      case 'morning':
+        this.playMorningSound()
+        break
+      case 'afternoon':
+        this.playAfternoonSound()
+        break
+      case 'evening':
+        this.playEveningSound()
+        break
+      case 'midnight':
+        this.playMidnightSound()
+        break
+      case 'reminder':
+        this.playReminderSound()
+        break
       default:
         this.playMatchSound()
     }
@@ -168,16 +402,61 @@ export class NotificationSounds {
   // 📋 Listar todos os sons disponíveis
   getAvailableSounds() {
     return [
-      { type: 'match', name: '🎯 Match Normal', description: 'Som para matches de leads', volume: 0.3 },
-      { type: 'partnership', name: '🤝 Parceria', description: 'Som harmônico para parcerias', volume: 0.25 },
-      { type: 'red', name: '🔴 Atenção', description: 'Som chamativo para alertas importantes', volume: 0.4 },
-      { type: 'vip-gold', name: '👑 VIP Gold', description: 'Som premium para leads VIP', volume: 0.5 },
-      { type: 'vip-platinum', name: '⭐ VIP Platinum', description: 'Som elegante para leads premium', volume: 0.6 },
-      { type: 'vip-diamond', name: '💎 VIP Diamond', description: 'Som luxuoso para leads top', volume: 0.7 },
-      { type: 'night', name: '🌙 Noturno', description: 'Som suave para horários noturnos', volume: 0.2 },
-      { type: 'high-value', name: '💰 Alto Valor', description: 'Som para leads de alto valor', volume: 0.6 },
-      { type: 'urgent', name: '🚨 Urgente', description: 'Som de urgência', volume: 0.8 },
-      { type: 'alarm', name: '🚨 Alarme', description: 'Som de alarme forte', volume: 0.6 }
+      // Sons básicos
+      { type: 'match', name: '🎯 Match Normal', description: 'Som para matches de leads', volume: 0.3, category: 'Básicos' },
+      { type: 'partnership', name: '🤝 Parceria', description: 'Som harmônico para parcerias', volume: 0.25, category: 'Básicos' },
+      { type: 'red', name: '🔴 Atenção', description: 'Som chamativo para alertas importantes', volume: 0.4, category: 'Básicos' },
+      { type: 'alarm', name: '🚨 Alarme', description: 'Som de alarme forte', volume: 0.6, category: 'Básicos' },
+      
+      // VIP
+      { type: 'vip-gold', name: '👑 VIP Gold', description: 'Som premium para leads VIP', volume: 0.5, category: 'VIP' },
+      { type: 'vip-platinum', name: '⭐ VIP Platinum', description: 'Som elegante para leads premium', volume: 0.6, category: 'VIP' },
+      { type: 'vip-diamond', name: '💎 VIP Diamond', description: 'Som luxuoso para leads top', volume: 0.7, category: 'VIP' },
+      { type: 'high-value', name: '💰 Alto Valor', description: 'Som para leads de alto valor', volume: 0.6, category: 'VIP' },
+      { type: 'urgent', name: '🚨 Urgente', description: 'Som de urgência', volume: 0.8, category: 'VIP' },
+      { type: 'night', name: '🌙 Noturno', description: 'Som suave para horários noturnos', volume: 0.2, category: 'VIP' },
+
+      // Sons por Cor/Tema
+      { type: 'green', name: '🟢 Verde', description: 'Som fresco e natural', volume: 0.3, category: 'Cores' },
+      { type: 'blue', name: '🔵 Azul', description: 'Som calmo e profissional', volume: 0.25, category: 'Cores' },
+      { type: 'yellow', name: '🟡 Amarelo', description: 'Som alegre e otimista', volume: 0.35, category: 'Cores' },
+      { type: 'purple', name: '🟣 Roxo', description: 'Som elegante e sofisticado', volume: 0.4, category: 'Cores' },
+      { type: 'orange', name: '🟠 Laranja', description: 'Som energético e vibrante', volume: 0.45, category: 'Cores' },
+
+      // Sons Musicais
+      { type: 'chord-major', name: '🎵 Acorde Maior', description: 'Som harmônico alegre', volume: 0.4, category: 'Musical' },
+      { type: 'chord-minor', name: '🎶 Acorde Menor', description: 'Som dramático e profundo', volume: 0.35, category: 'Musical' },
+      { type: 'bell', name: '🔔 Sino', description: 'Som cristalino de sino', volume: 0.3, category: 'Musical' },
+      { type: 'fanfare', name: '🎺 Fanfarra', description: 'Som triunfal de sucesso', volume: 0.5, category: 'Musical' },
+      { type: 'melody', name: '🎼 Melodia', description: 'Escala musical ascendente', volume: 0.35, category: 'Musical' },
+
+      // Sons por Intensidade
+      { type: 'gentle', name: '🌸 Suave', description: 'Som muito delicado', volume: 0.15, category: 'Intensidade' },
+      { type: 'soft', name: '🤫 Baixo', description: 'Som discreto', volume: 0.2, category: 'Intensidade' },
+      { type: 'medium', name: '🔊 Médio', description: 'Som equilibrado', volume: 0.4, category: 'Intensidade' },
+      { type: 'strong', name: '📢 Alto', description: 'Som forte e claro', volume: 0.6, category: 'Intensidade' },
+      { type: 'intense', name: '💥 Intenso', description: 'Som muito forte', volume: 0.8, category: 'Intensidade' },
+
+      // Sons por Função
+      { type: 'announcement', name: '📢 Anúncio', description: 'Som para anúncios importantes', volume: 0.5, category: 'Função' },
+      { type: 'success', name: '✅ Sucesso', description: 'Som de conquista', volume: 0.4, category: 'Função' },
+      { type: 'warning', name: '⚠️ Aviso', description: 'Som de alerta moderado', volume: 0.5, category: 'Função' },
+      { type: 'error', name: '❌ Erro', description: 'Som de problema', volume: 0.6, category: 'Função' },
+      { type: 'info', name: 'ℹ️ Informação', description: 'Som informativo', volume: 0.3, category: 'Função' },
+
+      // Sons por Estilo
+      { type: 'corporate', name: '🏢 Corporativo', description: 'Som profissional', volume: 0.35, category: 'Estilo' },
+      { type: 'gaming', name: '🎮 Games', description: 'Som estilo videogame', volume: 0.4, category: 'Estilo' },
+      { type: 'modern', name: '⚡ Moderno', description: 'Som tecnológico', volume: 0.3, category: 'Estilo' },
+      { type: 'fun', name: '🎉 Divertido', description: 'Som alegre e animado', volume: 0.4, category: 'Estilo' },
+      { type: 'zen', name: '🧘 Zen', description: 'Som relaxante', volume: 0.2, category: 'Estilo' },
+
+      // Sons por Contexto/Horário
+      { type: 'morning', name: '🌅 Manhã', description: 'Som matinal energizante', volume: 0.35, category: 'Contexto' },
+      { type: 'afternoon', name: '☀️ Tarde', description: 'Som diurno produtivo', volume: 0.4, category: 'Contexto' },
+      { type: 'evening', name: '🌆 Noite', description: 'Som vespertino tranquilo', volume: 0.3, category: 'Contexto' },
+      { type: 'midnight', name: '🌙 Madrugada', description: 'Som noturno discreto', volume: 0.2, category: 'Contexto' },
+      { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' }
     ] as const
   }
 
