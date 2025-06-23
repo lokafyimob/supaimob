@@ -53,38 +53,43 @@ export class NotificationSounds {
   }
 
   private playTone(frequencies: number[], volume: number = 0.5, waveType: OscillatorType = 'sine') {
-    if (!this.audioContext) return
+    const toneFunction = () => {
+      if (!this.audioContext) return
 
-    try {
-      const duration = 0.15 // Duration of each note
-      const gap = 0.05 // Gap between notes
+      try {
+        const duration = 0.15 // Duration of each note
+        const gap = 0.05 // Gap between notes
 
-      frequencies.forEach((freq, index) => {
-        const oscillator = this.audioContext!.createOscillator()
-        const gainNode = this.audioContext!.createGain()
+        frequencies.forEach((freq, index) => {
+          const oscillator = this.audioContext!.createOscillator()
+          const gainNode = this.audioContext!.createGain()
 
-        oscillator.connect(gainNode)
-        gainNode.connect(this.audioContext!.destination)
+          oscillator.connect(gainNode)
+          gainNode.connect(this.audioContext!.destination)
 
-        oscillator.frequency.setValueAtTime(freq, this.audioContext!.currentTime)
-        oscillator.type = waveType
+          oscillator.frequency.setValueAtTime(freq, this.audioContext!.currentTime)
+          oscillator.type = waveType
 
-        // Envelope for smooth sound
-        const startTime = this.audioContext!.currentTime + (index * (duration + gap))
-        const endTime = startTime + duration
+          // Envelope for smooth sound
+          const startTime = this.audioContext!.currentTime + (index * (duration + gap))
+          const endTime = startTime + duration
 
-        gainNode.gain.setValueAtTime(0, startTime)
-        gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01)
-        gainNode.gain.exponentialRampToValueAtTime(0.01, endTime)
+          gainNode.gain.setValueAtTime(0, startTime)
+          gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.01)
+          gainNode.gain.exponentialRampToValueAtTime(0.01, endTime)
 
-        oscillator.start(startTime)
-        oscillator.stop(endTime)
-      })
-    } catch (error) {
-      console.log('Audio playback error:', error)
-      // Fallback to simple beep
-      this.playSimpleBeep()
+          oscillator.start(startTime)
+          oscillator.stop(endTime)
+        })
+      } catch (error) {
+        console.log('Audio playback error:', error)
+        // Fallback to simple beep
+        this.playSimpleBeep()
+      }
     }
+
+    // Add tone to queue to prevent overlap
+    this.queueAudio(toneFunction)
   }
 
   // 🎵 Audio queue management
