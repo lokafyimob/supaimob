@@ -286,9 +286,13 @@ export class NotificationSounds {
 
   // 🎵 SOM PERSONALIZADO
   playCustomSound() {
-    // Toca o áudio personalizado que você criou
-    // Parâmetros: arquivo, volume, início (segundos), duração (segundos)
-    this.playAudioFile('mp3.mp3', 0.6, 0, 1) // Toca por 1 segundo
+    // Toca o áudio personalizado que você criou, pausa 3 segundos, e toca novamente
+    this.playAudioFile('mp3.mp3', 0.6) // Primeira reprodução
+    
+    // Programa a segunda reprodução após 3 segundos de pausa
+    setTimeout(() => {
+      this.playAudioFile('mp3.mp3', 0.6) // Segunda reprodução
+    }, 3000) // 3 segundos de pausa
   }
 
   // 🎵 SOM PERSONALIZADO - Versão completa (sem corte)
@@ -526,7 +530,7 @@ export class NotificationSounds {
       { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' },
 
       // Som Personalizado
-      { type: 'custom', name: '🎵 Som Personalizado (1s)', description: 'Seu áudio personalizado - 1 segundo', volume: 0.6, category: 'Personalizado' },
+      { type: 'custom', name: '🎵 Som Personalizado (2x)', description: 'Seu áudio personalizado - toca, pausa 3s, toca novamente', volume: 0.6, category: 'Personalizado' },
       { type: 'custom-full', name: '🎵 Som Completo', description: 'Seu áudio personalizado - versão completa', volume: 0.6, category: 'Personalizado' },
       { type: 'custom-short', name: '🎵 Som Curto (1.5s)', description: 'Seu áudio personalizado - versão curta', volume: 0.6, category: 'Personalizado' }
     ] as const
