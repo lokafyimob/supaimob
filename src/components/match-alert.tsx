@@ -26,7 +26,7 @@ export function MatchAlert({ matches, onDismiss, onViewMatches }: MatchAlertProp
     if (matches.length > 0) {
       setIsVisible(true)
       
-      // 🎵 Play match sound for each match (queued automatically)
+      // 🎵 Play match sound for each match (queued automatically with 2s interval)
       matches.forEach((_, index) => {
         notificationSounds.playByType('match')
       })
