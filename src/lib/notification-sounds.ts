@@ -85,6 +85,23 @@ export class NotificationSounds {
     }
   }
 
+  // 🎵 Play custom audio file
+  private playAudioFile(filename: string, volume: number = 0.5) {
+    try {
+      const audio = new Audio(`/sounds/${filename}`)
+      audio.volume = Math.min(Math.max(volume, 0), 1) // Clamp between 0 and 1
+      audio.play().catch(error => {
+        console.log('Custom audio playback error:', error)
+        // Fallback to simple beep if custom audio fails
+        this.playSimpleBeep()
+      })
+    } catch (error) {
+      console.log('Custom audio loading error:', error)
+      // Fallback to simple beep if custom audio fails
+      this.playSimpleBeep()
+    }
+  }
+
   // Fallback simple beep
   private playSimpleBeep() {
     if (!this.audioContext) return
@@ -248,6 +265,12 @@ export class NotificationSounds {
     this.playTone([784, 988, 784], 0.35, 'triangle') // Som de lembrete
   }
 
+  // 🎵 SOM PERSONALIZADO
+  playCustomSound() {
+    // Toca o áudio personalizado que você criou
+    this.playAudioFile('custom-notification.mp3', 0.6)
+  }
+
   // 🎯 Som por tipo - ARSENAL COMPLETO
   playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm' | 'red' |
     // Cores
@@ -261,7 +284,9 @@ export class NotificationSounds {
     // Estilo
     'corporate' | 'gaming' | 'modern' | 'fun' | 'zen' |
     // Contexto
-    'morning' | 'afternoon' | 'evening' | 'midnight' | 'reminder') {
+    'morning' | 'afternoon' | 'evening' | 'midnight' | 'reminder' |
+    // Personalizado
+    'custom') {
     switch (type) {
       case 'match':
         this.playMatchSound()
@@ -389,6 +414,10 @@ export class NotificationSounds {
       case 'reminder':
         this.playReminderSound()
         break
+      // Personalizado
+      case 'custom':
+        this.playCustomSound()
+        break
       default:
         this.playMatchSound()
     }
@@ -456,7 +485,10 @@ export class NotificationSounds {
       { type: 'afternoon', name: '☀️ Tarde', description: 'Som diurno produtivo', volume: 0.4, category: 'Contexto' },
       { type: 'evening', name: '🌆 Noite', description: 'Som vespertino tranquilo', volume: 0.3, category: 'Contexto' },
       { type: 'midnight', name: '🌙 Madrugada', description: 'Som noturno discreto', volume: 0.2, category: 'Contexto' },
-      { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' }
+      { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' },
+
+      // Som Personalizado
+      { type: 'custom', name: '🎵 Som Personalizado', description: 'Seu áudio personalizado para parcerias', volume: 0.6, category: 'Personalizado' }
     ] as const
   }
 
