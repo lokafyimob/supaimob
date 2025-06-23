@@ -268,7 +268,7 @@ export class NotificationSounds {
   // 🎵 SOM PERSONALIZADO
   playCustomSound() {
     // Toca o áudio personalizado que você criou
-    this.playAudioFile('custom-notification.mp3', 0.6)
+    this.playAudioFile('mp3.mp3', 0.6)
   }
 
   // 🎯 Som por tipo - ARSENAL COMPLETO
