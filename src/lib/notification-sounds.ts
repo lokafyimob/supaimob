@@ -2,6 +2,8 @@
 
 export class NotificationSounds {
   private audioContext: AudioContext | null = null
+  private isPlaying: boolean = false
+  private audioQueue: (() => void)[] = []
 
   constructor() {
     // Initialize Web Audio API
@@ -85,40 +87,66 @@ export class NotificationSounds {
     }
   }
 
+  // 🎵 Audio queue management
+  private processAudioQueue() {
+    if (this.isPlaying || this.audioQueue.length === 0) return
+    
+    this.isPlaying = true
+    const nextAudio = this.audioQueue.shift()!
+    nextAudio()
+    
+    // Set playing to false after audio duration + pause interval
+    setTimeout(() => {
+      this.isPlaying = false
+      this.processAudioQueue() // Process next in queue
+    }, 2000) // 2 second interval between sounds
+  }
+
+  // 🎵 Add audio to queue to prevent overlap
+  private queueAudio(audioFunction: () => void) {
+    this.audioQueue.push(audioFunction)
+    this.processAudioQueue()
+  }
+
   // 🎵 Play custom audio file with timing control
   private playAudioFile(filename: string, volume: number = 0.5, startTime: number = 0, duration?: number) {
-    try {
-      const audio = new Audio(`/sounds/${filename}`)
-      audio.volume = Math.min(Math.max(volume, 0), 1) // Clamp between 0 and 1
-      
-      // Set start time if specified
-      if (startTime > 0) {
-        audio.currentTime = startTime
-      }
-      
-      // Set duration limit if specified
-      if (duration && duration > 0) {
-        audio.addEventListener('loadedmetadata', () => {
-          // Stop audio after specified duration
-          setTimeout(() => {
-            if (!audio.paused && !audio.ended) {
-              audio.pause()
-              audio.currentTime = 0
-            }
-          }, duration * 1000) // Convert to milliseconds
+    const audioFunction = () => {
+      try {
+        const audio = new Audio(`/sounds/${filename}`)
+        audio.volume = Math.min(Math.max(volume, 0), 1) // Clamp between 0 and 1
+        
+        // Set start time if specified
+        if (startTime > 0) {
+          audio.currentTime = startTime
+        }
+        
+        // Set duration limit if specified
+        if (duration && duration > 0) {
+          audio.addEventListener('loadedmetadata', () => {
+            // Stop audio after specified duration
+            setTimeout(() => {
+              if (!audio.paused && !audio.ended) {
+                audio.pause()
+                audio.currentTime = 0
+              }
+            }, duration * 1000) // Convert to milliseconds
+          })
+        }
+        
+        audio.play().catch(error => {
+          console.log('Custom audio playback error:', error)
+          // Fallback to simple beep if custom audio fails
+          this.playSimpleBeep()
         })
-      }
-      
-      audio.play().catch(error => {
-        console.log('Custom audio playback error:', error)
+      } catch (error) {
+        console.log('Custom audio loading error:', error)
         // Fallback to simple beep if custom audio fails
         this.playSimpleBeep()
-      })
-    } catch (error) {
-      console.log('Custom audio loading error:', error)
-      // Fallback to simple beep if custom audio fails
-      this.playSimpleBeep()
+      }
     }
+    
+    // Add to queue to prevent overlap
+    this.queueAudio(audioFunction)
   }
 
   // Fallback simple beep
@@ -286,13 +314,8 @@ export class NotificationSounds {
 
   // 🎵 SOM PERSONALIZADO
   playCustomSound() {
-    // Toca o áudio personalizado que você criou, pausa 3 segundos, e toca novamente
-    this.playAudioFile('mp3.mp3', 0.6) // Primeira reprodução
-    
-    // Programa a segunda reprodução após 3 segundos de pausa
-    setTimeout(() => {
-      this.playAudioFile('mp3.mp3', 0.6) // Segunda reprodução
-    }, 3000) // 3 segundos de pausa
+    // Toca o áudio personalizado que você criou (com fila automática para múltiplas notificações)
+    this.playAudioFile('mp3.mp3', 0.6)
   }
 
   // 🎵 SOM PERSONALIZADO - Versão completa (sem corte)
@@ -530,7 +553,7 @@ export class NotificationSounds {
       { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' },
 
       // Som Personalizado
-      { type: 'custom', name: '🎵 Som Personalizado (2x)', description: 'Seu áudio personalizado - toca, pausa 3s, toca novamente', volume: 0.6, category: 'Personalizado' },
+      { type: 'custom', name: '🎵 Som Personalizado', description: 'Seu áudio personalizado - intervalo automático entre múltiplas notificações', volume: 0.6, category: 'Personalizado' },
       { type: 'custom-full', name: '🎵 Som Completo', description: 'Seu áudio personalizado - versão completa', volume: 0.6, category: 'Personalizado' },
       { type: 'custom-short', name: '🎵 Som Curto (1.5s)', description: 'Seu áudio personalizado - versão curta', volume: 0.6, category: 'Personalizado' }
     ] as const
