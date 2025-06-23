@@ -85,11 +85,30 @@ export class NotificationSounds {
     }
   }
 
-  // 🎵 Play custom audio file
-  private playAudioFile(filename: string, volume: number = 0.5) {
+  // 🎵 Play custom audio file with timing control
+  private playAudioFile(filename: string, volume: number = 0.5, startTime: number = 0, duration?: number) {
     try {
       const audio = new Audio(`/sounds/${filename}`)
       audio.volume = Math.min(Math.max(volume, 0), 1) // Clamp between 0 and 1
+      
+      // Set start time if specified
+      if (startTime > 0) {
+        audio.currentTime = startTime
+      }
+      
+      // Set duration limit if specified
+      if (duration && duration > 0) {
+        audio.addEventListener('loadedmetadata', () => {
+          // Stop audio after specified duration
+          setTimeout(() => {
+            if (!audio.paused && !audio.ended) {
+              audio.pause()
+              audio.currentTime = 0
+            }
+          }, duration * 1000) // Convert to milliseconds
+        })
+      }
+      
       audio.play().catch(error => {
         console.log('Custom audio playback error:', error)
         // Fallback to simple beep if custom audio fails
@@ -268,7 +287,20 @@ export class NotificationSounds {
   // 🎵 SOM PERSONALIZADO
   playCustomSound() {
     // Toca o áudio personalizado que você criou
+    // Parâmetros: arquivo, volume, início (segundos), duração (segundos)
+    this.playAudioFile('mp3.mp3', 0.6, 0, 1) // Toca por 1 segundo
+  }
+
+  // 🎵 SOM PERSONALIZADO - Versão completa (sem corte)
+  playCustomSoundFull() {
+    // Toca o áudio completo sem limitação de tempo
     this.playAudioFile('mp3.mp3', 0.6)
+  }
+
+  // 🎵 SOM PERSONALIZADO - Apenas uma parte específica
+  playCustomSoundClip(startSeconds: number = 0, durationSeconds: number = 2) {
+    // Permite controle personalizado do tempo
+    this.playAudioFile('mp3.mp3', 0.6, startSeconds, durationSeconds)
   }
 
   // 🎯 Som por tipo - ARSENAL COMPLETO
@@ -286,7 +318,7 @@ export class NotificationSounds {
     // Contexto
     'morning' | 'afternoon' | 'evening' | 'midnight' | 'reminder' |
     // Personalizado
-    'custom') {
+    'custom' | 'custom-full' | 'custom-short') {
     switch (type) {
       case 'match':
         this.playMatchSound()
@@ -418,6 +450,12 @@ export class NotificationSounds {
       case 'custom':
         this.playCustomSound()
         break
+      case 'custom-full':
+        this.playCustomSoundFull()
+        break
+      case 'custom-short':
+        this.playCustomSoundClip(0, 1.5) // 1.5 segundos
+        break
       default:
         this.playMatchSound()
     }
@@ -488,7 +526,9 @@ export class NotificationSounds {
       { type: 'reminder', name: '⏰ Lembrete', description: 'Som de lembrete', volume: 0.35, category: 'Contexto' },
 
       // Som Personalizado
-      { type: 'custom', name: '🎵 Som Personalizado', description: 'Seu áudio personalizado para parcerias', volume: 0.6, category: 'Personalizado' }
+      { type: 'custom', name: '🎵 Som Personalizado (1s)', description: 'Seu áudio personalizado - 1 segundo', volume: 0.6, category: 'Personalizado' },
+      { type: 'custom-full', name: '🎵 Som Completo', description: 'Seu áudio personalizado - versão completa', volume: 0.6, category: 'Personalizado' },
+      { type: 'custom-short', name: '🎵 Som Curto (1.5s)', description: 'Seu áudio personalizado - versão curta', volume: 0.6, category: 'Personalizado' }
     ] as const
   }
 
