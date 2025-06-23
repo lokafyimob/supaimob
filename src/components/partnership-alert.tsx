@@ -189,8 +189,25 @@ export function PartnershipAlert({ partnerships, onDismiss, onViewPartnerships }
                   window.open(`mailto:${currentPartnership.fromUserEmail}`, '_self')
                 }
               }}
-              className="flex-1 bg-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors text-xs flex items-center justify-center"
-              style={currentPartnership.fromUserPhone ? { color: '#25D366' } : { color: '#3B82F6' }}
+              className="flex-1 font-semibold py-2 px-3 rounded-lg transition-colors text-xs flex items-center justify-center"
+              style={currentPartnership.fromUserPhone ? 
+                { backgroundColor: '#E8F5E8', color: '#25D366' } : 
+                { backgroundColor: 'white', color: '#3B82F6' }
+              }
+              onMouseEnter={(e) => {
+                if (currentPartnership.fromUserPhone) {
+                  e.currentTarget.style.backgroundColor = '#D4F4D4'
+                } else {
+                  e.currentTarget.style.backgroundColor = '#f3f4f6'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (currentPartnership.fromUserPhone) {
+                  e.currentTarget.style.backgroundColor = '#E8F5E8'
+                } else {
+                  e.currentTarget.style.backgroundColor = 'white'
+                }
+              }}
             >
               {currentPartnership.fromUserPhone ? (
                 <WhatsAppIcon className="w-4 h-4 mr-1" />
