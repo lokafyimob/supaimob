@@ -11,6 +11,7 @@ import { PartnershipAlert } from '@/components/partnership-alert'
 import { LocationNotifications } from '@/components/location-notifications'
 import { ToastContainer, useToast } from '@/components/toast'
 import { DeleteConfirmationModal } from '@/components/delete-confirmation-modal'
+import { SoundTestModal } from '@/components/sound-test-modal'
 import { useLeadNotifications } from '@/hooks/use-lead-notifications'
 import {
   Plus,
@@ -30,7 +31,8 @@ import {
   Sparkles,
   Bed,
   TrendingUp,
-  Zap
+  Zap,
+  Volume2
 } from 'lucide-react'
 
 interface Lead {
@@ -78,6 +80,7 @@ export default function Leads() {
   const [leadToDelete, setLeadToDelete] = useState<Lead | null>(null)
   const [showLocationNotifications, setShowLocationNotifications] = useState(false)
   const [locationNotificationCount, setLocationNotificationCount] = useState(0)
+  const [showSoundTestModal, setShowSoundTestModal] = useState(false)
   const { toasts, removeToast, showSuccess, showError } = useToast()
   const { notifications: leadNotifications, markAsSent, hasNotifications } = useLeadNotifications()
   const [matchCounts, setMatchCounts] = useState<{[leadId: string]: number}>({})
@@ -463,6 +466,14 @@ export default function Leads() {
                 <MapPin className="w-4 h-4 mr-2" />
                 Ver Mapa
               </Link>
+              <button
+                onClick={() => setShowSoundTestModal(true)}
+                className="inline-flex items-center px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                title="Testar sons de notificação"
+              >
+                <Volume2 className="w-4 h-4 mr-2" />
+                Sons
+              </button>
               <button
                 onClick={() => {
                   setEditingLead(null)
@@ -999,6 +1010,12 @@ export default function Leads() {
         itemName={leadToDelete?.name}
         confirmText="Sim, excluir"
         cancelText="Cancelar"
+      />
+
+      {/* Sound Test Modal */}
+      <SoundTestModal
+        isOpen={showSoundTestModal}
+        onClose={() => setShowSoundTestModal(false)}
       />
     </DashboardLayout>
   )

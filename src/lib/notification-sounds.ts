@@ -165,16 +165,29 @@ export class NotificationSounds {
     return !!this.audioContext
   }
 
-  // 🔊 Testar todos os sons
-  testAllSounds() {
-    const sounds = ['match', 'partnership', 'vip-gold', 'vip-platinum', 'vip-diamond', 'urgent', 'night', 'high-value', 'alarm', 'red'] as const
-    
-    sounds.forEach((sound, index) => {
-      setTimeout(() => {
-        console.log(`🎵 Testing ${sound} sound`)
-        this.playByType(sound)
-      }, index * 1000)
-    })
+  // 📋 Listar todos os sons disponíveis
+  getAvailableSounds() {
+    return [
+      { type: 'match', name: '🎯 Match Normal', description: 'Som para matches de leads', volume: 0.3 },
+      { type: 'partnership', name: '🤝 Parceria', description: 'Som harmônico para parcerias', volume: 0.25 },
+      { type: 'red', name: '🔴 Atenção', description: 'Som chamativo para alertas importantes', volume: 0.4 },
+      { type: 'vip-gold', name: '👑 VIP Gold', description: 'Som premium para leads VIP', volume: 0.5 },
+      { type: 'vip-platinum', name: '⭐ VIP Platinum', description: 'Som elegante para leads premium', volume: 0.6 },
+      { type: 'vip-diamond', name: '💎 VIP Diamond', description: 'Som luxuoso para leads top', volume: 0.7 },
+      { type: 'night', name: '🌙 Noturno', description: 'Som suave para horários noturnos', volume: 0.2 },
+      { type: 'high-value', name: '💰 Alto Valor', description: 'Som para leads de alto valor', volume: 0.6 },
+      { type: 'urgent', name: '🚨 Urgente', description: 'Som de urgência', volume: 0.8 },
+      { type: 'alarm', name: '🚨 Alarme', description: 'Som de alarme forte', volume: 0.6 }
+    ] as const
+  }
+
+  // 🎵 Tocar som específico com log
+  playSoundWithLog(type: string) {
+    const soundInfo = this.getAvailableSounds().find(s => s.type === type)
+    if (soundInfo) {
+      console.log(`🎵 Tocando: ${soundInfo.name} - ${soundInfo.description}`)
+      this.playByType(type as any)
+    }
   }
 }
 
