@@ -116,8 +116,14 @@ export class NotificationSounds {
     this.playTone([1000, 800, 1000, 800, 1000], 0.6, 'square')
   }
 
+  // 🔴 Som Red (Alerta/Atenção)
+  playRedSound() {
+    // Som de atenção com frequências descendentes
+    this.playTone([880, 740, 659, 587], 0.4, 'sine') // Lá, Fá#, Mi, Ré - progressão descendente
+  }
+
   // 🎯 Som por tipo de lead
-  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm') {
+  playByType(type: 'match' | 'partnership' | 'vip-gold' | 'vip-platinum' | 'vip-diamond' | 'urgent' | 'night' | 'high-value' | 'alarm' | 'red') {
     switch (type) {
       case 'match':
         this.playMatchSound()
@@ -146,6 +152,9 @@ export class NotificationSounds {
       case 'alarm':
         this.playAlarmSound()
         break
+      case 'red':
+        this.playRedSound()
+        break
       default:
         this.playMatchSound()
     }
@@ -158,7 +167,7 @@ export class NotificationSounds {
 
   // 🔊 Testar todos os sons
   testAllSounds() {
-    const sounds = ['match', 'partnership', 'vip-gold', 'vip-platinum', 'vip-diamond', 'urgent', 'night', 'high-value'] as const
+    const sounds = ['match', 'partnership', 'vip-gold', 'vip-platinum', 'vip-diamond', 'urgent', 'night', 'high-value', 'alarm', 'red'] as const
     
     sounds.forEach((sound, index) => {
       setTimeout(() => {
