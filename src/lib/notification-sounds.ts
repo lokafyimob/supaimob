@@ -15,9 +15,9 @@ export class NotificationSounds {
     this.playTone([800, 1000, 1200], 0.3, 'sine')
   }
 
-  // 🤝 Som para Parceria (Azul)
+  // 🤝 Som para Parceria (Azul) - Som alegre e profissional
   playPartnershipSound() {
-    this.playTone([600, 800, 600], 0.4, 'triangle')
+    this.playTone([800, 1000, 1200, 1000], 0.3, 'sine')
   }
 
   // 👑 Som para Lead VIP Gold
