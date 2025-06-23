@@ -155,7 +155,25 @@ export function PartnershipAlert({ partnerships, onDismiss, onViewPartnerships }
             <button
               onClick={() => {
                 if (currentPartnership.fromUserPhone) {
-                  window.open(`tel:${currentPartnership.fromUserPhone}`, '_self')
+                  // Format phone number for WhatsApp (remove non-digits and add country code if needed)
+                  let phoneNumber = currentPartnership.fromUserPhone.replace(/\D/g, '')
+                  
+                  // Add Brazil country code if not present
+                  if (phoneNumber.length === 11 && phoneNumber.startsWith('9')) {
+                    phoneNumber = '55' + phoneNumber
+                  } else if (phoneNumber.length === 10) {
+                    phoneNumber = '559' + phoneNumber
+                  } else if (!phoneNumber.startsWith('55')) {
+                    phoneNumber = '55' + phoneNumber
+                  }
+                  
+                  // Create WhatsApp message
+                  const message = encodeURIComponent(
+                    `Olá ${currentPartnership.fromUserName}! Vi que você tem um cliente interessado no imóvel "${currentPartnership.propertyTitle}". Vamos conversar sobre esta parceria?`
+                  )
+                  
+                  // Open WhatsApp
+                  window.open(`https://wa.me/${phoneNumber}?text=${message}`, '_blank')
                 } else {
                   window.open(`mailto:${currentPartnership.fromUserEmail}`, '_self')
                 }
@@ -163,7 +181,7 @@ export function PartnershipAlert({ partnerships, onDismiss, onViewPartnerships }
               className="flex-1 bg-white text-blue-600 font-semibold py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors text-sm flex items-center justify-center"
             >
               <Phone className="w-4 h-4 mr-1" />
-              {currentPartnership.fromUserPhone ? 'Ligar Corretor' : 'Email Corretor'}
+              {currentPartnership.fromUserPhone ? 'WhatsApp Corretor' : 'Email Corretor'}
             </button>
             <button
               onClick={onViewPartnerships}
