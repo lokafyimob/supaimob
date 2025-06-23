@@ -15,9 +15,9 @@ export class NotificationSounds {
     this.playTone([800, 1000, 1200], 0.3, 'sine')
   }
 
-  // 🤝 Som para Parceria (Azul) - Som alegre e profissional
+  // 🤝 Som para Parceria (Verde WhatsApp) - Som suave e amigável
   playPartnershipSound() {
-    this.playTone([800, 1000, 1200, 1000], 0.3, 'sine')
+    this.playTone([523, 659, 784, 659], 0.25, 'sine') // Dó, Mi, Sol, Mi - acorde alegre
   }
 
   // 👑 Som para Lead VIP Gold

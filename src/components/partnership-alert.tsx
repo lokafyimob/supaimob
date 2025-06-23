@@ -189,7 +189,8 @@ export function PartnershipAlert({ partnerships, onDismiss, onViewPartnerships }
                   window.open(`mailto:${currentPartnership.fromUserEmail}`, '_self')
                 }
               }}
-              className="flex-1 bg-white text-blue-600 font-semibold py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors text-sm flex items-center justify-center"
+              className="flex-1 bg-white font-semibold py-2 px-3 rounded-lg hover:bg-gray-100 transition-colors text-xs flex items-center justify-center"
+              style={currentPartnership.fromUserPhone ? { color: '#25D366' } : { color: '#3B82F6' }}
             >
               {currentPartnership.fromUserPhone ? (
                 <WhatsAppIcon className="w-4 h-4 mr-1" />
