@@ -11,12 +11,14 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [errorType, setErrorType] = useState<'credentials' | 'blocked' | 'inactive' | 'general'>('general')
   const router = useRouter()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setErrorType('general')
 
     try {
       const result = await signIn('credentials', {
@@ -26,7 +28,18 @@ export default function Login() {
       })
 
       if (result?.error) {
-        setError('Credenciais inválidas')
+        console.log('Login error details:', result.error)
+        // Tratar diferentes tipos de erro baseado na mensagem retornada
+        if (result.error.includes('BLOCKED_USER')) {
+          setError('Usuário bloqueado. Entre em contato com o administrador.')
+          setErrorType('blocked')
+        } else if (result.error.includes('INACTIVE_USER')) {
+          setError('Usuário inativo. Entre em contato com o administrador.')
+          setErrorType('inactive')
+        } else {
+          setError('E-mail ou senha incorretos. Verifique seus dados e tente novamente.')
+          setErrorType('credentials')
+        }
       } else {
         const session = await getSession()
         if (session) {
@@ -50,7 +63,7 @@ export default function Login() {
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-lg mb-6" style={{backgroundColor: '#ff4352'}}>
               <Building className="w-6 h-6 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-gray-900 mb-2">CRM Imobiliário</h1>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2" style={{fontFamily: 'atyp-font-family, sans-serif'}}>G-PROP</h1>
             <p className="text-sm text-gray-600">Entre com suas credenciais para acessar</p>
           </div>
 
@@ -111,7 +124,32 @@ export default function Login() {
 
             {/* Error Message */}
             {error && (
-              <div className="text-sm text-center py-2 px-3 rounded-md border" style={{color: '#ff4352', backgroundColor: '#fef2f2', borderColor: '#fecaca'}}>
+              <div className={`text-sm text-center py-2 px-3 rounded-md border ${
+                errorType === 'blocked' || errorType === 'inactive' 
+                  ? 'text-orange-700 bg-orange-50 border-orange-200' 
+                  : 'text-red-700 bg-red-50 border-red-200'
+              }`}>
+                {errorType === 'blocked' && (
+                  <div className="flex items-center justify-center mb-1">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M13.477 14.89A6 6 0 015.11 6.524l8.367 8.368zm1.414-1.414L6.524 5.11a6 6 0 018.367 8.367zM18 10a8 8 0 11-16 0 8 8 0 0116 0z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+                {errorType === 'inactive' && (
+                  <div className="flex items-center justify-center mb-1">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
+                {errorType === 'credentials' && (
+                  <div className="flex items-center justify-center mb-1">
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                )}
                 {error}
               </div>
             )}

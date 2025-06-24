@@ -4,6 +4,9 @@ import { useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
+
 export default function Home() {
   const { data: session, status } = useSession()
   const router = useRouter()

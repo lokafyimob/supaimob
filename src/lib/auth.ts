@@ -34,11 +34,13 @@ export const authOptions: NextAuthOptions = {
 
         // Verificar se usuário está bloqueado ou inativo (campos opcionais)
         if (user.isBlocked === true) {
-          throw new Error('Usuário bloqueado. Entre em contato com o administrador.')
+          console.log('❌ User is blocked')
+          throw new Error('BLOCKED_USER')
         }
 
         if (user.isActive === false) {
-          throw new Error('Usuário inativo. Entre em contato com o administrador.')
+          console.log('❌ User is inactive')
+          throw new Error('INACTIVE_USER')
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -70,6 +72,9 @@ export const authOptions: NextAuthOptions = {
         }
         } catch (error) {
           console.log('❌ Auth error:', error)
+          if (error instanceof Error) {
+            throw error // Re-throw the error to be handled by NextAuth
+          }
           return null
         }
       }

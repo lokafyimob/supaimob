@@ -8,6 +8,8 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: false,
   },
+  trailingSlash: false,
+  generateStaticParams: false,
   experimental: {
     turbo: {
       rules: {

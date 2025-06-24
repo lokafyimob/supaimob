@@ -20,6 +20,19 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head>
+        <style dangerouslySetInnerHTML={{
+          __html: `
+            @font-face {
+              font-family: 'atyp-font-family';
+              src: url('/fonts/AtypDisplayTRIAL-Bold-BF65727125c8d1d.otf') format('opentype');
+              font-weight: bold;
+              font-style: normal;
+              font-display: swap;
+            }
+          `
+        }} />
+      </head>
       <body className={`${inter.className} ${montserrat.className}`} suppressHydrationWarning>
         <ThemeProvider>
           <CompanyLogoProvider>

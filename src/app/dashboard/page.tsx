@@ -1,6 +1,9 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+
+// Force dynamic rendering
+export const dynamic = 'force-dynamic'
 import { DashboardLayout } from '@/components/dashboard-layout'
 import {
   Building2,
